@@ -1,6 +1,8 @@
 # graph-app-kit
 
-Turn your graph data into a secure and interactive visual graph app in 15 minutes
+Turn your graph data into a secure and interactive visual graph app in 15 minutes! 
+
+This open source effort puts together patterns the Graphistry team has reused across many graph projects as teams went from Jupyter notebook experiments to deployed analyst tools. This means ideas like: Easy code editing and deployment, a project stucture ready for teams, built-in authentication, no need for JS/CSS, batteries-included dependencies, and fast loading & visualization of large graphs.
 
 ## The idea
 
@@ -14,15 +16,14 @@ Going from graph data to an interactive graph app just got a lot easier. This st
    * DataFrames: Pandas, Apache Arrow, RAPIDS (cuDF)
 * Docker and docker-compose for easy cross-platform deployment & management
 * Caddy reverse proxy for custom URLs, automatic LetsEncrypt TLS certificates, pluggable authentication
+* Volume mounts for opening in live web code editors like Jupter notebooks
 
 
 ## Get going
 
 ### Build
 
-```
-docker-compose build
-```
+`docker-compose build`
 
 ### Start & stop
 
@@ -47,3 +48,12 @@ docker-compose build
 
 * Wrangling: Set the docker-compose.yml's base image line to RAPIDS 
 * Visualization: Connect to an external Graphistry instance or run on the same node
+
+## Contribute
+
+We welcome all sorts of help!
+
+* Deployment: Docker, cloud runners, ...
+* Dependencies: Common graph packages
+* Connectors: Examples for common databases and how to get a lot of data out
+* Demos!
