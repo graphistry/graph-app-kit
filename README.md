@@ -1,8 +1,8 @@
-# graph-app-kit
+# Welcome to graph-app-kit
 
 Turn your graph data into a secure and interactive visual graph app in 15 minutes! 
 
-This open source effort puts together patterns the Graphistry team has reused across many graph projects as teams went from Jupyter notebook experiments to deployed analyst tools. This means ideas like: Easy code editing and deployment, a project stucture ready for teams, built-in authentication, no need for JS/CSS, batteries-included dependencies, and fast loading & visualization of large graphs.
+This open source effort puts together patterns the Graphistry team has reused across many graph projects as teams went from Jupyter notebook experiments to deployed analyst tools. This means ideas like: Easy code editing and deployment, a project stucture ready for teams, built-in authentication, no need for custom JS/CSS at the start, batteries-included dependencies, and fast loading & visualization of large graphs.
 
 ## The idea
 
