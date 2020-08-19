@@ -1,0 +1,41 @@
+version: "3.5"
+
+networks:
+  grph_net:
+    external:
+      name: grph_net
+
+x-production-options:
+  &production_opts
+  restart: unless-stopped
+  networks:
+    - grph_net
+
+x-build-kwargs:
+  &build_kwargs
+  args:
+    - APP_BUILD_TAG=${APP_BUILD_TAG:-latest}
+    - BUILDKIT_INLINE_CACHE=1    
+
+services:
+  streamlit:
+    << : *production_opts
+    image: graphistry/streamlit:${APP_BUILD_TAG:-latest}
+    command: --server.baseUrlPath="st_dashboard/" /apps/entrypoint.py
+    build:
+      << : *build_kwargs
+      context: .
+      dockerfile: ./Dockerfile
+      cache_from:
+        - graphistry/streamlit:${APP_BUILD_TAG:-latest}
+    container_name: "streamlit"
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./src:/apps
+    healthcheck:
+      test: ["CMD", "curl", "-Lf", "http://localhost:8501/st_dashboard/healthz"]
+      interval: 30s
+      timeout: 30s
+      retries: 10
+      start_period: 10s

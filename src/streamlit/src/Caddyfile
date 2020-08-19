@@ -1,0 +1,70 @@
+##########################################################################################
+###                                                                                      #
+### CUSTOM CADDYFILE                                                                     #
+###                                                                                      #
+### Caddy proxy configuration                                                            #
+###                                                                                      #
+###   -- Examples: See Caddyfile.default and official Caddy 1 docs                       #
+###                                                                                      #
+###   -- Relaunch:                                                                       #
+###                                                                                      #
+###      docker-compose stop caddy && docker-compose up -d                               #
+###                                                                                      #
+##########################################################################################
+
+#:80 {
+#  proxy / nginx:80 {
+#    websocket
+#    transparent
+#  }
+#}
+
+### Automatic TLS certificates with LetsEncrypt
+:80, a.bc.com {
+  tls {
+    max_certs 100
+  }
+
+  proxy / nginx:80 {
+    except /st_dashboard
+    websocket
+    transparent
+  }
+
+  proxy /st_dashboard streamlit:8501 {
+    websocket
+    transparent
+  }
+
+  #proxy /assets streamlit:8501/st {
+  #  websocket
+  #  transparent
+  #}
+
+  #reauth {
+  #  path /st
+  #  except /static
+  #  upstream url=http://nginx/django-json-auth,timeout=20s,follow=false,cookies=true
+  #  failure redirect target=/accounts/login/?next={uri}
+  #}
+
+}
+
+
+### Manual TLS
+#https://your.site.ngo:443 {
+#  tls /root/.caddy/my.crt /root/.caddy/my.key
+#  proxy / nginx:80 {
+#    websocket
+#  }
+#}
+
+
+### HTTP
+#:80 {
+#  proxy / nginx:80 {
+#    websocket
+#    transparent
+#  }
+#
+#}
