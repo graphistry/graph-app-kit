@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker-compose -f ../src/docker/docker-compose.yml build APP_BUILD_TAG=${DOCKER_TAG}

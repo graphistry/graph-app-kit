@@ -1,5 +1,5 @@
 ARG APP_BUILD_TAG=latest
-ARG VERSION_BASE=latest
+ARG VERSION_BASE=v2.31.5
 FROM graphistry/graphistry-forge-base:${VERSION_BASE}
 
 # exposing default port for streamlit
