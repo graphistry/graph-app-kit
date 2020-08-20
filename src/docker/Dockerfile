@@ -1,4 +1,4 @@
-ARG APP_BUILD_TAG=latest
+ARG DOCKER_TAG=latest
 ARG VERSION_BASE=v2.31.5
 FROM graphistry/graphistry-forge-base:${VERSION_BASE}
 

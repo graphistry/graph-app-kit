@@ -38,7 +38,7 @@ x-production-options:
 x-build-kwargs:
   &build_kwargs
   args:
-    - APP_BUILD_TAG=${APP_BUILD_TAG:-latest}
+    - DOCKER_TAG=${DOCKER_TAG:-latest}
     - BUILDKIT_INLINE_CACHE=1    
 
 
@@ -51,14 +51,14 @@ x-build-kwargs:
 services:
   streamlit:
     << : *production_opts
-    image: graphistry/graph-app-kit-st:${APP_BUILD_TAG:-latest}
+    image: graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}
     command: --server.baseUrlPath="$BASE_PATH" /apps/entrypoint.py
     build:
       << : *build_kwargs
       context: ..
       dockerfile: ./docker/Dockerfile
       cache_from:
-        - graphistry/streamlit:${APP_BUILD_TAG:-latest}
+        - graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}
     container_name: "streamlit"
     ports:
       - "8501:8501"
