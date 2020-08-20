@@ -1,33 +1,43 @@
-import importlib, os, streamlit as st
+import streamlit as st
 import SessionState
 
+from util import getChild, load_modules
+logger = getChild(__name__)
 
+
+####
+VIEW_INDEX_VAR="view_index"
+
+###
 query_params = st.experimental_get_query_params()
-app_state = st.experimental_get_query_params()
 session_state = SessionState.get(first_query_params=query_params)
 first_query_params = session_state.first_query_params
 
 
-apps = sorted([app.split('/')[-1] for (app,_,_) in os.walk('/apps/apps') if app != '/apps/apps'])
-modules = {app: importlib.import_module(f'apps.{app}') for app in apps}
-modules = {app: modules[app] for app in modules.keys() if hasattr(modules[app], 'run')}
-app_names = [app.info()['name'] for app in modules.values()]
+###
 
-maybe_default_app_index = eval(first_query_params["app_index"][0]) if "app_index" in first_query_params else None
+modules_by_id = load_modules()
 
-if len(modules.keys()) == 0:
-    st.sidebar.header('Create src/apps/myapp/__init__.py::run()')
+####
+maybe_default_view_index = eval(first_query_params[VIEW_INDEX_VAR][0]) if VIEW_INDEX_VAR in first_query_params else None
+
+###
+if len(modules_by_id.keys()) == 0:
+    st.sidebar.header('Create src/views/myapp/__init__.py::run()')
 else:
-    app = None
-    if len(modules.keys()) == 1:
-        app = modules.keys()[0]
+    view = None
+    if len(modules_by_id.keys()) == 1:
+        view_id = modules_by_id.values()[0]['id']
+        view = modules_by_id[view_id]
     else:
-        app = st.sidebar.selectbox('',
-            app_names,
-            index=0 if maybe_default_app_index is None else maybe_default_app_index,
-            format_func=(lambda option: option.upper()))
-        app_state["app_index"] = app_names.index(app)
-        st.experimental_set_query_params(**app_state)
-        st.sidebar.title(app)
-    st.title(app)
-    list(modules.values())[app_state["app_index"]].run()
+        sorted_mods = sorted(modules_by_id.values(), key=lambda nfo: nfo['i'])
+        view_id = st.sidebar.selectbox('',
+            [nfo['id'] for nfo in sorted_mods],
+            index=0 if maybe_default_view_index is None else maybe_default_view_index,
+            format_func=(lambda id: modules_by_id[id]['name'].upper()))
+        view = modules_by_id[view_id]
+        query_params[VIEW_INDEX_VAR] = sorted_mods.index(sorted_mods[view_id])
+        st.experimental_set_query_params(**query_params)
+        st.sidebar.title(view['name'])
+    st.title(view)
+    modules_by_id[view_id].run()

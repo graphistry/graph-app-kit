@@ -3,7 +3,8 @@ import streamlit as st
 
 def info():
     return {
-        'name': 'app2'
+        'name': 'app2',
+        'enabled': False
     }
 
 def run():

@@ -2,7 +2,7 @@ import streamlit as st
 
 # Full width for main area
 # https://discuss.streamlit.io/t/custom-render-widths/81/6
-def _css_max_main_width():
+def max_main_width():
     max_width_str = f"max-width: 2000px;"
     st.markdown(
         f"""
@@ -20,7 +20,7 @@ def _css_max_main_width():
             unsafe_allow_html=True)
 
 #Hide dev menu
-def _css_hide_dev_menu():
+def hide_dev_menu():
     hide_streamlit_style = """
     <style>
     #MainMenu {visibility: hidden;}

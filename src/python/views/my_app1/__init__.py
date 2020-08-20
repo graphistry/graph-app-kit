@@ -1,18 +1,22 @@
-import graphistry, pandas as pd, streamlit as st
-from css import _css_max_main_width, _css_hide_dev_menu  
+import pandas as pd, streamlit as st
 from time import sleep
 
-graphistry.register(api=3, username='###', password='###', protocol='https', server='hub.graphistry.com')
-#graphistry.register(api=3, username='###', password='###', protocol='http', server='nginx', client_protocol_hostname="http://localhost:80")
-
+from css import max_main_width, hide_dev_menu
+from util.graphistry import graphistry
 
 #######
 
 def info():
     return {
-        'name': 'app1'
+        'id': 'app1',
+        'name': 'app1',
+        'enabled': True,
     }
 
+def run():
+    run_all()
+
+#######
 
 def plot_url(edges_df, n):
     nodes_df = pd.DataFrame({
@@ -63,7 +67,7 @@ def run_filters(node_type, node_range, edges_df, n):
     return filtered_edges_df, url
         
 
-def run():
+def run_all():
 
     _css_max_main_width()
     _css_hide_dev_menu()

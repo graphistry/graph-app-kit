@@ -1,9 +1,33 @@
 version: "3.5"
 
+############################################################
+##
+## NETWORK
+##
+############################################################
+
+#-----------------------------------------------------------
+# Ex: Create new network
+#-----------------------------------------------------------
 networks:
   grph_net:
-    external:
-      name: grph_net
+    name: grph_net
+
+#-----------------------------------------------------------
+# Ex: Reuse network from another docker-compose
+#-----------------------------------------------------------
+#networks:
+#  grph_net:
+#    external:
+#      name: grph_net
+
+
+############################################################
+##
+## CONFIG
+##
+############################################################
+
 
 x-production-options:
   &production_opts
@@ -17,24 +41,31 @@ x-build-kwargs:
     - APP_BUILD_TAG=${APP_BUILD_TAG:-latest}
     - BUILDKIT_INLINE_CACHE=1    
 
+
+############################################################
+##
+## SERVICES
+##
+############################################################
+
 services:
   streamlit:
     << : *production_opts
     image: graphistry/streamlit:${APP_BUILD_TAG:-latest}
-    command: --server.baseUrlPath="st_dashboard/" /apps/entrypoint.py
+    command: --server.baseUrlPath="$BASE_PATH" /apps/entrypoint.py
     build:
       << : *build_kwargs
-      context: .
-      dockerfile: ./Dockerfile
+      context: ..
+      dockerfile: ./docker/Dockerfile
       cache_from:
         - graphistry/streamlit:${APP_BUILD_TAG:-latest}
     container_name: "streamlit"
     ports:
       - "8501:8501"
     volumes:
-      - ./src:/apps
+      - ../python:/apps
     healthcheck:
-      test: ["CMD", "curl", "-Lf", "http://localhost:8501/st_dashboard/healthz"]
+      test: ["CMD", "curl", "-Lf", "http://localhost:8501/$BASE_PATH/healthz"]
       interval: 30s
       timeout: 30s
       retries: 10
