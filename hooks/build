@@ -1,3 +1,12 @@
 #!/bin/bash
 
+echo "##########################################"
+echo "##"
+echo "## CUSTOM BUILD (hooks/build)"
+echo "##"
+echo "##########################################"
+echo "pwd: `pwd`"
+echo "DOCKER_TAG: ${DOCKER_TAG}"
+echo "IMAGE_NAME: ${IMAGE_NAME}"
+
 docker-compose -f ../src/docker/docker-compose.yml build APP_BUILD_TAG=${DOCKER_TAG}
