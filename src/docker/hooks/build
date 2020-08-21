@@ -7,6 +7,6 @@ echo "##"
 echo "##########################################"
 echo "pwd: `pwd`"
 echo "DOCKER_TAG: ${DOCKER_TAG}"
-echo "IMAGE_NAME: ${IMAGE_NAME}"
+echo "IMAGE_NAME: ${IMAGE_NAME}" # => src/docker
 
-docker-compose -f ../docker-compose.yml build DOCKER_TAG=${DOCKER_TAG}
+docker-compose build DOCKER_TAG=${DOCKER_TAG}
