@@ -9,4 +9,4 @@ echo "pwd: `pwd`"
 echo "DOCKER_TAG: ${DOCKER_TAG}"
 echo "IMAGE_NAME: ${IMAGE_NAME}" # => src/docker
 
-docker-compose build DOCKER_TAG=${DOCKER_TAG}
+docker-compose build
