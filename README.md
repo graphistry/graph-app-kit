@@ -1,3 +1,5 @@
+![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/graphistry/graph-app-kit-st)
+
 # Welcome to graph-app-kit
 
 Turn your graph data into a secure and interactive visual graph app in 15 minutes! 
