@@ -79,11 +79,9 @@ def run_filters(num_nodes, num_edges):
 
 def main_area(num_nodes, num_edges, nodes_df, edges_df, graph_url):
     logger.debug('rendering main area, with url: %s', graph_url)
-    st.header('Edges (RAPIDS GPU cudf DataFrame)')
-    st.markdown('**converted to CPU Pandas DataFrame frame after initial processing**')
-    st.write(edges_df)
-    st.header('Viz')
     GraphistrySt().render_url(graph_url)
+    st.header('Edges (RAPIDS GPU cudf DataFrame)')
+    st.write(edges_df)
 
 
 ############################################
