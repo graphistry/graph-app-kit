@@ -35,10 +35,9 @@ x-production-options:
   networks:
     - grph_net
   env_file:
-    - ./.env
     - ../envs/general.env
     - ../envs/graphistry.env
-
+    - ./.env
 
 x-build-kwargs:
   &build_kwargs
