@@ -16,7 +16,8 @@ RUN source activate rapids \
     && pip install streamlit==0.65.2 \
     && pip install -r requirements-system.txt
 
-RUN pip install -r requirements-app.txt
+RUN source activate rapids \
+    && pip install -r requirements-app.txt
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
@@ -29,6 +30,8 @@ email = \"\"\n\
 [server]\n\
 enableXsrfProtection = false\n\ 
 enableCORS = false\n\
+[browser]\n\
+gatherUsageStats = false\n\
 " > /root/.streamlit/config.toml'
 
 COPY docker/entrypoint.sh /entrypoint.sh
