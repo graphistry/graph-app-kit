@@ -1,2 +1,12 @@
 protobuf==3.13.0
 graphistry==0.11.8
+
+################
+#
+#  Per-DB
+#
+################
+
+### Neptune
+gremlinpython==3.4.8
+sshtunnel==0.1.5

@@ -60,7 +60,7 @@ def sidebar_area():
 
 # Given filter settings, generate/cache/return dataframes & viz
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def run_filters(num_nodes, num_edges):    
+def run_filters(num_nodes, num_edges):
     nodes_df = pd.DataFrame({ 'n': [x for x in range(0, num_nodes)] })
     edges_df = pd.DataFrame({
         's': [x % num_nodes for x in range(0, num_edges)],
