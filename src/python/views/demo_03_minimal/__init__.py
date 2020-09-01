@@ -4,7 +4,7 @@ import streamlit as st
 def info():
     return {
         'id': 'app3',
-        'name': 'app3: simple'
+        'name': 'app3: minimal'
     }
 
 

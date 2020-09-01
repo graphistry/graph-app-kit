@@ -35,6 +35,10 @@ def run():
 # Have fun!
 def custom_css():
     all_css()
+    st.markdown(
+        """<style>
+        
+        </style>""",unsafe_allow_html=True)
 
 
 # Given URL params, render left sidebar form and return combined filter settings
