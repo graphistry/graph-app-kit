@@ -1,43 +1,15 @@
-import streamlit as st
-import SessionState
+import os, SessionState, streamlit as st
+from components import AppPicker
 
-from util import getChild, load_modules
-logger = getChild(__name__)
+page_title_str ="Graph dashboard"
+st.beta_set_page_config(
+	layout="centered",  # Can be "centered" or "wide". In the future also "dashboard", etc.
+	initial_sidebar_state="auto",  # Can be "auto", "expanded", "collapsed"
+	page_title=page_title_str,  # String or None. Strings get appended with "• Streamlit". 
+	page_icon='none.png',  # String, anything supported by st.image, or None.
+)
 
-
-####
-VIEW_INDEX_VAR="view_index"
-
-###
-query_params = st.experimental_get_query_params()
-session_state = SessionState.get(first_query_params=query_params)
-first_query_params = session_state.first_query_params
-
-
-###
-
-modules_by_id = load_modules()
-
-####
-maybe_default_view_index = eval(first_query_params[VIEW_INDEX_VAR][0]) if VIEW_INDEX_VAR in first_query_params else None
-
-###
-if len(modules_by_id.keys()) == 0:
-    st.sidebar.header('Create src/views/myapp/__init__.py::run()')
-else:
-    view = None
-    if len(modules_by_id.keys()) == 1:
-        view_id = modules_by_id.values()[0]['id']
-        view = modules_by_id[view_id]
-    else:
-        sorted_mods = sorted(modules_by_id.values(), key=lambda nfo: nfo['i'])
-        view_id = st.sidebar.selectbox('',
-            [nfo['id'] for nfo in sorted_mods],
-            index=0 if maybe_default_view_index is None else maybe_default_view_index,
-            format_func=(lambda id: modules_by_id[id]['name'].upper()))
-        view = modules_by_id[view_id]
-        query_params[VIEW_INDEX_VAR] = sorted_mods.index(sorted_mods[view_id])
-        st.experimental_set_query_params(**query_params)
-        st.sidebar.title(view['name'])
-    st.title(view)
-    modules_by_id[view_id].run()
+#loads all views/<app>/__init__.py and tracks active as URL param "?view_index=<info()['id']>"
+#  includes modules with methods run() 
+#  and excludes if ('enabled' in info() and info()['enabled'] == False)
+AppPicker().load_active_app()

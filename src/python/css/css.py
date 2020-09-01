@@ -28,3 +28,8 @@ def hide_dev_menu():
     </style>
     """
     st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+
+
+def all_css():
+    max_main_width()
+    hide_dev_menu()
