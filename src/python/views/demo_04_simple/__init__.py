@@ -2,9 +2,6 @@ import graphistry, pandas as pd, streamlit as st
 from components import GraphistrySt, URLParam
 from css import all_css
 from util import getChild
-logger = getChild('app4')
-
-urlParams = URLParam('app4_')
 
 ############################################
 #
@@ -14,9 +11,14 @@ urlParams = URLParam('app4_')
 #  Controls how entrypoint.py picks it up
 
 
+app_id = 'app_04'
+logger = getChild(app_id)
+urlParams = URLParam(app_id)
+
+
 def info():
     return {
-        'id': 'app4',
+        'id': app_id,
         'name': 'app4: simple pipeline'
     }
 

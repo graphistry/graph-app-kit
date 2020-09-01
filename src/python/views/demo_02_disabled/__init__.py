@@ -3,7 +3,7 @@ import streamlit as st
 
 def info():
     return {
-        'id': 'app2',
+        'id': 'app_02',
         'name': 'app2: disabled',
         'enabled': False
     }

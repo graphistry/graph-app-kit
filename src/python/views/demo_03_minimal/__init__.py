@@ -1,9 +1,10 @@
 import streamlit as st
 
+# For copy/paste, 04_simple is probably better
 
 def info():
     return {
-        'id': 'app3',
+        'id': 'app_03',
         'name': 'app3: minimal'
     }
 

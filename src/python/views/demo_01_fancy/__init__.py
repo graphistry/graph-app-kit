@@ -5,7 +5,6 @@ from components import GraphistrySt, URLParam
 from css import all_css
 
 from util import getChild
-logger = getChild('app1')
 
 ############################################
 #
@@ -14,17 +13,23 @@ logger = getChild('app1')
 ############################################
 #  Controls how entrypoint.py picks it up
 
+
+app_id = 'app_01'
+logger = getChild(app_id)
+urlParams = URLParam(app_id)
+
+
 def info():
     return {
-        'id': 'app1',
+        'id': app_id,
         'name': 'app1: fancy graph',
         'enabled': True,
     }
 
+
 def run():
     run_all()
 
-urlParams = URLParam('app1_')
 
 ############################################
 #
