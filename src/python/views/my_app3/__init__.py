@@ -3,11 +3,12 @@ import streamlit as st
 
 def info():
     return {
-        'name': 'app3'
+        'id': 'app3',
+        'name': 'app3: simple'
     }
 
 
 def run():
     st.title('app3')
-    st.markdown('hello!')
+    st.markdown('hello! (minimal)')
     
