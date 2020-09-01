@@ -34,6 +34,10 @@ enableCORS = false\n\
 gatherUsageStats = false\n\
 " > /root/.streamlit/config.toml'
 
+#Note no trailing slash
+ENV BASE_URL=http://localhost:8501/dashboard
+ENV LOG_LEVEL=ERROR
+
 COPY docker/entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/apps/entrypoint.py"]
