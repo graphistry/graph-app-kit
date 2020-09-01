@@ -13,14 +13,14 @@ This open source effort puts together patterns the Graphistry team has reused ac
 `graph-app-kit` combines several emerging and best-of-class data technologies to get you going:
 
 * Prebuilt Python project structure ready for prototyping
-* (StreamLit)[https://www.streamlit.io/] for quick self-serve dashboarding
-* (Graphistry)[https://www.graphistry.com/get-started] for point-and-click GPU-accelerated visual graph analytics
+* [StreamLit](https://www.streamlit.io/) for quick self-serve dashboarding
+* [Graphistry](https://www.graphistry.com/get-started) for point-and-click GPU-accelerated visual graph analytics
 * Python connectors for your favorite data sources
-   * (TinkerPop Gremlin)[https://tinkerpop.apache.org/] connector (ex: (AWS Neptune)[https://aws.amazon.com/neptune/])
-   * Data frames: (Pandas)[https://pandas.pydata.org/], (Apache Arrow)[https://arrow.apache.org/], (RAPIDS)[https://rapids.ai/] (ex: (cuDF)[https://github.com/rapidsai/cudf]), including reading formats such as CSV, XLS, JSON, Parquet, and more
+   * [TinkerPop Gremlin](https://tinkerpop.apache.org/) connector (ex: [AWS Neptune](https://aws.amazon.com/neptune/))
+   * Data frames: [Pandas](https://pandas.pydata.org/), [Apache Arrow](https://arrow.apache.org/), [RAPIDS](https://rapids.ai/) (ex: [cuDF](https://github.com/rapidsai/cudf)), including reading formats such as CSV, XLS, JSON, Parquet, and more
 * Docker and docker-compose for easy cross-platform deployment & management
-* (Caddy)[https://caddyserver.com/] reverse proxy for custom URLs, (automatic LetsEncrypt TLS certificates)[http://letsencrypt.org/], pluggable authentication
-* Volume mounts for opening in live web code editors like (Jupter notebooks)[https://jupyter.org/]
+* [Caddy](https://caddyserver.com/) reverse proxy for custom URLs, [automatic LetsEncrypt TLS certificates](http://letsencrypt.org/), pluggable authentication
+* Volume mounts for opening in live web code editors like [Jupyter notebooks](https://jupyter.org/)
 
 
 ## Get going
@@ -58,9 +58,9 @@ By default, Docker json file driver: `docker-compose logs -f -t --tail=100`
 
 ## GPU-ready
 
-The containers can take advantage of GPUs when present and the host operating system enables the (Nvidia runtime for Docker)[https://github.com/NVIDIA/nvidia-docker]. The `graph-app-kit` Docker container is ready for:
+The containers can take advantage of GPUs when present and the host operating system enables the [Nvidia runtime for Docker](https://github.com/NVIDIA/nvidia-docker). The `graph-app-kit` Docker container is ready for:
 
-* GPU Analytics:  (RAPIDS)[https://www.rapids.ai] and CUDA already setup
+* GPU Analytics:  [RAPIDS](https://www.rapids.ai) and CUDA already setup
 * GPU Visualization: Connect to an external Graphistry instance or run on the same node
 
 ### Configure
@@ -87,4 +87,4 @@ We welcome all sorts of help!
 * Connectors: Examples for common databases and how to get a lot of data out
 * Demos!
 
-See (develop.md)[develop.md] for more information
+See [develop.md](develop.md) for more information
