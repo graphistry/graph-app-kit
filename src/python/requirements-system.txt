@@ -1,1 +1,2 @@
 protobuf==3.13.0
+graphistry==0.11.8
