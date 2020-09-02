@@ -3,7 +3,6 @@ from components import GraphistrySt, URLParam
 from css import all_css
 from util import getChild
 
-
 ### https://docs.aws.amazon.com/neptune/latest/userguide/access-graph-gremlin-python.html
 from gremlin_python import statics
 from gremlin_python.structure.graph import Graph
@@ -60,12 +59,35 @@ def custom_css():
 #https://docs.streamlit.io/en/stable/api.html#display-interactive-widgets
 def sidebar_area():
 
-    return { }
+    num_edges_init = urlParams.get_field('num_edges', 2000)
+    num_edges = st.sidebar.slider('Number of edges', min_value=1, max_value=10000, value=num_edges_init, step=20)
+    urlParams.set_field('num_edges', num_edges)
+
+
+    return { 'num_edges': num_edges }
+
+
+def plot_url(nodes_df, edges_df):
+
+    logger.info('Starting graphistry plot')
+    url = graphistry\
+            .edges(edges_df)\
+            .bind(source='s', destination='d', edge_label='l')\
+            .nodes(nodes_df)\
+            .bind(node='n', point_title='l')\
+            .settings(url_params={
+                'bg': '%23' + 'f0f2f6'
+            })\
+            .plot(render=False)
+
+    logger.info('Generated viz, got back urL: %s', url)
+
+    return url
 
 
 # Given filter settings, generate/cache/return dataframes & viz
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def run_filters():
+def run_filters(num_edges):
 
     graph = Graph()
 
@@ -120,10 +142,20 @@ def run_filters():
         remoteConn = DriverRemoteConnection(NEPTUNE_READER_CONN_STR, 'g')
         g = graph.traversal().withRemote(remoteConn)
 
-        logger.debug(('out', g.V().limit(2).toList()))
-        remoteConn.close()
+        edges = g.E().limit(num_edges).toList()
+        edges_df = pd.DataFrame([{'s': e.inV.id, 'd': e.outV.id, 'l': e.label} for e in edges])
+        nodes = [e.inV for e in edges] + [e.outV for e in edges]
+        nodes_df = pd.DataFrame([{'n': v.id, 'l': v.label} for v in nodes]).drop_duplicates(subset=['n']).reset_index(drop=True)
 
-        return { }
+        url = plot_url(nodes_df, edges_df)
+
+        try:
+            remoteConn.close()
+        except RuntimeError as e:
+            st.warning(('Known error encountered when closing db conn', e))
+        logger.debug('closed')
+
+        return { 'nodes_df': nodes_df, 'edges_df': edges_df, 'url': url }
     except Exception as e:
         logger.error('oops in gremlin', exc_info=True)
         raise e
@@ -132,8 +164,14 @@ def run_filters():
         if not (server is None):
             server.stop()
     
-def main_area():
-    pass
+def main_area(num_edges, nodes_df, edges_df, url):
+
+    logger.debug('rendering main area, with url: %s', url)
+    GraphistrySt().render_url(url)
+
+    st.write('nodes', nodes_df)
+    st.write('edges', edges_df)
+
 
 
 ############################################
