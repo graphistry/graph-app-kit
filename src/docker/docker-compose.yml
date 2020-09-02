@@ -68,6 +68,7 @@ services:
       - "8501:8501"
     volumes:
       - ../python:/apps
+      #- /my_local_path/.ssh/neptune-tunnel.pem:/secrets/neptune-reader.pem
     healthcheck:
       test: ["CMD", "curl", "-Lf", "http://localhost:8501/$BASE_PATH/healthz"]
       interval: 30s

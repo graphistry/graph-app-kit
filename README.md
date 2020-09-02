@@ -70,6 +70,7 @@ Most settings can be set by creating a custom Docker environment file `src/docke
 * URL base path: `BASE_PATH=my_subpath/` (default `dashboard/`) and `BASE_URL=http://site.com/my_subpath/` (default `http://localhost:8501/dashboard`)
 * Graphistry: `GRAPHISTRY_USERNAME=usr` + `GRAPHISTRY_PASSWORD=pwd` (see `src/envs/graphistry.env` for more, like `GRAPHISTRY_SERVER`)
 * Log level: `LOG_LEVEL=DEBUG` (default `ERROR`)
+* Neptune: Set options in `envs/neptune.env`, and optionally, run through a tunnel outside of the VPC
 
 Advanced edits may also happen in `docker-compose.yml` and `/etc/docker/daemon.json` . 
 
