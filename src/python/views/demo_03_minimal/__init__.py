@@ -5,7 +5,8 @@ import streamlit as st
 def info():
     return {
         'id': 'app_03',
-        'name': 'app3: minimal'
+        'name': 'INTRO: minimal',
+        'tags': ['demo', 'demo_intro']
     }
 
 
