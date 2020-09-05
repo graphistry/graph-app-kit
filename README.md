@@ -74,7 +74,18 @@ Most settings can be set by creating a custom Docker environment file `src/docke
 
 Advanced edits may also happen in `docker-compose.yml` and `/etc/docker/daemon.json` . 
 
-WIP:
+### Toggle views
+
+Configure which dashboards `AppPicker` includes:
+
+* Disable individual dashboards: Have a dashboard's `info()` return `{'enabled': False}`
+* Create tags and toggle them: 
+  * Tag a dashboard view its `info()`: `{'tags': ['demo', ...]}`
+  * Opt-in to tags: `AppPicker(include=['demo', 'demo_rapids'])`
+  * Out-out of tags: `AppPicker(exclude=['demo_basic'])`
+
+
+### WIP:
 * Support both private + public dashboards
 * Free TLS certificates: Modify `Caddyfile` with your domain name
 * Reuse your auth provider: Modify `Caddyfile` with your JWT etc. auth check URL

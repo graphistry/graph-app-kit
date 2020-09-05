@@ -1,5 +1,5 @@
 ARG DOCKER_TAG=latest
-ARG VERSION_BASE=v2.31.5
+ARG VERSION_BASE=v2.31.7
 FROM graphistry/graphistry-forge-base:${VERSION_BASE}
 
 # exposing default port for streamlit
@@ -36,6 +36,7 @@ gatherUsageStats = false\n\
 
 #Note no trailing slash
 ENV BASE_URL=http://localhost:8501/dashboard
+ENV BASE_PATH=dashboard/
 ENV LOG_LEVEL=ERROR
 
 COPY docker/entrypoint.sh /entrypoint.sh
