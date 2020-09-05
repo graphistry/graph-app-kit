@@ -9,8 +9,29 @@ logger = getChild(__name__)
 class AppPicker:
     VIEW_APP_ID_VAR="view_index"
 
-    def __init__(self):
+    # include: if non-empty, include if any tags match
+    # exclude: exclude if any tag matches
+    def __init__(self, include=[], exclude=[]):
+        self.include = include
+        self.exclude = exclude
         pass
+
+    def check_included(self, mod_info):
+        if ('enabled' in mod_info) and not mod_info['enabled']:
+            return False
+        if len(self.include) > 0:
+            hit = False
+            for tag in self.include:
+                if tag in mod_info['tags']:
+                    hit = True
+                    break
+            if not hit:
+                return False
+        for tag in self.exclude:
+            if tag in mod_info['tags']:
+                return False
+        return True
+
 
     # () -> {'id' -> { 'name': str, 'id': str, 'module': Module } }
     def list_modules(self):
@@ -19,15 +40,16 @@ class AppPicker:
             mod = importlib.import_module(f'views.{view_folder}')
             if hasattr(mod, 'run'):
                 nfo = mod.info() if hasattr(mod, 'info') else {'name': view_folder}
-                if ('enabled' in nfo) and not nfo['enabled']:
-                    continue
                 mod_id = nfo['id'] if 'id' in nfo else nfo['name']
-                modules_by_id[mod_id] = {
+                nfo_resolved = {
                     'name': view_folder,
+                    'tags': [],
                     **nfo,
                     'id': mod_id,
                     'module': mod,
                 }
+                if self.check_included(nfo_resolved):
+                    modules_by_id[mod_id] = nfo_resolved
         sorted_mods = sorted(modules_by_id.values(), key=lambda nfo: nfo['id'])
         for i in range(len(sorted_mods)):
             sorted_mods[i]['index'] = i

@@ -19,7 +19,8 @@ urlParams = URLParam(app_id)
 def info():
     return {
         'id': app_id,
-        'name': 'app4: simple pipeline'
+        'name': 'INTRO: simple pipeline',
+        'tags': ['demo', 'demo_intro']
     }
 
 

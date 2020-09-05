@@ -22,8 +22,9 @@ urlParams = URLParam(app_id)
 def info():
     return {
         'id': app_id,
-        'name': 'app1: fancy graph',
+        'name': 'INTRO: fancy graph',
         'enabled': True,
+        'tags': ['demo', 'demo_intro']
     }
 
 

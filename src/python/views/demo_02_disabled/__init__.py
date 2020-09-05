@@ -4,8 +4,9 @@ import streamlit as st
 def info():
     return {
         'id': 'app_02',
-        'name': 'app2: disabled',
-        'enabled': False
+        'name': 'INTRO: disabled',
+        'enabled': False,
+        'tags': ['demo', 'demo_intro']
     }
 
 def run():

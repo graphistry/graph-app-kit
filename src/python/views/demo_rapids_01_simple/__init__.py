@@ -19,7 +19,8 @@ urlParams = URLParam(app_id)
 def info():
     return {
         'id': app_id,
-        'name': 'app5: RAPIDS (cudf)'
+        'name': 'RAPIDS: RAPIDS (cudf)',
+        'tags': ['demo', 'demo_rapids']
     }
 
 

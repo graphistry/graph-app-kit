@@ -31,7 +31,8 @@ urlParams = URLParam(app_id)
 def info():
     return {
         'id': app_id,
-        'name': 'app6: neptune'
+        'name': 'GREMLIN: sample',
+        'tags': ['demo', 'neptune_demo']
     }
 
 

@@ -12,4 +12,7 @@ st.beta_set_page_config(
 #loads all views/<app>/__init__.py and tracks active as URL param "?view_index=<info()['id']>"
 #  includes modules with methods run() 
 #  and excludes if ('enabled' in info() and info()['enabled'] == False)
+#  ... and further include/exclude via info()['tags'] 
 AppPicker().load_active_app()
+
+#AppPicker(include=[], exclude=['demo']).load_active_app()
