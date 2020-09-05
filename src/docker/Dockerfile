@@ -36,6 +36,7 @@ gatherUsageStats = false\n\
 
 #Note no trailing slash
 ENV BASE_URL=http://localhost:8501/dashboard
+ENV BASE_PATH=dashboard/
 ENV LOG_LEVEL=ERROR
 
 COPY docker/entrypoint.sh /entrypoint.sh
