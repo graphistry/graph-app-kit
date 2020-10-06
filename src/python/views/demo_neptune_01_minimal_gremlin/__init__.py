@@ -146,7 +146,7 @@ def run_filters(num_edges):
     return {'nodes_df': nodes_df, 'edges_df': edges_df, 'url': url, 'res': res}
 
 
-def main_area(num_edges, nodes_df, edges_df, url, res):
+def main_area(url):
 
     logger.debug('rendering main area, with url: %s', url)
     GraphistrySt().render_url(url)
@@ -171,7 +171,7 @@ def run_all():
         filter_pipeline_result = run_filters(**sidebar_filters)
 
         # Render main viz area based on computed filter pipeline results and sidebar settings
-        main_area(**sidebar_filters, **filter_pipeline_result)
+        main_area(filter_pipeline_result['url'])
 
     except Exception as exn:
         st.write('Error loading dashboard')

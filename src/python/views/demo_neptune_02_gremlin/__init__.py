@@ -211,12 +211,17 @@ def run_filters(num_edges, state, city):
     metrics['neptune_time'] = toc-tic
 
     nodes_df, edges_df = path_to_df(res)
-    # Calculate the metrics
-    metrics['node_cnt'] = nodes_df.count()[0]
-    metrics['edge_cnt'] = edges_df.count()[0]
-    metrics['prop_cnt'] = nodes_df.count().sum() + edges_df.count().sum()
 
-    url = plot_url(nodes_df, edges_df)
+    # Calculate the metrics
+    metrics['node_cnt'] = nodes_df.size
+    metrics['edge_cnt'] = edges_df.size
+    metrics['prop_cnt'] = (nodes_df.size * nodes_df.columns.size) + \
+        (edges_df.size * edges_df.columns.size)
+
+    if nodes_df.size > 0:
+        url = plot_url(nodes_df, edges_df)
+    else:
+        url = ""
 
     logger.info("Finished compute phase")
 
@@ -290,11 +295,14 @@ def run_all():
         # Selective mark these as URL params as well
         filter_pipeline_result = run_filters(**sidebar_filters)
 
-        # Render main viz area based on computed filter pipeline results and sidebar settings
-        main_area(filter_pipeline_result['url'],
-                  filter_pipeline_result['nodes_df'],
-                  filter_pipeline_result['edges_df'],
-                  sidebar_filters['state'])
+        # Render main viz area based on computed filter pipeline results and sidebar settings if data is returned
+        if filter_pipeline_result['nodes_df'].size > 0:
+            main_area(filter_pipeline_result['url'],
+                      filter_pipeline_result['nodes_df'],
+                      filter_pipeline_result['edges_df'],
+                      sidebar_filters['state'])
+        else:  # render a message
+            st.write("No data matching the specfiied criteria is found")
 
     except Exception as exn:
         st.write('Error loading dashboard')
