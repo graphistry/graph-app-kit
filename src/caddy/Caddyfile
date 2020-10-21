@@ -12,37 +12,34 @@
 ###                                                                                      #
 ##########################################################################################
 
-#:80 {
-#  proxy / nginx:80 {
-#    websocket
-#    transparent
-#  }
-#}
-
 ### Automatic TLS certificates with LetsEncrypt
 :80, a.bc.com {
   tls {
     max_certs 100
   }
 
+  #your regular app
   proxy / nginx:80 {
-    except /st_dashboard
+    except /dashboard
     websocket
     transparent
   }
 
-  proxy /st_dashboard streamlit:8501 {
+  #streamlit
+  proxy /dashboard streamlit:8501 {
     websocket
     transparent
   }
 
-  #proxy /assets streamlit:8501/st {
+  #streamlit sttaic assets (if not loading)
+  #proxy /assets streamlit:8501 {
   #  websocket
   #  transparent
   #}
 
+  #optionally 
   #reauth {
-  #  path /st
+  #  path /dashboard
   #  except /static
   #  upstream url=http://nginx/django-json-auth,timeout=20s,follow=false,cookies=true
   #  failure redirect target=/accounts/login/?next={uri}
@@ -51,20 +48,13 @@
 }
 
 
+### HTTP
+### Use if no LetsEncrypt-allowed domain (Ex: LE free TLS prohibits AWS)
+#:80 {
+#
+#}
+
 ### Manual TLS
 #https://your.site.ngo:443 {
 #  tls /root/.caddy/my.crt /root/.caddy/my.key
-#  proxy / nginx:80 {
-#    websocket
-#  }
-#}
-
-
-### HTTP
-#:80 {
-#  proxy / nginx:80 {
-#    websocket
-#    transparent
-#  }
-#
 #}
