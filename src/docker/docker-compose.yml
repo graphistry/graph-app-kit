@@ -34,10 +34,16 @@ x-production-options:
   restart: unless-stopped
   networks:
     - grph_net
+  #keep explicit for usability
   env_file:
     - ../envs/general.env
     - ../envs/graphistry.env
+    - ../envs/neptune.env
+    - ../envs/streamlit.env
     - ./.env
+  environment:
+    - GRAPH_VIEWS=${GRAPH_VIEWS:-../python/views}
+    - ST_PUBLIC_PORT=${ST_PUBLIC_PORT:-8501}
 
 x-build-kwargs:
   &build_kwargs
@@ -63,12 +69,12 @@ services:
       dockerfile: ./docker/Dockerfile
       cache_from:
         - graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}
-    container_name: "streamlit"
     ports:
-      - "8501:8501"
+      - "${ST_PUBLIC_PORT}:8501"
     volumes:
       - ../python:/apps
-      #- /my_local_path/.ssh/neptune-tunnel.pem:/secrets/neptune-reader.pem
+      - ${GRAPH_VIEWS}:/apps/views
+      - /Users/lmeyerov2/.ssh/neptune-aws-daveb.pem:/secrets/neptune-reader.pem
     healthcheck:
       test: ["CMD", "curl", "-Lf", "http://localhost:8501/$BASE_PATH/healthz"]
       interval: 30s

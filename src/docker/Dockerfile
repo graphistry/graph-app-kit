@@ -1,23 +1,15 @@
 ARG DOCKER_TAG=latest
-ARG VERSION_BASE=v2.31.7
+ARG VERSION_BASE=v2.32.4
 FROM graphistry/graphistry-forge-base:${VERSION_BASE}
 
-# exposing default port for streamlit
 EXPOSE 8501
 
 # making directory of app
 WORKDIR /app
 
-# copy over requirements
 COPY python/requirements-app.txt python/requirements-system.txt ./
-
-# TODO system/user conda environment.yml before pip
-RUN source activate rapids \
-    && pip install streamlit==0.65.2 \
-    && pip install -r requirements-system.txt
-
-RUN source activate rapids \
-    && pip install -r requirements-app.txt
+RUN source activate rapids && pip install -r requirements-system.txt
+RUN source activate rapids && pip install -r requirements-app.txt
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
