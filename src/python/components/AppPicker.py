@@ -37,19 +37,23 @@ class AppPicker:
     def list_modules(self):
         modules_by_id = {}
         for view_folder in sorted([view.split('/')[-1] for (view,_,_) in os.walk('/apps/views') if view != '/apps/views']):
-            mod = importlib.import_module(f'views.{view_folder}')
-            if hasattr(mod, 'run'):
-                nfo = mod.info() if hasattr(mod, 'info') else {'name': view_folder}
-                mod_id = nfo['id'] if 'id' in nfo else nfo['name']
-                nfo_resolved = {
-                    'name': view_folder,
-                    'tags': [],
-                    **nfo,
-                    'id': mod_id,
-                    'module': mod,
-                }
-                if self.check_included(nfo_resolved):
-                    modules_by_id[mod_id] = nfo_resolved
+            try:
+                mod = importlib.import_module(f'views.{view_folder}')
+                if hasattr(mod, 'run'):
+                    nfo = mod.info() if hasattr(mod, 'info') else {'name': view_folder}
+                    mod_id = nfo['id'] if 'id' in nfo else nfo['name']
+                    nfo_resolved = {
+                        'name': view_folder,
+                        'tags': [],
+                        **nfo,
+                        'id': mod_id,
+                        'module': mod,
+                    }
+                    if self.check_included(nfo_resolved):
+                        modules_by_id[mod_id] = nfo_resolved
+            except:
+                logger.debug('Module loader ignoring file views/%s due to import failure; safe to ignore for .swp etc files',
+                    view_folder, exc_info=True)
         sorted_mods = sorted(modules_by_id.values(), key=lambda nfo: nfo['id'])
         for i in range(len(sorted_mods)):
             sorted_mods[i]['index'] = i
