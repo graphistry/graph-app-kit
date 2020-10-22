@@ -36,6 +36,7 @@ x-production-options:
     - grph_net
   #keep explicit for usability
   env_file:
+    - ../envs/docker.env
     - ../envs/general.env
     - ../envs/graphistry.env
     - ../envs/neptune.env

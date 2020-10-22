@@ -18,26 +18,27 @@
     max_certs 100
   }
 
-  #your regular app
-  proxy / nginx:80 {
-    except /dashboard
-    websocket
-    transparent
-  }
+  #your regular app, e.g., Graphistry server
+  #proxy / nginx:80 {
+  #  except /dashboard
+  #  websocket
+  #  transparent
+  #}
 
   #streamlit
+  #check `docker ps` as `streamlit:8501` may instead be something like `streamlit-pub_streamlit_1:8502`
   proxy /dashboard streamlit:8501 {
     websocket
     transparent
   }
 
-  #streamlit sttaic assets (if not loading)
+  #streamlit static assets (check browser console if page loads but not assets like images)
   #proxy /assets streamlit:8501 {
   #  websocket
   #  transparent
   #}
 
-  #optionally 
+  #optionally auth
   #reauth {
   #  path /dashboard
   #  except /static
@@ -49,7 +50,7 @@
 
 
 ### HTTP
-### Use if no LetsEncrypt-allowed domain (Ex: LE free TLS prohibits AWS)
+### Use when IP-only / LetsEncrypt-prohibited domain (Ex: AWS URLs)
 #:80 {
 #
 #}
