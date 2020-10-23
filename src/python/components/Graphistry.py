@@ -29,8 +29,8 @@ class GraphistrySt:
         graphistry.login(username=cfg['username'], password=cfg['password'])
 
     def render_url(self, url):
+        if self.test_login():
             logger.debug('rendering main area, with url: %s', url)
-
             iframe = '<iframe src="' + url + '", height="800", width="100%" allow="fullscreen"></iframe>'
             st.markdown(iframe, unsafe_allow_html=True)
 
@@ -43,6 +43,16 @@ class GraphistrySt:
             st.markdown("""
                 Graphistry not authenticated. Did you set credentials in docker/.env based on envs/graphistry.env ?
             """)
+
+    def test_login(self, verbose=True):
+        try:
+            graphistry.register()
+            return True
+        except:
+            if verbose:
+                st.write(Exception('Not logged in for Graphistry plots: Get free GPU account at graphistry.com/get-started and plug into src/docker/.env using template at envs/graphistry.env'))
+            return False
+
 
 
 GraphistrySt()

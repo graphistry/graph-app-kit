@@ -34,10 +34,19 @@ x-production-options:
   restart: unless-stopped
   networks:
     - grph_net
+  #Warning: Loads into continer env, not used by compose envvar interpolation
   env_file:
+    - ../envs/docker.env
     - ../envs/general.env
     - ../envs/graphistry.env
-    - ./.env
+    - ../envs/neptune.env
+    - ../envs/streamlit.env
+    - .env
+  #Warning: Loads into continer env, not used by compose envvar interpolation
+  environment:
+    - BASE_PATH=${BASE_PATH:-dashboard/}
+    - BASE_URL=${BASE_URL:-http://localhost:8501/dashboard}
+    - GRAPH_VIEWS=${GRAPH_VIEW:-../python/views}
 
 x-build-kwargs:
   &build_kwargs
@@ -57,21 +66,36 @@ services:
     << : *production_opts
     image: graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}
     command: --server.baseUrlPath="$BASE_PATH" /apps/entrypoint.py
+    labels:
+      autoheal: "false"
     build:
       << : *build_kwargs
       context: ..
       dockerfile: ./docker/Dockerfile
       cache_from:
         - graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}
-    container_name: "streamlit"
     ports:
-      - "8501:8501"
+      - "${ST_PUBLIC_PORT:-8501}:8501"
+    labels:
+      autoheal: "true"
     volumes:
       - ../python:/apps
-      #- /my_local_path/.ssh/neptune-tunnel.pem:/secrets/neptune-reader.pem
+      - ${GRAPH_VIEW:-../python/views}:/apps/views
+      - ${NEPTUNE_KEY_PATH:-/tmp/mt.pem}:/secrets/neptune-reader.pem
     healthcheck:
-      test: ["CMD", "curl", "-Lf", "http://localhost:8501/$BASE_PATH/healthz"]
+      test: ["CMD", "curl", "-Lf", "http://localhost:8501/healthz"]
       interval: 30s
       timeout: 30s
       retries: 10
       start_period: 10s
+
+  autoheal:
+    << : *production_opts
+    image: willfarrell/autoheal:v0.7.0
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=autoheal
+      - DOCKER_SOCK=/var/run/docker.sock
+      - AUTOHEAL_INTERVAL=60
+      - CURL_TIMEOUT=60
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
