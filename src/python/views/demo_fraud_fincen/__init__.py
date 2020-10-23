@@ -131,17 +131,18 @@ def bank_name_to_ids(df, bank, bank_ids):
     
     filtered = df
 
-    if len(bank) > 0 and not (bank == '(off)') and not (bank == ''):
-        filtered = filtered[ filtered['bank'].str.contains(bank, case=False) ]
-    
-    ids = [x for x in bank_ids if x != '(off)']
-    if len(ids) > 0:
+    bank_name_filter = bank if len(bank) > 0 and not (bank == '(off)') and not (bank == '') else None
+    bank_id_filter = [x for x in bank_ids if x != '(off)']
+
+    if (not (bank_name_filter is None)) or (len(bank_id_filter) > 0):
         hits = filtered['bank_id'] == 'no hits'
-        for id in ids:
+        if not (bank_name_filter is None):
+            hits = filtered['bank'].str.contains(bank_name_filter, case=False)
+        for id in bank_id_filter:
             hits = hits | (filtered['bank_id'] == id)
         filtered = filtered[ hits ]
     
-    return filtered['bank_id'].to_list()
+    return filtered['bank_id'].unique().tolist()
 
 # Given filter settings, generate/cache/return dataframes & viz
 @st.cache(suppress_st_warning=True, allow_output_mutation=True, hash_funcs={pd.DataFrame: lambda _: None})
