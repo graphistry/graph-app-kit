@@ -69,9 +69,6 @@ def sidebar_area():
         bank = st.text_input('Show banks with name like', b_init)
         urlParams.set_field('B', bank)
 
-    #st.subheader('banks')
-    #st.write( banks )
-
     return {'num_nodes': 1000000, 'num_edges': 1000000, 'bank': bank, 'bank_ids': bank_ids}
 
 
