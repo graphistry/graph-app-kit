@@ -1,4 +1,4 @@
-streamlit==0.68.0
+streamlit==0.69.2
 protobuf==3.13.0
 graphistry==0.14.0
 

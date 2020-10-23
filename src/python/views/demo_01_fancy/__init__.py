@@ -164,6 +164,9 @@ def plot_url(edges_df, n):
     nodes_df['nc'] = nodes_df['n'].apply(lambda v: 0x01000000 * round(255 * v / n))
 
     logger.info('Starting graphistry plot')
+    if not GraphistrySt().test_login():
+        return ''
+
     url = graphistry\
             .bind(source="s", destination="d")\
             .edges(edges_df)\
