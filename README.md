@@ -36,6 +36,14 @@ This open source effort puts together patterns the Graphistry team has reused ac
 
 * [Caddy](https://caddyserver.com/): Reverse proxy for custom URLs, [automatic LetsEncrypt TLS certificates](http://letsencrypt.org/), multiple sites on the same domain, pluggable authentication
 
+### GPU-ready (Optional)
+
+The containers can take advantage of GPUs when present and the host operating system enables the [Nvidia runtime for Docker](https://github.com/NVIDIA/nvidia-docker). The `graph-app-kit` Docker container is ready for:
+
+* GPU Analytics:  [RAPIDS](https://www.rapids.ai) and CUDA already setup
+* GPU Visualization: Connect to an external Graphistry instance or run on the same node
+
+
 ## Get going
 
 Most commands can be run from folder `src/docker`:
@@ -66,33 +74,13 @@ docker-compose build
 
 By default, Docker json file driver: `docker-compose logs -f -t --tail=100`
 
+## Develop views
+
 ### Live edit
 
 * Modify Python files in `src/python/views/[your dashboard]/__init__.py`, and in-tool, hit the `rerun` button that appears
 * Add new views by adding `views/[your dsahboard]/__init__.py` with methods `def info(): return {'name': 'x'}` and `def run(): None`
 * Add new dependencies: modify `src/python/requirements-app.txt` and rerun `docker-compose build` and restart
-
-## GPU-ready (Optional)
-
-The containers can take advantage of GPUs when present and the host operating system enables the [Nvidia runtime for Docker](https://github.com/NVIDIA/nvidia-docker). The `graph-app-kit` Docker container is ready for:
-
-* GPU Analytics:  [RAPIDS](https://www.rapids.ai) and CUDA already setup
-* GPU Visualization: Connect to an external Graphistry instance or run on the same node
-
-### Configure
-
-Most settings can be set by creating a custom Docker environment file `src/docker/.env` (see `src/envs/*.env` for options). You can also edit `docker-compose.yml` and `/etc/docker/daemon.json`, but we recommend sticking to `.env`.
-
-
-**Core:**
-* StreamLit: URL base path: `BASE_PATH=dashboard/` and `BASE_URL=http://localhost/dashboard/`
-* Graphistry: None - set `GRAPHISTRY_USERNAME=usr` + `GRAPHISTRY_PASSWORD=pwd` (see `src/envs/graphistry.env` for more, like `GRAPHISTRY_SERVER` if using a private Graphistry server)
-* Log level: `LOG_LEVEL=ERROR` (for Python's `logging`)
-
-**Integrations:**
-* [Amazon Neptune guide](docs/neptune.md) for TinkerPop/Gremlin integration
-* [Caddy sample](src/caddy/Caddyfile) for reverse proxying
-
 
 ### Toggle views
 
@@ -105,10 +93,52 @@ Configure which dashboards `AppPicker` includes:
   * Opt-in and opt-out to tags: in `src/python/entrypoint.py`:
     * `AppPicker(include=['testing', 'new_app'], exclude=['demo'])`
 
-### WIP:
-* Support both private + public dashboards
-* Free TLS certificates: Modify `Caddyfile` with your domain name
-* Reuse your auth provider: Modify `Caddyfile` with your JWT etc. auth check URL
+### Toggle view CSS defaults
+Use the `css` module in your `views`:
+
+```python
+from css import all_css
+def run():
+  all_css()
+  all_css(is_max_main_width=False, is_hide_dev_menu=False)
+```
+
+### Configure site theme
+Tweak `src/python/entrypoint.py`:
+
+```python
+page_title_str ="Graph dashboard"
+st.beta_set_page_config(
+	layout="centered",  # Can be "centered" or "wide". In the future also "dashboard", etc.
+	initial_sidebar_state="auto",  # Can be "auto", "expanded", "collapsed"
+	page_title=page_title_str,  # String or None. Strings get appended with "• Streamlit". 
+	page_icon='none.png',  # String, anything supported by st.image, or None.
+)
+```
+
+## Configure integrations
+
+Most settings can be set by creating a custom Docker environment file `src/docker/.env` (see `src/envs/*.env` for options). You can also edit `docker-compose.yml` and `/etc/docker/daemon.json`, but we recommend sticking to `.env`.
+
+### Core
+
+* StreamLit: URL base path: `BASE_PATH=dashboard/` and `BASE_URL=http://localhost/dashboard/`
+* Graphistry: None - set `GRAPHISTRY_USERNAME=usr` + `GRAPHISTRY_PASSWORD=pwd` (see `src/envs/graphistry.env` for more, like `GRAPHISTRY_SERVER` if using a private Graphistry server)
+* Log level: `LOG_LEVEL=ERROR` (for Python's `logging`)
+
+### Databases
+
+* [Amazon Neptune guide](docs/neptune.md) for TinkerPop/Gremlin integration
+
+### TLS with Cadddy
+
+* Auth: See [Caddy sample](src/caddy/Caddyfile) reverse proxy example for an authentication check against an account system, including the one shipping with your Graphistry server (requires `sudo docker-compose restart caddy` in your Graphistry server upon editing `/var/graphistry/data/config/Caddyfile`)
+
+### Public+Private views
+* To simulatenously run 1 public and 1 private instance, create two `graph-app-kit` clones `public_dash` and `private_dash`, and for `src/docker/.env`, set:
+  * `COMPOSE_PROJECT_NAME=streamlit-pub` and `COMPOSE_PROJECT_NAME=streamlit-priv`
+  * Override default `ST_PUBLIC_PORT=8501` with two distinct values
+* See [Caddy sample](src/caddy/Caddyfile) for configuring URI routes, including covering the private instance with your Graphistry account system (JWT auth URL)
 
 ## Contribute
 

@@ -30,6 +30,8 @@ def hide_dev_menu():
     st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
 
 
-def all_css():
-    max_main_width()
-    hide_dev_menu()
+def all_css(is_max_main_width=True, is_hide_dev_menu=True):
+    if is_max_main_width:
+        max_main_width()
+    if is_hide_dev_menu:
+        hide_dev_menu()
