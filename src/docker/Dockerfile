@@ -1,6 +1,6 @@
 ARG DOCKER_TAG=latest
-ARG VERSION_BASE=v2.32.4
-FROM graphistry/graphistry-forge-base:${VERSION_BASE}
+ARG GRAPHISTRY_FORGE_BASE_VERSION=latest
+FROM graphistry/graphistry-forge-base:${GRAPHISTRY_FORGE_BASE_VERSION}
 
 EXPOSE 8501
 
