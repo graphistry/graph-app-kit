@@ -1,14 +1,19 @@
 ARG DOCKER_TAG=latest
-ARG VERSION_BASE=v2.32.4
-FROM graphistry/graphistry-forge-base:${VERSION_BASE}
+ARG GRAPHISTRY_FORGE_BASE_VERSION=latest
+FROM graphistry/graphistry-forge-base:${GRAPHISTRY_FORGE_BASE_VERSION}
 
 EXPOSE 8501
 
 # making directory of app
 WORKDIR /app
 
-COPY python/requirements-app.txt python/requirements-system.txt ./
+COPY python/conda-app.sh ./
+RUN source activate rapids && ./conda-app.sh
+
+COPY python/requirements-system.txt ./
 RUN source activate rapids && pip install -r requirements-system.txt
+
+COPY python/requirements-app.txt ./
 RUN source activate rapids && pip install -r requirements-app.txt
 
 ENV LC_ALL=C.UTF-8
