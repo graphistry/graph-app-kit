@@ -7,8 +7,13 @@ EXPOSE 8501
 # making directory of app
 WORKDIR /app
 
-COPY python/requirements-app.txt python/requirements-system.txt ./
+COPY python/conda-app.sh ./
+RUN source activate rapids && ./conda-app.sh
+
+COPY python/requirements-system.txt ./
 RUN source activate rapids && pip install -r requirements-system.txt
+
+COPY python/requirements-app.txt ./
 RUN source activate rapids && pip install -r requirements-app.txt
 
 ENV LC_ALL=C.UTF-8
