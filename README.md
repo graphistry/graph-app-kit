@@ -18,7 +18,7 @@ This open source effort puts together patterns the Graphistry team has reused ac
 ### Core stack
 
 * Prebuilt Python project structure ready for prototyping
-* [StreamLit](https://www.streamlit.io/) for quick self-serve dashboarding
+* [Streamlit](https://www.streamlit.io/) for quick self-serve dashboarding
 * [Graphistry](https://www.graphistry.com/get-started) for point-and-click GPU-accelerated visual graph analytics
 * Data frames: Data wrangling via [Pandas](https://pandas.pydata.org/), [Apache Arrow](https://arrow.apache.org/), [RAPIDS](https://rapids.ai/) (ex: [cuDF](https://github.com/rapidsai/cudf)), including handling formats such as CSV, XLS, JSON, Parquet, and more
 * Docker and docker-compose for easy cross-platform deployment & management
@@ -122,7 +122,7 @@ Most settings can be set by creating a custom Docker environment file `src/docke
 
 ### Core
 
-* StreamLit: URL base path: `BASE_PATH=dashboard/` and `BASE_URL=http://localhost/dashboard/`
+* Streamlit: URL base path: `BASE_PATH=dashboard/` and `BASE_URL=http://localhost/dashboard/`
 * Graphistry: None - set `GRAPHISTRY_USERNAME=usr` + `GRAPHISTRY_PASSWORD=pwd` (see `src/envs/graphistry.env` for more, like `GRAPHISTRY_SERVER` if using a private Graphistry server)
 * Log level: `LOG_LEVEL=ERROR` (for Python's `logging`)
 
