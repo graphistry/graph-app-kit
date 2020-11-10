@@ -14,9 +14,12 @@ There are several steps that you need to take to ensure that your Neptune databa
 
 ### Demo quick launch: Customer identity graph database
 
-Quick launch the customer identity graph database using the [identity graph sample cloud formation templates](https://aws.amazon.com/blogs/database/building-a-customer-identity-graph-with-amazon-neptune/). 
+Quick launch the customer identity graph database using the [identity graph sample cloud formation templates](https://aws.amazon.com/blogs/database/building-a-customer-identity-graph-with-amazon-neptune/):
 
-Ater the stack launches (5-20min), the root `Identity-Graph-Sample` item's `Output` tab will show values used to configure the next steps.
+1. Click `Launch Stack` button for your region
+2. Check the acknowledgement boxes in the `Capabilities` section
+3. Click `Create Stack` (5-20min)
+4. The root `Identity-Graph-Sample` item's `Output` tab will show values used to configure the next steps
 
 Later, you can use the `delete` button here to delete the stack.
 
