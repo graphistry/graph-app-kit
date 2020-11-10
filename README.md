@@ -32,26 +32,26 @@ sudo docker-compose logs -f -t --tail=100
 
 1. [Setup & launch](docs/setup.md): Docker, GPU, Graphistry
 2. [Add views](docs/views.md)
-3. [Configure and extend](docs/extend.md): database connectors, authentication, notebook-based editing, and more
-  * [AWS Neptune](docs/neptune.md)
+3. Configure:
+    * [Main configurations and extensions](docs/extend.md): database connectors, authentication, notebook-based editing, and more
+    * [AWS Neptune](docs/neptune.md)
 
 ## The pieces
 
-`graph-app-kit` combines several emerging and best-of-class data technologies to get you going.
-
-### Core stack
+### Core
 
 * Prebuilt Python project structure ready for prototyping
-* [Streamlit](https://www.streamlit.io/) for quick self-serve dashboarding
-* [Graphistry](https://www.graphistry.com/get-started) for point-and-click GPU-accelerated visual graph analytics
+* [Streamlit](https://www.streamlit.io/) quick self-serve dashboarding
+* [Graphistry](https://www.graphistry.com/get-started) point-and-click GPU-accelerated visual graph analytics
 * Data frames: Data wrangling via [Pandas](https://pandas.pydata.org/), [Apache Arrow](https://arrow.apache.org/), [RAPIDS](https://rapids.ai/) (ex: [cuDF](https://github.com/rapidsai/cudf)), including handling formats such as CSV, XLS, JSON, Parquet, and more
-* Docker and docker-compose for easy cross-platform deployment & management
+* Standard Docker and docker-compose cross-platform deployment
 
-### GPU-ready (Optional)
+### GPU acceleration (optional)
 
-If present, `graph-app-kit` is ready to leverage GPU cloud acceleration:
+If GPUs are present, `graph-app-kit` leverages GPU cloud acceleration:
 
 * GPU Analytics:  [RAPIDS](https://www.rapids.ai) and CUDA already setup for use if run with an Nvidia docker runtime - cudf GPU dataframes, [BlazingSQL](https://www.blazingsql.com) GPU SQL, cuGraph GPU graph algorithms, cuML libraries, and more
+
 * GPU Visualization: Connect to an external Graphistry server or, faster, run on the same GPU server
 
 ### Prebuilt integrations & recipes
@@ -79,4 +79,4 @@ We welcome all sorts of help!
 * Connectors: Examples for common databases and how to get a lot of data out
 * Demos!
 
-See [develop.md](develop.md) for more information
+See [develop.md](develop.md) for more contributor information
