@@ -1,10 +1,30 @@
 # Setup graph-app-kit
 
-## 1. Launch and setup a server for Docker
+## 1. Launch and setup a server for Docker + extensions
 
-Launch a Linux server with Docker, docker-compose, and optionally, with a [RAPIDS.ai](https://www.rapids.ai)-compatible GPU with the Nvidia docker runtime on by default.
+**Manual: Launch a Linux server and install, configure dependencies**
 
-To quick launch a ready server, launch a [Graphistry marketplace instance](https://www.graphistry.com/get-started). They are preconfigured instances in AWS and Azure ready for GPU-aware docker-compose and with a built-in Graphistry GPU visualization server, account system, team Jupyter notebooks, ready RAPIDS.ai environment, and resiliency layers.
+* Open ports: 22, 80, 443, 8501 for all users (`0.0.0.0/0`) or for specific admin and user IPs
+
+* Ubuntu 18.04 LTS is the most common choice for containerized GPU computing
+
+* Install docker-ce and docker-compose
+
+* Optional:
+   * GPU: If you have a [RAPIDS.ai](https://www.rapids.ai)-compatible GPU (see below), install the Nvidia docker runtime and set it as the default for Docker daemons
+
+   * Extensions: Install Jupyter, a reverse proxy (ex: Caddy), and an authentication system
+
+**Quick launch (recommended):**
+
+Launch a prebuilt [Graphistry marketplace instance](https://www.graphistry.com/get-started) with open ports 22, 80, 443, and 8501. SSH in with `ssh -i ~/my/private/key.pem ubuntu@the.public.ip.address` and ensure it started by going to `http://the.public.ip.address`
+
+This launches all of the above, as well as runs a local Graphistry server for private data and faster performance (less data movement)
+
+**Note: GPU Instances**: Cloud providers generally require you to request GPU capacity quota for your account, which may take 1 day. [RAPIDS.ai-compatible GPU instance types](https://github.com/graphistry/graphistry-cli/blob/master/hardware-software.md#cloud) include:
+
+* AWS: g4, p3, p4
+* Azure: NC6s_v2+, ND+, NCasT4
 
 ## 2. Download graph-app-kit
 
@@ -15,25 +35,25 @@ git clone https://github.com/graphistry/graph-app-kit.git
 ## 3. Build
 
 ```bash
-cd src/docker
+cd graph-app-kit/src/docker
 sudo docker-compose build
 ```
 
 ## 4. Set your Graphistry visualization credentials
 
-Get a Graphistry account:
+Get a public or private Graphistry account:
 
-* Graphistry Hub (free): [Create a free Graphistry Hub account](https://hub.graphistry.com/) using the username/password option, which you will use for API access
+* Graphistry Hub (public, free): [Create a free Graphistry Hub account](https://hub.graphistry.com/) using the username/password option, which you will use for API access. Visualizations will default to pointing to the public Graphistry Hub GPU servers.
 
-* Alternatively, [launch a private Graphistry server](https://www.graphistry.com/get-started), login, and note the username/password for the account
+* Alternatively, [launch a private Graphistry server](https://www.graphistry.com/get-started), login, and use the username/password/URL for your configurtion.
 
 Edit `src/docker/.env` with:
 
 ```bash
 GRAPHISTRY_USERNAME=your_username
 GRAPHISTRY_PASSWORD=your_password
-### OPTIONAL: Private server config
-#GRAPHISTRY_PROTOCOL=http
+### OPTIONAL: Add if a private/local Graphistry server
+#GRAPHISTRY_PROTOCOL=http or https
 #GRAPHISTRY_SERVER=your.private-server.net
 ```
 
