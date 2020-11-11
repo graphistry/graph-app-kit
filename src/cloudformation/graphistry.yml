@@ -108,9 +108,10 @@ Resources:
           Fn::Join:
           - ''
           - - "#!/bin/sh\n"
+            - "set -ex\n"
             - "sudo usermod -a -G docker ubuntu\n"
             - "cd /home/ubuntu/graphistry\n"
-            - "docker-compose up -d\n"
+            - "sudo docker-compose up -d\n"
             - "cd /home/ubuntu\n"
             - "mkdir -p graph-app-kit/public\n"
             - "cd graph-app-kit/public\n"
@@ -119,12 +120,13 @@ Resources:
             - "docker-compose build\n"
             - "cd /home/ubuntu/graphistry\n"
             - "curl -s http://169.254.169.254/latest/meta-data/instance-id > /home/ubuntu/INSTANCE_ID\n"
+            - "export INSTANCE_ID=\"`cat /home/ubuntu/INSTANCE_ID`\"\n"
             - "until ( curl -fsS http://localhost/streamgl-gpu/secondary/gpu/health > /dev/null ); do ( docker-compose ps && sleep 1 ); done\n"
             - "docker-compose exec nexus bash -c \"source activate rapids && echo \\\"from nexus.users.models import User; user=User.objects.create_superuser(username='admin', email='admin@amazon.com', password='`cat /home/ubuntu/INSTANCE_ID`', name='admin', is_active=True); \\\" | CELERY_BROKER_URL=zz python manage.py shell && echo done || { echo fail && exit 1; }\"\n"
             - "docker-compose exec nexus bash -c \"source activate rapids && echo \\\"from allauth.account.models import EmailAddress; e = EmailAddress.objects.create(user=user, email='admin@amazon.com', primary=True, verified=True); e.save()\\\" | CELERY_BROKER_URL=zz python manage.py shell && echo done || { echo fail && exit 1; }\"\n"
             - "cd /home/ubuntu/graph-app-kit/public/graph-app-kit/src/docker\n"
             - "echo \"GRAPHISTRY_USERNAME=admin\" >> .env\n"
-            - "echo \"GRAPHISTRY_PASSWORD=`cat /home/ubuntu/INSTANCE_ID`\" >> .env\n"
+            - "echo \"GRAPHISTRY_PASSWORD=$INSTANCE_ID\" >> .env\n"
             - "echo \"GRAPHISTRY_PROTOCOL=http\" >> .env\n"
             - "echo \"GRAPHISTRY_SERVER=`curl http://169.254.169.254/latest/meta-data/public-ipv4`\" >> .env\n"
             - "echo \"NEPTUNE_READER_PROTOCOL=wss\" >> .env\n"
@@ -132,6 +134,7 @@ Resources:
             - "echo \"NEPTUNE_READER_HOST=\""
             - Ref: NeptuneReaderHost
             - "\" >> .env\n"
+            - "echo \"====\" && cat .env && echo \"===\"\n"
             - "docker-compose up -d\n"
             - "/opt/aws/bin/cfn-signal -e $? --stack "
             - Ref: AWS::StackName
