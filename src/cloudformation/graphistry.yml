@@ -154,7 +154,7 @@ Resources:
             - "echo \"GRAPHISTRY_PROTOCOL=http\" >> .env\n"
             - "echo \"GRAPHISTRY_SERVER=`curl http://169.254.169.254/latest/meta-data/public-ipv4`\" >> .env\n"
             - "echo \"NEPTUNE_READER_PROTOCOL=wss\" >> .env\n"
-            - "echo \"NEPTUNE_READER_PORT=8181\" >> .env\n"
+            - "echo \"NEPTUNE_READER_PORT=8182\" >> .env\n"
             - "echo \"NEPTUNE_READER_HOST="
             - Ref: NeptuneReaderHost
             - "\" >> .env\n"
