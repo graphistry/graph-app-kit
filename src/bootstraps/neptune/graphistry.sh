@@ -10,8 +10,8 @@ cd ../scripts
 SCRIPT="Full graph-app-kit for Neptune/Graphistry"
 ./hello-start.sh "$SCRIPT"
 
-export GRAPHISTRY_HOME={$GRAPHISTRY_HOME:-/home/ubuntu/graphistry}
-export NOTEBOOKS_HOME={$NOTEBOOKS_HOME:-$GRAPHISTRY_HOME/data/notebooks}
+export GRAPHISTRY_HOME=${GRAPHISTRY_HOME:-/home/ubuntu/graphistry}
+export NOTEBOOKS_HOME=${NOTEBOOKS_HOME:-${GRAPHISTRY_HOME}/data/notebooks}
 export NEPTUNE_READER_HOST=$1
 
 echo
