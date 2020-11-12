@@ -6,7 +6,7 @@
 
 Amazon Neptune supports both property graph queries with [Apache Gremlin/Tinkerpop](https://tinkerpop.apache.org/) queries, and RDF graphs with SPAQL queries. By using `graph-app-kit` with Amazon Neptune, you can visually explore graph database data and share point-and-click dashboard tools. 
 
-This guides walks through quick launch scripts for Neptune and Neptune-aware `graph-app-kit`. Alternatively, you may follow the [manual `graph-app-kit` Amazon Neptune setup guide](neptune-manual.md).
+This guides walks through quick launch scripts for Neptune and Neptune-aware `graph-app-kit`. Alternatively, you may follow the [manual `graph-app-kit` Amazon Neptune setup guide](neptune-manual.md). By using the quick launcher, you get out-of-the-box integration with Neptune, and extensions like built-in GPU Graphistry, Jupyter notebooks and web authoring, and public+private dashboards.
 
 ## 1. Setup Amazon Neptune with identity graph demo data
 
