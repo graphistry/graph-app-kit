@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ex
 
-SCRIPT="Build graph-app-kit docker"
+SCRIPT="Wait Graphistry docker containers healthy"
 ./hello-start.sh "$SCRIPT"
 
 
@@ -20,6 +20,7 @@ SCRIPT="Build graph-app-kit docker"
   ); done \
 )
 
-sudo docker-compose ps
+echo "--- Graphistry status after healthy waiting ---"
+( cd "${GRAPHISTRY_HOME}" && sudo docker-compose ps )
 
 ./hello-end.sh "$SCRIPT"
