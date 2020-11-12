@@ -129,7 +129,7 @@ Resources:
             - "git clone https://github.com/graphistry/graph-app-kit.git\n"
             - "cp -r /home/ubuntu/graph-app-kit/public /home/ubuntu/graph-app-kit/private\n"
             - "echo '===== Running graph-app-kit bootstraps'\n"
-            - "cd /home/ubuntu/graph-app-kit/public/graph-app-kit/src/cloudformation/neptune\n"
+            - "cd /home/ubuntu/graph-app-kit/public/graph-app-kit/src/bootstraps/neptune\n"
             - "./graphistry.sh \""
             - Ref: NeptuneReaderHost
             - "\"\n"
