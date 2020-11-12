@@ -61,6 +61,11 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Graphistry Graph App Kit Access 8501 22
+      Tags: 
+        - Key: "name"
+          Value: "graph-app-kit-quicklaunch-a"
+        - Key: "kind"
+          Value: "graph-app-kit"
       VpcId: 
         Ref: GraphAppKitVPC
       SecurityGroupIngress:
@@ -83,6 +88,11 @@ Resources:
   GraphAppKitEC2:
     Type: AWS::EC2::Instance
     Properties:
+      Tags: 
+        - Key: "name"
+          Value: "graph-app-kit-quicklaunch-a"
+        - Key: "kind"
+          Value: "graph-app-kit"
       ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", HVM64]
       InstanceType: g4dn.xlarge
       SubnetId:
@@ -107,23 +117,37 @@ Resources:
         Fn::Base64:
           Fn::Join:
           - ''
-          - - "#!/bin/sh\n"
+          - - "#!/bin/bash\n"
             - "set -ex\n"
             - "sudo usermod -a -G docker ubuntu\n"
-            - "cd /home/ubuntu/graphistry\n"
-            - "sudo docker-compose up -d\n"
+            - "echo '===== System check'\n"
+            - "nvidia-smi\n"
+            - "echo '===== Install CloudFormation helpers'\n"
+            - "sudo apt-get update -y\n"
+            - "sudo apt-get install -y python-pip python-setuptools\n"
+            - "sudo mkdir -p /opt/aws/bin\n"
+            - "sudo python /usr/lib/python2.7/dist-packages/easy_install.py --script-dir /opt/aws/bin https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n"
+            - "echo sudo /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource EC2 --configsets setup --region ${AWS::Region}\n"
+            - "echo sudo /opt/aws/bin/cfn-signal -e --stack ${AWS::StackName} --resource EC2 --configsets setup --region ${AWS::Region}\n"
+            - "echo '===== Downloading graph-app-kit'\n"
             - "cd /home/ubuntu\n"
             - "mkdir -p graph-app-kit/public\n"
             - "cd graph-app-kit/public\n"
             - "git clone https://github.com/graphistry/graph-app-kit.git\n"
+            - "echo '===== Building graph-app-kit'\n"
             - "cd /home/ubuntu/graph-app-kit/public/graph-app-kit/src/docker\n"
             - "docker-compose build\n"
+            - "echo '===== Waiting on Graphistry'\n"
+            - "cd /home/ubuntu/graphistry\n"
+            - "for i in `sudo docker-compose ps --services`; do ( until ( [[ '\"healthy\"' == $(sudo docker inspect \"graphistry_${i}_1\" --format \"{{json .State.Health.Status}}\") ]] ); do ( echo \"waiting on $i\" && sudo docker-compose ps && sleep 5 ); done && echo \"healthy $i\" ); done\n"
+            - "sudo docker-compose ps\n"
+            - "echo '===== Creating Graphistry service account'\n"
             - "cd /home/ubuntu/graphistry\n"
             - "curl -s http://169.254.169.254/latest/meta-data/instance-id > /home/ubuntu/INSTANCE_ID\n"
             - "export INSTANCE_ID=\"`cat /home/ubuntu/INSTANCE_ID`\"\n"
             - "until ( curl -fsS http://localhost/streamgl-gpu/secondary/gpu/health > /dev/null ); do ( docker-compose ps && sleep 1 ); done\n"
-            - "docker-compose exec nexus bash -c \"source activate rapids && echo \\\"from nexus.users.models import User; user=User.objects.create_superuser(username='admin', email='admin@amazon.com', password='`cat /home/ubuntu/INSTANCE_ID`', name='admin', is_active=True); \\\" | CELERY_BROKER_URL=zz python manage.py shell && echo done || { echo fail && exit 1; }\"\n"
-            - "docker-compose exec nexus bash -c \"source activate rapids && echo \\\"from allauth.account.models import EmailAddress; e = EmailAddress.objects.create(user=user, email='admin@amazon.com', primary=True, verified=True); e.save()\\\" | CELERY_BROKER_URL=zz python manage.py shell && echo done || { echo fail && exit 1; }\"\n"
+            - "docker-compose exec -T nexus bash -c \"source activate rapids && echo \\\"from nexus.users.models import User; user=User.objects.create_superuser(username='admin', email='admin@amazon.com', password='`cat /home/ubuntu/INSTANCE_ID`', name='admin', is_active=True); print('made user'); from allauth.account.models import EmailAddress; e = EmailAddress.objects.create(user=user, email='admin@amazon.com', primary=True, verified=True); e.save(); print('verified user')\\\" | CELERY_BROKER_URL=zz python manage.py shell && echo done || { echo fail && exit 1; }\"\n"
+            - "echo '===== Configuring graph-app-kit with Graphistry service account and Neptune'\n"
             - "cd /home/ubuntu/graph-app-kit/public/graph-app-kit/src/docker\n"
             - "echo \"GRAPHISTRY_USERNAME=admin\" >> .env\n"
             - "echo \"GRAPHISTRY_PASSWORD=$INSTANCE_ID\" >> .env\n"
@@ -131,11 +155,14 @@ Resources:
             - "echo \"GRAPHISTRY_SERVER=`curl http://169.254.169.254/latest/meta-data/public-ipv4`\" >> .env\n"
             - "echo \"NEPTUNE_READER_PROTOCOL=wss\" >> .env\n"
             - "echo \"NEPTUNE_READER_PORT=8181\" >> .env\n"
-            - "echo \"NEPTUNE_READER_HOST=\""
+            - "echo \"NEPTUNE_READER_HOST="
             - Ref: NeptuneReaderHost
             - "\" >> .env\n"
-            - "echo \"====\" && cat .env && echo \"===\"\n"
+            - "echo '----- Config:'\n"
+            - "cat .env\n"
+            - "echo '----- Launching graph-app-kit on 8501'\n"
             - "docker-compose up -d\n"
+            - "echo '===== !!! SUCCESSFULLY LAUNCHED GRAPHISTRY + GRAPH-APP-KIT !!! ====='\n"
             - "/opt/aws/bin/cfn-signal -e $? --stack "
             - Ref: AWS::StackName
             - " --resource GraphAppKitEC2 --region "
