@@ -46,7 +46,7 @@ x-production-options:
   environment:
     - BASE_PATH=${BASE_PATH:-dashboard/}
     - BASE_URL=${BASE_URL:-http://localhost:8501/dashboard}
-    - GRAPH_VIEWS=${GRAPH_VIEW:-../python/views}
+    - GRAPH_VIEWS=${GRAPH_VIEWS:-../python/views}
 
 x-build-kwargs:
   &build_kwargs
