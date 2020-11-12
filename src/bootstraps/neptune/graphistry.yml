@@ -94,7 +94,7 @@ Resources:
         - Key: "kind"
           Value: "graph-app-kit"
       ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", HVM64]
-      InstanceType: g4dn.xlarge
+      InstanceType: !Ref InstanceType
       SubnetId:
         Ref: GraphAppKitSubnet
       SecurityGroupIds:
