@@ -1,0 +1,64 @@
+#!/bin/bash
+set -ex
+
+### Full neptune/graphistry/st setup:
+###  caddy, jupyter, pub/priv st, ...
+### Assumes Graphistry GPU AMI: docker, ...
+
+cd ../scripts
+
+SCRIPT="Full graph-app-kit for Neptune/Graphistry"
+./hello-start.sh "$SCRIPT"
+
+export GRAPHISTRY_HOME={$GRAPHISTRY_HOME:-/home/ubuntu/graphistry}
+export NOTEBOOKS_HOME={$NOTEBOOKS_HOME:-$GRAPHISTRY_HOME/data/notebooks}
+export NEPTUNE_READER_HOST=$1
+
+echo
+echo "----- SETTINGS ------"
+echo " * GRAPHISTRY_HOME: $GRAPHISTRY_HOME"
+echo " * NOTEBOOKS_HOME: $NOTEBOOKS_HOME"
+echo " * NEPTUNE_READER_HOST (\$1): $NEPTUNE_READER_HOST"
+echo "---------------------"
+source instance-id.sh
+echo " * INSTANCE_ID: $INSTANCE_ID"
+echo
+
+./cloudformation-bootstrap.sh
+./docker-container-build.sh
+./prepopulate-notebooks graph-app-kit/public views
+./prepopulate-notebooks graph-app-kit/private views
+./graphistry-wait-healthy.sh
+./swap-caddy.sh
+./graphistry-server-account.sh
+
+echo '===== Configuring graph-app-kit with Graphistry service account and Neptune ====='
+( \
+    cd ../../docker \
+    && echo "BASE_PATH=public/dash/" \
+    && echo "GRAPH_VIEWS=/home/ubuntu/graphistry/data/notebooks/graph-app-kit/public/views" \
+    && echo "GRAPHISTRY_USERNAME=admin" \
+    && echo "GRAPHISTRY_PASSWORD=$INSTANCE_ID" \
+    && echo "GRAPHISTRY_PROTOCOL=http" \
+    && echo "GRAPHISTRY_SERVER=`curl http://169.254.169.254/latest/meta-data/public-ipv4`" \
+    && echo "NEPTUNE_READER_PROTOCOL=wss" \
+    && echo "NEPTUNE_READER_PORT=8182" \
+    && echo "NEPTUNE_READER_HOST=$NEPTUNE_READER_HOST" \
+) >> ../../docker/.env
+
+echo '----- Config:'
+cat ../../docker/.env
+
+echo '----- Reuse public graph-app-kit .env as private .env'
+sudo cp \
+    /home/ubuntu/graph-app-kit/public/graph-app-kit/src/docker/.env \
+    /home/ubuntu/graph-app-kit/private/graph-app-kit/src/docker/.env
+
+echo '----- Launching graph-app-kit as streamlit-pub/priv:8501'\
+( cd /home/ubuntu/graph-app-kit/public/graph-app-kit/src/docker \
+  && sudo docker-compose -p pub run -d --name streamlit-pub streamlit )
+
+( cd /home/ubuntu/graph-app-kit/private/graph-app-kit/src/docker \
+  && sudo docker-compose -p priv run -d --name streamlit-priv streamlit )
+
+./hello-end.sh "$SCRIPT"
