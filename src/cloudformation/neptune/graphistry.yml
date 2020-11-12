@@ -133,7 +133,7 @@ Resources:
             - "cd /home/ubuntu\n"
             - "mkdir -p graph-app-kit/public\n"
             - "cd graph-app-kit/public\n"
-            - "git clone https://github.com/graphistry/graph-app-kit.git -b 'dev/formation-jupyter'\n"
+            - "git clone https://github.com/graphistry/graph-app-kit.git\n"
             - "cp -r /home/ubuntu/graph-app-kit/public /home/ubuntu/graph-app-kit/private\n"
             - "echo '===== Building graph-app-kit'\n"
             - "cd /home/ubuntu/graph-app-kit/public/graph-app-kit/src/docker\n"
