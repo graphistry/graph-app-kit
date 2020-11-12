@@ -1,0 +1,26 @@
+
+:80 {
+
+  proxy /public/dash http://streamlit-pub:8501/ {
+    websocket
+    transparent
+  }
+
+  proxy /private/dash http://streamlit-priv:8501/ {
+    websocket
+    transparent
+  }
+
+  proxy / nginx:80 {
+    websocket
+    transparent
+  }
+
+  reauth {
+    path /private/dash
+    upstream url=http://nginx/django-json-auth,timeout=20s,follow=false,cookies=true
+    failure redirect target=/accounts/login/?next={uri}
+  }
+
+}
+
