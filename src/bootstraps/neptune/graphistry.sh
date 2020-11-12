@@ -26,19 +26,20 @@ echo
 
 ./cloudformation-bootstrap.sh
 ./docker-container-build.sh
-./prepopulate-notebooks graph-app-kit/public views
-./prepopulate-notebooks graph-app-kit/private views
+./prepopulate-notebooks.sh graph-app-kit/public views
+./prepopulate-notebooks.sh graph-app-kit/private views
 ./graphistry-wait-healthy.sh
 ./swap-caddy.sh
-./graphistry-server-account.sh
+source ./graphistry-service-account.sh
+echo "Got SERVICE_USER ${SERVICE_USER}, SERVICE_PASS"
 
 echo '===== Configuring graph-app-kit with Graphistry service account and Neptune ====='
 ( \
     cd ../../docker \
     && echo "BASE_PATH=public/dash/" \
     && echo "GRAPH_VIEWS=/home/ubuntu/graphistry/data/notebooks/graph-app-kit/public/views" \
-    && echo "GRAPHISTRY_USERNAME=admin" \
-    && echo "GRAPHISTRY_PASSWORD=$INSTANCE_ID" \
+    && echo "GRAPHISTRY_USERNAME=${SERVICE_USER}" \
+    && echo "GRAPHISTRY_PASSWORD=${SERVICE_PASS}" \
     && echo "GRAPHISTRY_PROTOCOL=http" \
     && echo "GRAPHISTRY_SERVER=`curl http://169.254.169.254/latest/meta-data/public-ipv4`" \
     && echo "NEPTUNE_READER_PROTOCOL=wss" \
