@@ -46,7 +46,7 @@ x-production-options:
   environment:
     - BASE_PATH=${BASE_PATH:-dashboard/}
     - BASE_URL=${BASE_URL:-http://localhost:8501/dashboard}
-    - GRAPH_VIEWS=${GRAPH_VIEW:-../python/views}
+    - GRAPH_VIEWS=${GRAPH_VIEWS:-../python/views}
 
 x-build-kwargs:
   &build_kwargs
@@ -84,7 +84,7 @@ services:
       - ${GRAPH_VIEW:-../python/views}:/apps/views
       - ${NEPTUNE_KEY_PATH:-/tmp/mt.pem}:/secrets/neptune-reader.pem
     healthcheck:
-      test: ["CMD", "curl", "-Lf", "http://localhost:8501/healthz"]
+      test: ["CMD", "curl", "-Lf", "http://localhost:8501/${BASE_PATH}healthz"]
       interval: 30s
       timeout: 30s
       retries: 10

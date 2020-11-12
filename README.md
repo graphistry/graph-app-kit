@@ -60,8 +60,8 @@ If GPUs are present, `graph-app-kit` leverages GPU cloud acceleration:
 
 * Graph databases
   
+  * [AWS Neptune](https://aws.amazon.com/neptune/) ([quick launch](docs/neptune.md) and [manual launch](docs/neptune-manual.md))
   * [TinkerPop Gremlin](https://tinkerpop.apache.org/) ([query demos](https://github.com/graphistry/graph-app-kit/tree/master/src/python/views/demo_neptune_01_minimal_gremlin))
-  * [AWS Neptune](https://aws.amazon.com/neptune/) ([integration guide](docs/neptune.md))
 
   * Collaborations welcome!
 
