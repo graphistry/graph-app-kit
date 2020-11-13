@@ -10,26 +10,35 @@ This guides walks through quick launch scripts for Neptune and Neptune-aware `gr
 
 ## 1. Setup Amazon Neptune with identity graph demo data
 
-Use the buttons at the bottom of the [identity graph sample cloud formation templates tutorial](https://aws.amazon.com/blogs/database/building-a-customer-identity-graph-with-amazon-neptune/):
+Launch using a button at the bottom of the [identity graph sample cloud formation templates tutorial](https://aws.amazon.com/blogs/database/building-a-customer-identity-graph-with-amazon-neptune/):
 
 
-1. Click the `Launch Stack` button for your region. To use a GPU instance for `graph-app-kit`, ensure Neptune is in a region where you have GPU quota.
+1. Click the `Launch Stack` button for your region:
+  * The recommended full `graph-app-kit` quick launcher requires a GPU instance:
+     * ... So ensure Neptune is in a region where you have `g4dn`/`p3`/`p4` GPU quota [or request it](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-resource-limits.html)
+  * The minimal `graph-app-kit` quick launcher can run without a GPU, but also does not come with Jupyter, public/private dashboards, etc.
 2. Check the acknowledgement boxes in the `Capabilities` section
 3. Click `Create Stack` (5-20min)
-  *  The root `Identity-Graph-Sample` item's `Output` tab will show values used to configure the next steps:
+  *  OUTPUT: The root `Identity-Graph-Sample` item's `Output` tab will show values used to configure the next steps:
 
       * `VPC`: ID `vpc-abc`
       * `PublicSubnet1`: ID `subnet-abc`
-          * Optional verification: Inspecting the AWS Console (`Services` -> `VPC` -> `Subnets`) should report `Auto-assign public IPv4 address: Yes `
-      * `DBClusterReadEndpoint`: URL
-4. *Optional POC $ saver*: After successful launch, resize Neptune to a smaller instance: 
-  * `AWS Console` -> `Services` -> `Neptune` -> `Databases` -> **Modify** the **Writer**
+      * `DBClusterReadEndpoint`: URL `abc.cluster-ro-xyz.zzz.neptune.amazonaws.com`
+
+----
+
+**Manage:**
+
+* **Neptune UI**: AWS console -> `Services` -> `Neptune` -> `Databases`
+
+* **Stack**: At any time, inspect the template's generated AWS resources and `delete` them:
+	*  `AWS Console` -> `Services` -> `CloudFormation` -> `Stacks` 
+
+* **Resize ($)**: Upon completed launch, resize Neptune to a cheaper instance: 
+  * Got to the above Neptune UI -> `Databases` -> **Modify** the **Writer**
   * Change *DB instance class* to *db.r4.large* -> `Continue` -> check **Apply immediately** -> `Modify DB Instance`
 
-
-At any time, you can return to the stack page by `AWS Console` -> `Services` -> `CloudFormation` -> `Stacks` . From here, you can inspect the generated stack and `delete` any resources it generated.
-
-## 2. Launch and configure graph-app-kit for Amazon Neptune
+## 2. Launch graph-app-kit configured for Amazon Neptune
 
 The quick launch template launchs a single GPU EC2 instance in your Neptune VPC. You will be able to log into the instance and start making views for Neptune data. It automatically connects to both the Neptune demo database and to your production instance. It contains Graphistry, Streamlit for public and team-only use, and RAPIDS.ai-ready Jupyter notebooks.
 
@@ -44,33 +53,49 @@ The quick launch template launchs a single GPU EC2 instance in your Neptune VPC.
   * Form `Options` config:
       * *Recommended*: Add tag `name` => `graph-app-kit-a`
 
-2. **Click on the `Resources` tab and click into the EC2 instance AWS console page once your GPU instance gets generated to see its details.**
+2. **Go to your `graph-app-kit` instance**
 
-From a commandline, SSH in to your GPU instance and watch the initialization logs for errors:
+  * Click the `Resources` tab and follow the link to the EC2 instance AWS console page after it gets generated
+
+  * Click on the instance to find its public IP address
+
+  * *Optional*: From a commandline, SSH in to your GPU instance and watch the initialization logs for errors:
 
 ```bash
 ssh -i /my/private.key ubuntu@the.instance.public.ip
-tail -f /var/log/cloud-init-output.log -n 100
+tail -f /var/log/cloud-init-output.log -n 1000
 ```
 
 ## 4. Graph!
 
-Upon successful GPU instance initialization, you will have a full suite of graph tools:
 
-* **Graphistry**:
-  * http://the.public.ip.address
+### Login
+
+* Upon launch completion, you will have a full suite of graph tools located at **http://[the.public.ip.address]**
+
+* Login using credentials **`admin`** / ***`i-theInstanceID`*** 
+
+### Minimal
+
+If using the minimal launcher, you will only have url **http://[the.public.ip.address]/public/dash** and can edit views via SSH (`ubuntu@[the.public.ip]:/home/ubuntu/graph-app-kit`)
+
+### URLs
+
+* **Graphistry: GPU-accelerated visual analytics + account login**
+  * **http://[the.public.ip.address]**
   * Login as `admin` / `your-aws-instance-id`
   * Installed at `/home/ubuntu/graphistry`
-* **Streamlit (public views)**:
-  * http://the.public.ip.address/public/dash
+  * You can change your admin password using the web UI
+* **Streamlit: Public dashboards**
+  * **http://[the.public.ip.address]/public/dash**
   * Installed at `/home/ubuntu/graph-app-kit/public/graph-app-kit`
   * Run as `src/docker $ docker-compose -p pub run -d --name streamlit-pub streamlit`
-* **Streamlit (login-required views)**:
-  * http://the.public.ip.address/private/dash
+* **Streamlit: Private dashboards**
+  * **http://[the.public.ip.address]/private/dash**
   * Installed at `/home/ubuntu/graph-app-kit/private/graph-app-kit`
   * Run as `src/docker $ docker-compose -p priv run -d --name streamlit-priv streamlit`
-* **Jupyter**: 
-  * http://the.public.ip.address/notebook
+* **Jupyter: Data science notebooks + Streamlit dashboard live-editing**
+  * **http://[the.public.ip.address]/notebook**
   * Live-edit `graph-app-kit` view folders `notebook/graph-app-kit/[public,private]/views`
 
 
