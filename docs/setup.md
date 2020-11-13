@@ -1,70 +1,98 @@
 # Setup graph-app-kit
 
-## 1. Launch and setup a server for Docker + extensions
+The below provides quick launchers for AWS-based deployments. See [manual setup](setup-manual.md) for alternative instructions.
 
-**Manual: Launch a Linux server and install, configure dependencies**
+## 1. Launch graph-app-kit
 
-* Open ports: 22, 80, 443, 8501 for all users (`0.0.0.0/0`) or for specific admin and user IPs
+**Option 1 - Full (Recommended):**
 
-* Ubuntu 18.04 LTS is the most common choice for containerized GPU computing
+  * GPU instance
+  * Web-based live editing
+  * Included: Graphistry, public + private Streamlit dashboards, Jupyter notebooks, RAPIDS.ai Python GPU ecosystem
 
-* Install docker-ce and docker-compose
+  [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/core/graphistry.yml)
+  
+  If AWS reports `Please select another region`, use the `Select a Region` dropdown in the top right menu.
 
-* Optional:
-   * GPU: If you have a [RAPIDS.ai](https://www.rapids.ai)-compatible GPU (see below), install the Nvidia docker runtime and set it as the default for Docker daemons
+  **Note: GPU Instances**: The compatible GPU instance familes are g4, p3, p4
 
-   * Extensions: Install Jupyter, a reverse proxy (ex: Caddy), and an authentication system
+**Option 2 - Minimal:**
 
-**Quick launch (recommended):**
+  * CPU instance
+  * Author views from your terminal
+  * Included: Public Streamlit dashboards linked against a remote Graphistry account
+  * Not included: Local Graphistry, private dashboards, Jupyter, RAPIDS.ai
 
-Launch a prebuilt [Graphistry marketplace instance](https://www.graphistry.com/get-started) with open ports 22, 80, 443, and 8501. SSH in with `ssh -i ~/my/private/key.pem ubuntu@the.public.ip.address` and ensure it started by going to `http://the.public.ip.address`
+  Get a free or self-managed [Graphistry server account](https://www.graphistry.com/get-started) with username+pass then [launch a minimal stack](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/core/graphistry.yml)
+  
+  If AWS reports `Please select another region`, use the `Select a Region` dropdown in the top right menu.
 
-This launches all of the above, as well as runs a local Graphistry server for private data and faster performance (less data movement)
+----
 
-**Note: GPU Instances**: Cloud providers generally require you to request GPU capacity quota for your account, which may take 1 day. [RAPIDS.ai-compatible GPU instance types](https://github.com/graphistry/graphistry-cli/blob/master/hardware-software.md#cloud) include:
+1. **Launch configuration: Details parameters**
 
-* AWS: g4, p3, p4
-* Azure: NC6s_v2+, ND+, NCasT4
+  1. Set stack name to anything, such as `graph-app-kit-a`
+  1. Set `VPC` to one that is web-accessible
+  1. Set `Subnet` to a web-accessible subnet in the VPC ("`subnet-...`")
+  1. Set `GraphAppKitKeyPair` to any where you have the SSH private.key
 
-## 2. Download graph-app-kit
+  If using the minimal template, fill in details for your Graphistry account
 
-```bash
-git clone https://github.com/graphistry/graph-app-kit.git
-```
+2. ***(Optional):*** **Monitor instance launch for progress and errors**
 
-## 3. Build
+  * Click the `Resources` tab and follow the link to the EC2 instance AWS console page after it gets generated
 
-```bash
-cd graph-app-kit/src/docker
-sudo docker-compose build
-```
+  * Click on the instance to find its public IP address
+  
+  * Login and watch:
 
-## 4. Set your Graphistry visualization credentials
+  ```bash
+  ssh -i /my/private.key ubuntu@the.instance.public.ip 
+  ### ssh -i /my/private.key ec2-user@the.instance.public.ip for Minimal launcher
 
-Get a public or private Graphistry account:
+  tail -f /var/log/cloud-init-output.log -n 1000
+  ```
 
-* Graphistry Hub (public, free): [Create a free Graphistry Hub account](https://hub.graphistry.com/) using the username/password option, which you will use for API access. Visualizations will default to pointing to the public Graphistry Hub GPU servers.
+## 3. Graph!
 
-* Alternatively, [launch a private Graphistry server](https://www.graphistry.com/get-started), login, and use the username/password/URL for your configurtion.
+Go to your public Streamlit dashboard and start exploring: http://[the.public.ip.address]/public/dash
 
-Edit `src/docker/.env` with:
+### Login
 
-```bash
-GRAPHISTRY_USERNAME=your_username
-GRAPHISTRY_PASSWORD=your_password
-### OPTIONAL: Add if a private/local Graphistry server
-#GRAPHISTRY_PROTOCOL=http or https
-#GRAPHISTRY_SERVER=your.private-server.net
-```
+* Upon launch completion, you will have a full suite of graph tools located at **http://[the.public.ip.address]**
 
-## 5. Start & stop
+* Web login using credentials **`admin`** / ***`i-theInstanceID`*** 
 
-`cd src/docker` and then:
+* SSH using the instructions from step 2
 
-* Start: `sudo docker-compose up -d`
-* Use: Go to `http://localhost:8501/dashboard` (or whatever the public IP)
-* Stop: `sudo docker-compose down -v`
+* ***Note***: The minimal launcher has no web admin portal, just SSH and Streamlit
 
-## Graph!
+### URLs for full stack 
 
-You are now ready to [add custom views](views.md) and [add integrations](extend.md).
+* **Graphistry: GPU-accelerated visual analytics + account login**
+  * **http://[the.public.ip.address]**
+  * Login as `admin` / `your-aws-instance-id`
+  * Installed at `/home/ubuntu/graphistry`
+  * You can change your admin password using the web UI
+* **Streamlit: Public dashboards**
+  * **http://[the.public.ip.address]/public/dash**
+  * Installed at `/home/ubuntu/graph-app-kit/public/graph-app-kit`
+  * Run as `src/docker $ docker-compose -p pub run -d --name streamlit-pub streamlit`
+* **Streamlit: Private dashboards**
+  * **http://[the.public.ip.address]/private/dash**
+  * Installed at `/home/ubuntu/graph-app-kit/private/graph-app-kit`
+  * Run as `src/docker $ docker-compose -p priv run -d --name streamlit-priv streamlit`
+* **Jupyter: Data science notebooks + Streamlit dashboard live-editing**
+  * **http://[the.public.ip.address]/notebook**
+  * Live-edit `graph-app-kit` view folders `notebook/graph-app-kit/[public,private]/views`
+
+### URLs for minimal stack 
+
+* **Streamlit: Public dashboards**
+  * **http://[the.public.ip.address]/public/dash**
+  * Installed at `/home/ubuntu/graph-app-kit/public/graph-app-kit`
+  * Run as `src/docker $ docker-compose up -d streamlit`
+
+## 4. Next steps
+
+Continue to the instructions for [creating custom views](views.md) and [adding common extensions](extend.md) like TLS, public/private dashboards, and more

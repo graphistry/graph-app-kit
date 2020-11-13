@@ -13,4 +13,8 @@ Managed via DockerHub automated builds
 
 See [current tags](https://hub.docker.com/repository/docker/graphistry/graph-app-kit-st)
 
+## Publish
+
+* Docker rebuilds on merge to main
+* CloudFormation templates upload upon a PR being labeled "publish"
 

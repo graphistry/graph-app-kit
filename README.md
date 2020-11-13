@@ -30,11 +30,10 @@ sudo docker-compose logs -f -t --tail=100
 
 ### Guides
 
-1. [Setup & launch](docs/setup.md): Docker, GPU, Graphistry
+1. [Quick launch](docs/setup.md): Preintegrated Docker, Graphistry, Streamlit, Jupyter, RAPIDS.ai (GPU)
+  * Variants: [manual launch](docs/setup-manual.md), [Amazon Neptune](docs/neptune.md)
 2. [Add views](docs/views.md)
-3. Configure:
-    * [Main configurations and extensions](docs/extend.md): database connectors, authentication, notebook-based editing, and more
-    * [AWS Neptune](docs/neptune.md)
+3. [Main configurations and extensions](docs/extend.md): Database connectors, authentication, notebook-based editing, and more
 
 ## The pieces
 

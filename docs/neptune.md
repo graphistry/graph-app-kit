@@ -6,7 +6,7 @@
 
 Amazon Neptune supports both property graph queries with [Apache Gremlin/Tinkerpop](https://tinkerpop.apache.org/) queries, and RDF graphs with SPAQL queries. By using `graph-app-kit` with Amazon Neptune, you can visually explore graph database data and share point-and-click dashboard tools. 
 
-This guides walks through quick launch scripts for Neptune and Neptune-aware `graph-app-kit`. Alternatively, you may follow the [manual `graph-app-kit` Amazon Neptune setup guide](neptune-manual.md). By using the quick launcher, you get out-of-the-box integration with Neptune, and extensions like built-in GPU Graphistry, Jupyter notebooks and web authoring, and public+private dashboards.
+This guides walks through quick launch scripts for Neptune and Neptune-aware `graph-app-kit`. Alternatively, you may follow our [manual Neptune setup guide](neptune-manual.md). 
 
 ## 1. Setup Amazon Neptune with identity graph demo data
 
@@ -40,45 +40,70 @@ Launch using a button at the bottom of the [identity graph sample cloud formatio
 
 ## 2. Launch graph-app-kit configured for Amazon Neptune
 
-The quick launch template launchs a single GPU EC2 instance in your Neptune VPC. You will be able to log into the instance and start making views for Neptune data. It automatically connects to both the Neptune demo database and to your production instance. It contains Graphistry, Streamlit for public and team-only use, and RAPIDS.ai-ready Jupyter notebooks.
+**Option 1 - Full (Recommended):** 
 
+  * GPU EC2 instance in your Neptune VPC
+  * Start making views for Neptune data immediately
+  * Web-based live editing
+  * Included: Graphistry, public + private Streamlit dashboards, Jupyter notebooks, RAPIDS.ai Python GPU ecosystem
 
-1. **Launch the template using the following Details parameters:**
+  [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/neptune/graphistry.yml)
+  
+  If AWS reports `Please select another region`, use the `Select a Region` dropdown in the top right menu.
+
+**Option 2 - Minimal:**
+
+  * CPU EC2 instance in your Neptune VPC
+  * Create Neptune views from your terminal
+  * Included: Public Streamlit dashboards linked against a remote Graphistry account
+  * Not included: Local Graphistry, private dashboards, Jupyter, RAPIDS.ai
+
+  Get a free or self-managed [Graphistry server account](https://www.graphistry.com/get-started) with username+pass then [launch a minimal stack](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/neptune/graphistry.yml)
+  
+  If AWS reports `Please select another region`, use the `Select a Region` dropdown in the top right menu.
+
+----
+
+1. **Launch configuration: Details parameters**
 
   1. Set stack name to anything, such as `graph-app-kit-a`
   1. Set `VPC` to the `VPC` ID value ("`vpc-...`") from `1. Setup Amazon Neptune`
   1. Set `Subnet` to the `PublicSubnet1` subnet ID value ("`subnet-...`") from `1. Setup Amazon Neptune`
   1. Set `GraphAppKitKeyPair` to any where you have the SSH private.key
 
-2. **Go to your `graph-app-kit` instance**
+  If using the minimal template, fill in details for your Graphistry account
+
+2. ***(Optional):*** **Monitor instance launch for progress and errors**
 
   * Click the `Resources` tab and follow the link to the EC2 instance AWS console page after it gets generated
 
   * Click on the instance to find its public IP address
+  
+  * Login and watch:
 
-  * *Optional*: From a commandline, SSH in to your GPU instance and watch the initialization logs for errors:
+  ```bash
+  ssh -i /my/private.key ubuntu@the.instance.public.ip 
+  ### ssh -i /my/private.key ec2-user@the.instance.public.ip for Minimal launcher
 
-```bash
-ssh -i /my/private.key ubuntu@the.instance.public.ip 
-### Use ec2-user@ if Minimal quick launcher
+  tail -f /var/log/cloud-init-output.log -n 1000
+  ```
 
-tail -f /var/log/cloud-init-output.log -n 1000
-```
+## 3. Graph!
 
-## 4. Graph!
-
+* Go to your public Streamlit dashboard: http://[the.public.ip.address]/public/dash
+* Select `GREMLIN: SIMPLE SAMPLE` from the dropdown to load a random sample of nodes from whatever Neptune database is connected
 
 ### Login
 
 * Upon launch completion, you will have a full suite of graph tools located at **http://[the.public.ip.address]**
 
-* Login using credentials **`admin`** / ***`i-theInstanceID`*** 
+* Web login using credentials **`admin`** / ***`i-theInstanceID`*** 
 
-### Minimal
+* SSH using the instructions from step 2
 
-If using the minimal launcher, you will only have url **http://[the.public.ip.address]/public/dash** and can edit views via SSH (`ec2-user@[the.public.ip]:/home/ubuntu/graph-app-kit`)
+* ***Note***: The minimal launcher has no web admin portal, just SSH and Streamlit
 
-### URLs
+### URLs for full stack 
 
 * **Graphistry: GPU-accelerated visual analytics + account login**
   * **http://[the.public.ip.address]**
@@ -97,11 +122,15 @@ If using the minimal launcher, you will only have url **http://[the.public.ip.ad
   * **http://[the.public.ip.address]/notebook**
   * Live-edit `graph-app-kit` view folders `notebook/graph-app-kit/[public,private]/views`
 
+### URLs for minimal stack 
 
-To start exploring graphs:
+* **Streamlit: Public dashboards**
+  * **http://[the.public.ip.address]/public/dash**
+  * Installed at `/home/ubuntu/graph-app-kit/public/graph-app-kit`
+  * Run as `src/docker $ docker-compose up -d streamlit`
 
-* Go to your Streamlit homepage using the link from the launch section you followed
-* Select `GREMLIN: SIMPLE SAMPLE` from the dropdown to load a random sample of nodes from whatever Neptune database is connected
-* Continue to the instructions for [creating custom views](views.md) and [adding common extensions](extend.md) like TLS, public/private dashboards, and more
+## 4. Next steps
 
-For more advanced configuration options, see the [manual Amazone Neptune setup guide](neptune-manual.md).
+Continue to the instructions for [creating custom views](views.md) and [adding common extensions](extend.md) like TLS, public/private dashboards, and more
+
+For more advanced Neptune configuration options, see the [manual Amazone Neptune setup guide](neptune-manual.md).
