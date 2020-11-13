@@ -15,6 +15,7 @@ export GRAPHISTRY_USERNAME=$2
 export GRAPHISTRY_PASSWORD=$3
 export GRAPHISTRY_HOST=$4
 export GRAPHISTRY_PROTOCOL=$5
+export GAK_PUBLIC=/home/ec2-user/graph-app-kit/public/graph-app-kit
 
 echo
 echo "----- SETTINGS ------"
@@ -23,6 +24,7 @@ echo " * GRAPHISTRY_USERNAME (\$2): $GRAPHISTRY_USERNAME"
 echo " * GRAPHISTRY_PASSWORD (\$3): ***"
 echo " * GRAPHISTRY_HOST (\$4): $GRAPHISTRY_HOST"
 echo " * GRAPHISTRY_PROTOCOL (\$5): $GRAPHISTRY_PROTOCOL"
+echo " * GAK_PUBLIC: $GAK_PUBLIC"
 echo "---------------------"
 source instance-id.sh
 echo " * INSTANCE_ID: $INSTANCE_ID"
@@ -36,7 +38,6 @@ echo '===== Configuring graph-app-kit with Graphistry account and Neptune ====='
 ( \
     cd ../../docker \
     && echo "BASE_PATH=public/dash/" \
-    && echo "GRAPH_VIEWS=/home/ubuntu/graphistry/data/notebooks/graph-app-kit/public/views" \
     && echo "GRAPHISTRY_USERNAME=${GRAPHISTRY_USERNAME}" \
     && echo "GRAPHISTRY_PASSWORD=${GRAPHISTRY_PASSWORD}" \
     && echo "GRAPHISTRY_PROTOCOL=${GRAPHISTRY_PROTOCOL}" \
@@ -50,7 +51,9 @@ echo '----- Config:'
 cat ../../docker/.env
 
 echo '----- Launching graph-app-kit as streamlit-pub:8501'\
-( cd /home/ubuntu/graph-app-kit/public/graph-app-kit/src/docker \
-  && sudo docker-compose -p pub run -d --name streamlit-pub streamlit )
+( \
+  cd "${GAK_PUBLIC}/src/docker" \
+  && sudo docker-compose -p pub run -d --name streamlit-pub streamlit \
+)
 
 ./hello-end.sh "$SCRIPT"
