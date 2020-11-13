@@ -14,18 +14,6 @@ jobs:
       - name: Do nothing
         run: echo "Do nothing"
 
-  cancel_outstanding:  
-    name: Detect and cancel outstanding runs of this workflow
-    if: github.event.label.name == 'publish'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Cancel Previous Runs
-        if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-cancel') }}
-        uses: styfle/cancel-workflow-action@0.4.0
-        with:
-          access_token: ${{ github.token }}
-
   publish:
     name: Upload to Amazon S3
     if: github.event.label.name == 'publish'
@@ -44,9 +32,8 @@ jobs:
 
     - name: Copy CloudFormation templates
       run: |
-        find .
         aws s3 cp src/bootstraps/core/graphistry.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/core/graphistry.yml"
         aws s3 cp src/bootstraps/core/minimal.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/core/minimal.yml"
-        aws s3 cp src/bootstraps/neptune/graphistry.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/core/neptune.yml"
-        aws s3 cp src/bootstraps/neptune/minimal.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/core/neptune.yml"
+        aws s3 cp src/bootstraps/neptune/graphistry.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/neptune/graphistry.yml"
+        aws s3 cp src/bootstraps/neptune/minimal.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/neptune/minimal.yml"
         
