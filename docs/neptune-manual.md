@@ -17,13 +17,13 @@ Ensure your Amazon Neptune database instance can be connected to by your `graph-
 ## 2. Manually launch and configure graph-app-kit for Amazon Neptune
 
 
-Create an AWS EC2 `graph-app-kit` instance using the usual [graph-app-kit first launch step](steps.md), with the following launch settings:
+Create an AWS EC2 `graph-app-kit` instance using the usual [graph-app-kit first launch step](setup-manual.md), with the following launch settings:
 
   1. Set `Network` to the `VPC` ID value ("`vpc-...`") from `1. Setup Amazon Neptune` (unless performing an alternative like manual VPC peering)
   2. Set `Subnet` to the `PublicSubnet1` subnet ID value ("`subnet-...`") from `1. Setup Amazon Neptune`
       * `Auto-assign Public IP` should default to `Use subnet setting (Enable)`
 
-Continue through the [graph-app-kit steps to download and build](steps.md).
+Continue through the [graph-app-kit steps to download and build](setup-manual.md).
 
 
 SSH into your `graph-app-kit` instance and set the following required environment variable configurations in your [src/docker/.env](src/docker/.env) file:

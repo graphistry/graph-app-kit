@@ -14,7 +14,7 @@ The below provides quick launchers for AWS-based deployments. See [manual setup]
   
   If AWS reports `Please select another region`, use the `Select a Region` dropdown in the top right menu.
 
-  **Note: GPU Instances**: The compatible GPU instance familes are g4, p3, p4
+  Tenants launching GPUs for the first time may need to [request 4+ vCPU of g4, p3, or p4 capacity](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-resource-limits.html)
 
 **Option 2 - Minimal:**
 

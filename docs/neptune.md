@@ -51,6 +51,8 @@ Launch using a button at the bottom of the [identity graph sample cloud formatio
   
   If AWS reports `Please select another region`, use the `Select a Region` dropdown in the top right menu.
 
+  Tenants launching GPUs for the first time may need to [request 4+ vCPU of g4, p3, or p4 capacity](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-resource-limits.html) in the intended Neptune region
+
 **Option 2 - Minimal:**
 
   * CPU EC2 instance in your Neptune VPC
