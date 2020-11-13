@@ -28,6 +28,7 @@ jobs:
 
   publish:
     name: Upload to Amazon S3
+    if: github.event.label.name == 'publish'
     runs-on: ubuntu-latest
 
     steps:
@@ -43,6 +44,7 @@ jobs:
 
     - name: Copy CloudFormation templates
       run: |
+        find .
         aws s3 sync src/bootstraps/core/graphistry.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/core/graphistry.yml"
         aws s3 sync src/bootstraps/core/minimal.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/core/minimal.yml"
         aws s3 sync src/bootstraps/neptune/graphistry.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/core/neptune.yml"
