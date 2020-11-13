@@ -36,6 +36,7 @@ echo
 echo '===== Configuring graph-app-kit with Graphistry account and Neptune ====='
 ( \
     cd ../../docker \
+    && echo "ST_PUBLIC_PORT=80" \
     && echo "BASE_PATH=public/dash/" \
     && echo "GRAPHISTRY_USERNAME=${GRAPHISTRY_USERNAME}" \
     && echo "GRAPHISTRY_PASSWORD=${GRAPHISTRY_PASSWORD}" \
@@ -49,7 +50,7 @@ echo '===== Configuring graph-app-kit with Graphistry account and Neptune ====='
 echo '----- Launching graph-app-kit as streamlit-pub:8501'
 ( \
   cd "${GAK_PUBLIC}/src/docker" \
-  && docker-compose -p pub run -d --name streamlit-pub streamlit \
+  && sudo /usr/local/bin/docker-compose up -d streamlit \
 )
 
 ./hello-end.sh "$SCRIPT"
