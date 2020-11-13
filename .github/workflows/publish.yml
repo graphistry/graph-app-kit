@@ -1,0 +1,50 @@
+name: Publish
+
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+
+  stub_mt:
+    name: Always-succeed step to prevent appearing as a failure
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Do nothing
+        run: echo "Do nothing"
+
+  cancel_outstanding:  
+    name: Detect and cancel outstanding runs of this workflow
+    if: github.event.label.name == 'publish'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Cancel Previous Runs
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-cancel') }}
+        uses: styfle/cancel-workflow-action@0.4.0
+        with:
+          access_token: ${{ github.token }}
+
+  publish:
+    name: Upload to Amazon S3
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.S3_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.S3_AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.S3_AWS_REGION_PUBLIC }}
+
+    - name: Copy CloudFormation templates
+      run: |
+        aws s3 sync src/bootstraps/core/graphistry.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/core/graphistry.yml"
+        aws s3 sync src/bootstraps/core/minimal.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/core/minimal.yml"
+        aws s3 sync src/bootstraps/neptune/graphistry.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/core/neptune.yml"
+        aws s3 sync src/bootstraps/neptune/minimal.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/core/neptune.yml"
+        
