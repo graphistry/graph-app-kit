@@ -13,6 +13,8 @@ SCRIPT="Full graph-app-kit for Neptune/Graphistry"
 export GRAPHISTRY_HOME=${GRAPHISTRY_HOME:-/home/ubuntu/graphistry}
 export NOTEBOOKS_HOME=${NOTEBOOKS_HOME:-${GRAPHISTRY_HOME}/data/notebooks}
 export NEPTUNE_READER_HOST=$1
+export GAK_PUBLIC=/home/ubuntu/graph-app-kit/public/graph-app-kit
+export GAK_PRIVATE=/home/ubuntu/graph-app-kit/private/graph-app-kit
 
 echo
 echo "----- SETTINGS ------"
@@ -37,7 +39,7 @@ echo '===== Configuring graph-app-kit with Graphistry service account and Neptun
 ( \
     cd ../../docker \
     && echo "BASE_PATH=public/dash/" \
-    && echo "GRAPH_VIEWS=/home/ubuntu/graphistry/data/notebooks/graph-app-kit/public/views" \
+    && echo "GRAPH_VIEWS=${GRAPHISTRY_HOME}/data/notebooks/graph-app-kit/public/views" \
     && echo "GRAPHISTRY_USERNAME=${SERVICE_USER}" \
     && echo "GRAPHISTRY_PASSWORD=${SERVICE_PASS}" \
     && echo "GRAPHISTRY_PROTOCOL=http" \
@@ -51,15 +53,16 @@ echo '----- Config:'
 cat ../../docker/.env
 
 echo '----- Reuse public graph-app-kit .env as private .env'
-sudo cp \
-    /home/ubuntu/graph-app-kit/public/graph-app-kit/src/docker/.env \
-    /home/ubuntu/graph-app-kit/private/graph-app-kit/src/docker/.env
+sudo cp "${GAK_PUBLIC}/src/docker/.env" "${GAK_PRIVATE}/src/docker/.env"
 
-echo '----- Launching graph-app-kit as streamlit-pub/priv:8501'\
-( cd /home/ubuntu/graph-app-kit/public/graph-app-kit/src/docker \
-  && sudo docker-compose -p pub run -d --name streamlit-pub streamlit )
-
-( cd /home/ubuntu/graph-app-kit/private/graph-app-kit/src/docker \
-  && sudo docker-compose -p priv run -d --name streamlit-priv streamlit )
+echo '----- Launching graph-app-kit as streamlit-pub/priv:8501'
+( \
+  cd "${GAK_PUBLIC}/src/docker" \
+  && sudo docker-compose -p pub run -d --name streamlit-pub streamlit \
+)
+( \
+  cd "${GAK_PRIVATE}/src/docker" \
+  && sudo docker-compose -p priv run -d --name streamlit-priv streamlit \
+)
 
 ./hello-end.sh "$SCRIPT"
