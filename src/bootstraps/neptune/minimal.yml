@@ -117,7 +117,7 @@ Resources:
             - "echo '===== Downloading graph-app-kit'\n"
             - "mkdir -p graph-app-kit/public\n"
             - "cd graph-app-kit/public\n"
-            - "git clone https://github.com/graphistry/graph-app-kit.git -b dev/minimal\n"
+            - "git clone https://github.com/graphistry/graph-app-kit.git\n"
             - "echo '===== Running graph-app-kit bootstraps'\n"
             - "cd /home/ec2-user/graph-app-kit/public/graph-app-kit/src/bootstraps/neptune\n"
             - "./minimal.sh \""
