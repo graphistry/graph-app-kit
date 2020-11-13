@@ -44,12 +44,12 @@ echo '===== Configuring graph-app-kit with Graphistry account and Neptune ====='
     && echo "NEPTUNE_READER_PROTOCOL=wss" \
     && echo "NEPTUNE_READER_PORT=8182" \
     && echo "NEPTUNE_READER_HOST=$NEPTUNE_READER_HOST" \
-) >> ../../docker/.env
+) | sudo tee ../../docker/.env
 
 echo '----- Launching graph-app-kit as streamlit-pub:8501'
 ( \
   cd "${GAK_PUBLIC}/src/docker" \
-  && sudo docker-compose -p pub run -d --name streamlit-pub streamlit \
+  && docker-compose -p pub run -d --name streamlit-pub streamlit \
 )
 
 ./hello-end.sh "$SCRIPT"

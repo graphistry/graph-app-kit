@@ -47,7 +47,7 @@ echo '===== Configuring graph-app-kit with Graphistry service account and Neptun
     && echo "NEPTUNE_READER_PROTOCOL=wss" \
     && echo "NEPTUNE_READER_PORT=8182" \
     && echo "NEPTUNE_READER_HOST=$NEPTUNE_READER_HOST" \
-) >> ../../docker/.env
+) | sudo tee ../../docker/.env
 
 echo '----- Reuse public graph-app-kit .env as private .env'
 sudo cp "${GAK_PUBLIC}/src/docker/.env" "${GAK_PRIVATE}/src/docker/.env"
