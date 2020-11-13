@@ -12,11 +12,8 @@ This guides walks through quick launch scripts for Neptune and Neptune-aware `gr
 
 Launch using a button at the bottom of the [identity graph sample cloud formation templates tutorial](https://aws.amazon.com/blogs/database/building-a-customer-identity-graph-with-amazon-neptune/):
 
-
 1. Click the `Launch Stack` button for your region:
-  * The recommended full `graph-app-kit` quick launcher requires a GPU instance:
-     * ... So ensure Neptune is in a region where you have `g4dn`/`p3`/`p4` GPU quota [or request it](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-resource-limits.html)
-  * The minimal `graph-app-kit` quick launcher can run without a GPU, but also does not come with Jupyter, public/private dashboards, etc.
+  * If launching the Full `graph-app-kit` template or using a GPU instance, use an AWS region with 4+ vCPU quota of `g4dn`/`p3`/`p4` ([or request it](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-resource-limits.html))
 2. Check the acknowledgement boxes in the `Capabilities` section
 3. Click `Create Stack` (5-20min)
   *  OUTPUT: The root `Identity-Graph-Sample` item's `Output` tab will show values used to configure the next steps:
@@ -29,57 +26,58 @@ Launch using a button at the bottom of the [identity graph sample cloud formatio
 
 **Manage:**
 
-* **Neptune UI**: AWS console -> `Services` -> `Neptune` -> `Databases`
+* **Neptune**: AWS console -> `Services` -> `Neptune` -> `Databases`
 
-* **Stack**: At any time, inspect the template's generated AWS resources and `delete` them:
-	*  `AWS Console` -> `Services` -> `CloudFormation` -> `Stacks` 
+* **Stack** (inspect/delete): `AWS Console` -> `Services` -> `CloudFormation` -> `Stacks` 
 
-* **Resize ($)**: Upon completed launch, resize Neptune to a cheaper instance: 
-  * Got to the above Neptune UI -> `Databases` -> **Modify** the **Writer**
+* **Resize ($)**:
+  * Above **Neptune** console -> `Databases` -> **Modify** the **Writer**
   * Change *DB instance class* to *db.r4.large* -> `Continue` -> check **Apply immediately** -> `Modify DB Instance`
 
 ## 2. Launch graph-app-kit configured for Amazon Neptune
 
-**Option 1 - Full (Recommended):** 
-
-  * GPU EC2 instance in your Neptune VPC
-  * Start making views for Neptune data immediately
-  * Web-based live editing
-  * Included: Graphistry, public + private Streamlit dashboards, Jupyter notebooks, RAPIDS.ai Python GPU ecosystem
+**Configuration 1: Full (Recommended)** 
 
   [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/neptune/graphistry.yml)
+
+  Launches: 
+
+  * GPU EC2 instance in your Neptune VPC ([request 4+ vCPU of g4, p3, or p4 capacity](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-resource-limits.html) if none)
+  * Start making views for Neptune data immediately
+  * Web-based live editing
+  * Graphistry, public + private Streamlit dashboards, Jupyter notebooks, RAPIDS.ai Python GPU ecosystem
+
   
-  If AWS reports `Please select another region`, use the `Select a Region` dropdown in the top right menu.
+  If AWS warns `Please select another region`, use the `Select a Region` dropdown in the top right menu.
 
-  Tenants launching GPUs for the first time may need to [request 4+ vCPU of g4, p3, or p4 capacity](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-resource-limits.html) in the intended Neptune region
+**Configuration 2: Minimal**
 
-**Option 2 - Minimal:**
-
+  1. [Get a free or self-managed Graphistry server account](https://www.graphistry.com/get-started) with username+password
+  
+  2. [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/neptune/graphistry.yml)
+  
+  Launches: 
+  
   * CPU EC2 instance in your Neptune VPC
   * Create Neptune views from your terminal
-  * Included: Public Streamlit dashboards linked against a remote Graphistry account
-  * Not included: Local Graphistry, private dashboards, Jupyter, RAPIDS.ai
+  * Public Streamlit dashboards linked against a remote Graphistry account
+  * Not included: Local Graphistry server, private dashboards, Jupyter notebooks, RAPIDS.ai GPU ecosystem
 
-  Get a free or self-managed [Graphistry server account](https://www.graphistry.com/get-started) with username+pass then [launch a minimal stack](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/neptune/graphistry.yml)
-  
   If AWS reports `Please select another region`, use the `Select a Region` dropdown in the top right menu.
 
 ----
 
-1. **Launch configuration: Details parameters**
+#### Launch configuration: Details parameters
 
-  1. Set stack name to anything, such as `graph-app-kit-a`
-  1. Set `VPC` to the `VPC` ID value ("`vpc-...`") from `1. Setup Amazon Neptune`
-  1. Set `Subnet` to the `PublicSubnet1` subnet ID value ("`subnet-...`") from `1. Setup Amazon Neptune`
-  1. Set `GraphAppKitKeyPair` to any where you have the SSH private.key
+    * Set stack name to anything, such as `graph-app-kit-a`
+    * Set `VPC` to the `VPC` ID value ("`vpc-...`") from `1. Setup Amazon Neptune`
+    * Set `Subnet` to the `PublicSubnet1` subnet ID value ("`subnet-...`") from `1. Setup Amazon Neptune`
+    * Set `GraphAppKitKeyPair` to one where you have a private.key for SSH'ing
+    * If using the minimal template, fill in details for connecting to a remote Graphistry server
 
-  If using the minimal template, fill in details for your Graphistry account
+#### *Optional:* Monitor instance launch for progress and errors
 
-2. ***(Optional):*** **Monitor instance launch for progress and errors**
-
-  * Click the `Resources` tab and follow the link to the EC2 instance AWS console page after it gets generated
-
-  * Click on the instance to find its public IP address
+  * `Resources` tab -> EC2 instance link -> click instance for details (public IP, ...)
   
   * Login and watch:
 
@@ -97,15 +95,13 @@ Launch using a button at the bottom of the [identity graph sample cloud formatio
 
 ### Login
 
-* Upon launch completion, you will have a full suite of graph tools located at **http://[the.public.ip.address]**
+* Login into the web portal at **http://[the.public.ip.address]** using credentials **`admin`** / ***`i-theInstanceID`*** 
 
-* Web login using credentials **`admin`** / ***`i-theInstanceID`*** 
+  * The minimal launcher has no web-based account portal
 
-* SSH using the instructions from step 2
+* *Optional*: SSH using the instructions from step 2
 
-* ***Note***: The minimal launcher has no web admin portal, just SSH and Streamlit
-
-### URLs for full stack 
+### Launched URLs for full stack 
 
 * **Graphistry: GPU-accelerated visual analytics + account login**
   * **http://[the.public.ip.address]**
@@ -124,7 +120,7 @@ Launch using a button at the bottom of the [identity graph sample cloud formatio
   * **http://[the.public.ip.address]/notebook**
   * Live-edit `graph-app-kit` view folders `notebook/graph-app-kit/[public,private]/views`
 
-### URLs for minimal stack 
+### Launched URLs for minimal stack 
 
 * **Streamlit: Public dashboards**
   * **http://[the.public.ip.address]/public/dash**
