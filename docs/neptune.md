@@ -40,21 +40,27 @@ Launch using a button at the bottom of the [identity graph sample cloud formatio
 
 ## 2. Launch graph-app-kit configured for Amazon Neptune
 
-**Option 1 - Full (Recommended):** Start a single GPU EC2 instance in your Neptune VPC:
+**Option 1 - Full (Recommended):** 
 
+  * GPU EC2 instance in your Neptune VPC
   * Start making views for Neptune data immediately
   * Web-based live editing
   * Included: Graphistry, public + private Streamlit dashboards, Jupyter notebooks, RAPIDS.ai Python GPU ecosystem
 
   [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/neptune/graphistry.yml)
+  
+  If AWS reports `Please select another region`, use the `Select a Region` dropdown in the top right menu.
 
-**Option 2 - Minimal:** Start a CPU instance in your Neptune VPC:
+**Option 2 - Minimal:**
 
-  * Create views from your terminal
-  * Included: Public Streamlit linked against a remote Graphistry account
-  * Not included: Local Graphistry, Jupyter, RAPIDS.ai
+  * CPU EC2 instance in your Neptune VPC
+  * Create Neptune views from your terminal
+  * Included: Public Streamlit dashboards linked against a remote Graphistry account
+  * Not included: Local Graphistry, private dashboards, Jupyter, RAPIDS.ai
 
   Get a free or self-managed [Graphistry server account](https://www.graphistry.com/get-started) with username+pass then [launch a minimal stack](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/neptune/graphistry.yml)
+  
+  If AWS reports `Please select another region`, use the `Select a Region` dropdown in the top right menu.
 
 ----
 
@@ -127,4 +133,4 @@ Launch using a button at the bottom of the [identity graph sample cloud formatio
 
 Continue to the instructions for [creating custom views](views.md) and [adding common extensions](extend.md) like TLS, public/private dashboards, and more
 
-For more advanced configuration options, see the [manual Amazone Neptune setup guide](neptune-manual.md).
+For more advanced Neptune configuration options, see the [manual Amazone Neptune setup guide](neptune-manual.md).
