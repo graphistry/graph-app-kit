@@ -30,7 +30,6 @@ source instance-id.sh
 echo " * INSTANCE_ID: $INSTANCE_ID"
 echo
 
-./cloudformation-bootstrap.sh
 ./docker-aws.sh
 ./docker-container-build.sh
 
