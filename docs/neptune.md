@@ -13,14 +13,15 @@ This guides walks through quick launch scripts for Neptune and Neptune-aware `gr
 Launch using a button at the bottom of the [identity graph sample cloud formation templates tutorial](https://aws.amazon.com/blogs/database/building-a-customer-identity-graph-with-amazon-neptune/):
 
 1. Click the `Launch Stack` button for your region:
-  * If launching the Full `graph-app-kit` template or using a GPU instance, use an AWS region with 4+ vCPU quota of `g4dn`/`p3`/`p4` ([or request it](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-resource-limits.html))
+    * If launching the Full `graph-app-kit` template or using a GPU instance, use an AWS region with 4+ vCPU quota of `g4dn`/`p3`/`p4` ([or request it](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-resource-limits.html))
 2. Check the acknowledgement boxes in the `Capabilities` section
 3. Click `Create Stack` (5-20min)
-  *  OUTPUT: The root `Identity-Graph-Sample` item's `Output` tab will show values used to configure the next steps:
 
-      * `VPC`: ID `vpc-abc`
-      * `PublicSubnet1`: ID `subnet-abc`
-      * `DBClusterReadEndpoint`: URL `abc.cluster-ro-xyz.zzz.neptune.amazonaws.com`
+**Important Output**: Open the root `Identity-Graph-Sample` item's `Output` tab to see the values you will fill in to configure the next steps:
+
+  * `VPC`: ID `vpc-abc`
+  * `PublicSubnet1`: ID `subnet-abc`
+  * `DBClusterReadEndpoint`: URL `abc.cluster-ro-xyz.zzz.neptune.amazonaws.com`
 
 ----
 
@@ -36,9 +37,9 @@ Launch using a button at the bottom of the [identity graph sample cloud formatio
 
 ## 2. Launch graph-app-kit configured for Amazon Neptune
 
-**Configuration 1: Full (Recommended)** 
+#### Configuration 1: Full (Recommended)
 
-  [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/neptune/graphistry.yml)
+  [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/neptune/graphistry.yml) *Full stack*
 
   Launches: 
 
@@ -50,11 +51,11 @@ Launch using a button at the bottom of the [identity graph sample cloud formatio
   
   If AWS warns `Please select another region`, use the `Select a Region` dropdown in the top right menu.
 
-**Configuration 2: Minimal**
+#### Configuration 2: Minimal
 
   1. [Get a free or self-managed Graphistry server account](https://www.graphistry.com/get-started) with username+password
   
-  2. [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/neptune/graphistry.yml)
+  2. [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/neptune/graphistry.yml) *Minimal stack*
   
   Launches: 
   
