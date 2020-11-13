@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -e
 
 SCRIPT="Get AWS Instance ID"
 ./hello-start.sh "$SCRIPT"

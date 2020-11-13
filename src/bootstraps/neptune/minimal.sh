@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -e
 
 ### Full neptune/graphistry/st setup:
 ###  caddy, jupyter, pub/priv st, ...
@@ -46,9 +46,6 @@ echo '===== Configuring graph-app-kit with Graphistry account and Neptune ====='
     && echo "NEPTUNE_READER_PORT=8182" \
     && echo "NEPTUNE_READER_HOST=$NEPTUNE_READER_HOST" \
 ) >> ../../docker/.env
-
-echo '----- Config:'
-cat ../../docker/.env
 
 echo '----- Launching graph-app-kit as streamlit-pub:8501'\
 ( \

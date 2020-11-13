@@ -42,7 +42,7 @@ Parameters:
   GraphistryPassword:
     NoEcho: true
     Type: String
-    Description: 'Graphistry account password'
+    Description: 'Graphistry account password. Get free at https://hub.graphistry.com .'
   GraphistryHost:
     Type: String
     Default: "hub.graphistry.com"
