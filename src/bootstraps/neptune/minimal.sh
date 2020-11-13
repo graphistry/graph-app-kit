@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -e
 
 ### Full neptune/graphistry/st setup:
 ###  caddy, jupyter, pub/priv st, ...
@@ -15,6 +15,7 @@ export GRAPHISTRY_USERNAME=$2
 export GRAPHISTRY_PASSWORD=$3
 export GRAPHISTRY_HOST=$4
 export GRAPHISTRY_PROTOCOL=$5
+export GAK_PUBLIC=/home/ec2-user/graph-app-kit/public/graph-app-kit
 
 echo
 echo "----- SETTINGS ------"
@@ -23,20 +24,20 @@ echo " * GRAPHISTRY_USERNAME (\$2): $GRAPHISTRY_USERNAME"
 echo " * GRAPHISTRY_PASSWORD (\$3): ***"
 echo " * GRAPHISTRY_HOST (\$4): $GRAPHISTRY_HOST"
 echo " * GRAPHISTRY_PROTOCOL (\$5): $GRAPHISTRY_PROTOCOL"
+echo " * GAK_PUBLIC: $GAK_PUBLIC"
 echo "---------------------"
 source instance-id.sh
 echo " * INSTANCE_ID: $INSTANCE_ID"
 echo
 
-./cloudformation-bootstrap.sh
 ./docker-aws.sh
 ./docker-container-build.sh
 
 echo '===== Configuring graph-app-kit with Graphistry account and Neptune ====='
 ( \
     cd ../../docker \
+    && echo "ST_PUBLIC_PORT=80" \
     && echo "BASE_PATH=public/dash/" \
-    && echo "GRAPH_VIEWS=/home/ubuntu/graphistry/data/notebooks/graph-app-kit/public/views" \
     && echo "GRAPHISTRY_USERNAME=${GRAPHISTRY_USERNAME}" \
     && echo "GRAPHISTRY_PASSWORD=${GRAPHISTRY_PASSWORD}" \
     && echo "GRAPHISTRY_PROTOCOL=${GRAPHISTRY_PROTOCOL}" \
@@ -44,13 +45,12 @@ echo '===== Configuring graph-app-kit with Graphistry account and Neptune ====='
     && echo "NEPTUNE_READER_PROTOCOL=wss" \
     && echo "NEPTUNE_READER_PORT=8182" \
     && echo "NEPTUNE_READER_HOST=$NEPTUNE_READER_HOST" \
-) >> ../../docker/.env
+) | sudo tee ../../docker/.env
 
-echo '----- Config:'
-cat ../../docker/.env
-
-echo '----- Launching graph-app-kit as streamlit-pub:8501'\
-( cd /home/ubuntu/graph-app-kit/public/graph-app-kit/src/docker \
-  && sudo docker-compose -p pub run -d --name streamlit-pub streamlit )
+echo '----- Launching graph-app-kit as streamlit-pub:8501'
+( \
+  cd "${GAK_PUBLIC}/src/docker" \
+  && sudo /usr/local/bin/docker-compose up -d streamlit \
+)
 
 ./hello-end.sh "$SCRIPT"

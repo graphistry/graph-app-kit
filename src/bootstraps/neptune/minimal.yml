@@ -40,13 +40,14 @@ Parameters:
     Type: String
     Description: 'Graphistry account username. Get free at https://hub.graphistry.com .'
   GraphistryPassword:
+    NoEcho: true
     Type: String
-    Description: 'Graphistry account password'
+    Description: 'Graphistry account password. Get free at https://hub.graphistry.com .'
   GraphistryHost:
     Type: String
     Default: "hub.graphistry.com"
     Description: 'Graphistry server domain. Ex: hub.graphistry.com'
-GraphistryProtocol:
+  GraphistryProtocol:
     Type: String
     Default: "https"
     Description: 'Graphistry server protocol (requires certificate installed for TLS). Ex: http'
@@ -58,10 +59,10 @@ Resources:
     Properties:
       GroupDescription: Graphistry Graph App Kit Access 8501 22
       Tags: 
-        - Key: "name"
-          Value: "graph-app-kit-quicklaunch-a"
         - Key: "kind"
-          Value: "graph-app-kit"
+          Value: "graph-app-kit-minimal"
+        - Key: Name
+          Value: Graph-App-Kit-Minimal
       VpcId: 
         Ref: GraphAppKitVPC
       SecurityGroupIngress:
@@ -98,10 +99,6 @@ Resources:
         Ref: GraphAppKitSecurityGroup
       KeyName: 
         Ref: GraphAppKitKeyPair
-      Tags:
-        - 
-          Key: Name
-          Value: Graphistry-Graph-App-Kit
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:
@@ -116,12 +113,13 @@ Resources:
           - - "#!/bin/bash\n"
             - "set -ex\n"
             - "sudo yum install -y git\n"
+            - "cd /home/ec2-user\n"
             - "echo '===== Downloading graph-app-kit'\n"
             - "mkdir -p graph-app-kit/public\n"
             - "cd graph-app-kit/public\n"
-            - "git clone https://github.com/graphistry/graph-app-kit.git -b dev/neptune-templates\n"
+            - "git clone https://github.com/graphistry/graph-app-kit.git\n"
             - "echo '===== Running graph-app-kit bootstraps'\n"
-            - "cd /home/ubuntu/graph-app-kit/public/graph-app-kit/src/bootstraps/neptune\n"
+            - "cd /home/ec2-user/graph-app-kit/public/graph-app-kit/src/bootstraps/neptune\n"
             - "./minimal.sh \""
             - Ref: NeptuneReaderHost
             - "\" \""
