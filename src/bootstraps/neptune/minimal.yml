@@ -113,6 +113,7 @@ Resources:
           - - "#!/bin/bash\n"
             - "set -ex\n"
             - "sudo yum install -y git\n"
+            - "cd /home/ec2-user\n"
             - "echo '===== Downloading graph-app-kit'\n"
             - "mkdir -p graph-app-kit/public\n"
             - "cd graph-app-kit/public\n"
