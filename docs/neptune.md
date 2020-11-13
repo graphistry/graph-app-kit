@@ -43,15 +43,12 @@ Launch using a button at the bottom of the [identity graph sample cloud formatio
 The quick launch template launchs a single GPU EC2 instance in your Neptune VPC. You will be able to log into the instance and start making views for Neptune data. It automatically connects to both the Neptune demo database and to your production instance. It contains Graphistry, Streamlit for public and team-only use, and RAPIDS.ai-ready Jupyter notebooks.
 
 
-1. **Launch the template using the following parameters:**
+1. **Launch the template using the following Details parameters:**
 
-  * Form `Details` config:
-      1. Set stack name to anything, such as `graph-app-kit-a`
-      1. Set `VPC` to the `VPC` ID value ("`vpc-...`") from `1. Setup Amazon Neptune`
-      1. Set `Subnet` to the `PublicSubnet1` subnet ID value ("`subnet-...`") from `1. Setup Amazon Neptune`
-      1. Set `GraphAppKitKeyPair` to any where you have the SSH private.key
-  * Form `Options` config:
-      * *Recommended*: Add tag `name` => `graph-app-kit-a`
+  1. Set stack name to anything, such as `graph-app-kit-a`
+  1. Set `VPC` to the `VPC` ID value ("`vpc-...`") from `1. Setup Amazon Neptune`
+  1. Set `Subnet` to the `PublicSubnet1` subnet ID value ("`subnet-...`") from `1. Setup Amazon Neptune`
+  1. Set `GraphAppKitKeyPair` to any where you have the SSH private.key
 
 2. **Go to your `graph-app-kit` instance**
 
@@ -62,7 +59,9 @@ The quick launch template launchs a single GPU EC2 instance in your Neptune VPC.
   * *Optional*: From a commandline, SSH in to your GPU instance and watch the initialization logs for errors:
 
 ```bash
-ssh -i /my/private.key ubuntu@the.instance.public.ip
+ssh -i /my/private.key ubuntu@the.instance.public.ip 
+### Use ec2-user@ if Minimal quick launcher
+
 tail -f /var/log/cloud-init-output.log -n 1000
 ```
 
@@ -77,7 +76,7 @@ tail -f /var/log/cloud-init-output.log -n 1000
 
 ### Minimal
 
-If using the minimal launcher, you will only have url **http://[the.public.ip.address]/public/dash** and can edit views via SSH (`ubuntu@[the.public.ip]:/home/ubuntu/graph-app-kit`)
+If using the minimal launcher, you will only have url **http://[the.public.ip.address]/public/dash** and can edit views via SSH (`ec2-user@[the.public.ip]:/home/ubuntu/graph-app-kit`)
 
 ### URLs
 
