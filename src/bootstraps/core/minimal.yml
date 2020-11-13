@@ -1,0 +1,144 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    -
+      Label:
+        default: "Network Configuration"
+      Parameters:
+        - GraphAppKitVPC
+        - GraphAppKitSubnet
+    -
+      Label:
+        default: "Server Configuration"
+      Parameters:
+        - GraphAppKitKeyPair
+
+Parameters:
+  GraphAppKitKeyPair:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: "Enter an EC2 Key Pair for this instance"
+  GraphAppKitVPC:
+    Type: AWS::EC2::VPC::Id
+    Description: "Enter a web-accessible VPC. Ex: vpc-abc"
+  GraphAppKitSubnet:
+    Type: AWS::EC2::Subnet::Id
+    Description: "Enter a public subnet within the previously selected VPC. Ex: subnet-123"
+  InstanceType:
+    Type: String
+    Default: 't3.medium'
+    Description: "Enter preferred CPU type. Ex: t3.medium"
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+    Description: 'Base AMI'
+  GraphistryUserName:
+    Type: String
+    Description: 'Graphistry account username. Get free at https://hub.graphistry.com .'
+  GraphistryPassword:
+    NoEcho: true
+    Type: String
+    Description: 'Graphistry account password. Get free at https://hub.graphistry.com .'
+  GraphistryHost:
+    Type: String
+    Default: "hub.graphistry.com"
+    Description: 'Graphistry server domain. Ex: hub.graphistry.com'
+  GraphistryProtocol:
+    Type: String
+    Default: "https"
+    Description: 'Graphistry server protocol (requires certificate installed for TLS). Ex: http'
+
+
+Resources:
+  GraphAppKitSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Graphistry Graph App Kit Access 8501 22
+      Tags: 
+        - Key: "kind"
+          Value: "graph-app-kit-minimal"
+        - Key: Name
+          Value: Graph-App-Kit-Minimal
+      VpcId: 
+        Ref: GraphAppKitVPC
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 8501
+        ToPort: 8501
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+  GraphAppKitEC2:
+    Type: AWS::EC2::Instance
+    Properties:
+      Tags: 
+        - Key: "name"
+          Value: "graph-app-kit-quicklaunch-a"
+        - Key: "kind"
+          Value: "graph-app-kit"
+      ImageId: !Ref LatestAmiId
+      InstanceType: !Ref InstanceType
+      SubnetId:
+        Ref: GraphAppKitSubnet
+      SecurityGroupIds:
+      - 
+        Ref: GraphAppKitSecurityGroup
+      KeyName: 
+        Ref: GraphAppKitKeyPair
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeType: gp2
+            VolumeSize: '60'
+            DeleteOnTermination: 'true'
+            Encrypted: 'false'
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+          - ''
+          - - "#!/bin/bash\n"
+            - "set -ex\n"
+            - "sudo yum install -y git\n"
+            - "cd /home/ec2-user\n"
+            - "echo '===== Downloading graph-app-kit'\n"
+            - "mkdir -p graph-app-kit/public\n"
+            - "cd graph-app-kit/public\n"
+            - "git clone https://github.com/graphistry/graph-app-kit.git\n"
+            - "echo '===== Running graph-app-kit bootstraps'\n"
+            - "cd /home/ec2-user/graph-app-kit/public/graph-app-kit/src/bootstraps/core\n"
+            - "./minimal.sh \""
+            - Ref: GraphistryUserName
+            - "\" \""
+            - Ref: GraphistryPassword
+            - "\" \""
+            - Ref: GraphistryHost
+            - "\" \""
+            - Ref: GraphistryProtocol
+            - "\"\n"
+            - "/opt/aws/bin/cfn-signal -e $? --stack "
+            - Ref: AWS::StackName
+            - " --resource GraphAppKitEC2 --region "
+            - Ref: AWS::Region
+            - "\n"
+    CreationPolicy:
+      ResourceSignal:
+        Count: 1
+        Timeout: "PT20M"
+
+Outputs:
+  PublicIp:
+    Description: GraphAppKitEC2 Public IP
+    Value: !GetAtt GraphAppKitEC2.PublicIp
+    Export:
+      Name: !Sub "${AWS::StackName}-PublicIp"
