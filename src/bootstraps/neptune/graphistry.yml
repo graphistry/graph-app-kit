@@ -89,17 +89,10 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       Tags: 
-<<<<<<< HEAD
         - Key: "kind"
           Value: "graph-app-kit-full"
         - Key: Name
           Value: Graphistry-Graph-App-Kit
-=======
-        - Key: "name"
-          Value: "graph-app-kit-quicklaunch-a"
-        - Key: "kind"
-          Value: "graph-app-kit"
->>>>>>> master
       ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", HVM64]
       InstanceType: !Ref InstanceType
       SubnetId:
@@ -109,13 +102,6 @@ Resources:
         Ref: GraphAppKitSecurityGroup
       KeyName: 
         Ref: GraphAppKitKeyPair
-<<<<<<< HEAD
-=======
-      Tags:
-        - 
-          Key: Name
-          Value: Graphistry-Graph-App-Kit
->>>>>>> master
       BlockDeviceMappings:
         - DeviceName: /dev/xvda
           Ebs:

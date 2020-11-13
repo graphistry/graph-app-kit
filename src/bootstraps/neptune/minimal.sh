@@ -1,9 +1,5 @@
 #!/bin/bash
-<<<<<<< HEAD
 set -e
-=======
-set -ex
->>>>>>> master
 
 ### Full neptune/graphistry/st setup:
 ###  caddy, jupyter, pub/priv st, ...
