@@ -142,3 +142,10 @@ Resources:
       ResourceSignal:
         Count: 1
         Timeout: "PT20M"
+
+Outputs:
+  PublicIp:
+    Description: GraphAppKitEC2 Public IP
+    Value: !GetAtt GraphAppKitEC2.PublicIp
+    Export:
+      Name: !Sub "${AWS::StackName}-PublicIp"
