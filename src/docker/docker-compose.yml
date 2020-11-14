@@ -81,7 +81,7 @@ services:
       autoheal: "true"
     volumes:
       - ../python:/apps
-      - ${GRAPH_VIEW:-../python/views}:/apps/views
+      - ${GRAPH_VIEWS:-../python/views}:/apps/views
       - ${NEPTUNE_KEY_PATH:-/tmp/mt.pem}:/secrets/neptune-reader.pem
     healthcheck:
       test: ["CMD", "curl", "-Lf", "http://localhost:8501/${BASE_PATH}healthz"]
