@@ -59,12 +59,12 @@ If GPUs are present, `graph-app-kit` leverages GPU cloud acceleration:
 
 * Graph databases
   
-  * [AWS Neptune](https://aws.amazon.com/neptune/) ([quick launch](docs/neptune.md) and [manual launch](docs/neptune-manual.md))
-  * [TinkerPop Gremlin](https://tinkerpop.apache.org/) ([query demos](https://github.com/graphistry/graph-app-kit/tree/master/src/python/views/demo_neptune_01_minimal_gremlin))
+  * [AWS Neptune](https://aws.amazon.com/neptune/): [quick launch](docs/neptune.md) and [manual launch](docs/neptune-manual.md)
+  * [TinkerPop Gremlin](https://tinkerpop.apache.org/): [query demos](https://github.com/graphistry/graph-app-kit/tree/master/src/python/views/demo_neptune_01_minimal_gremlin)
 
   * Collaborations welcome!
 
-* [Jupyter notebooks](https://jupyter.org/): Volume mount recipe for sharing code so code can be live-edited (see [integrations guide](docs/extend.md))
+* [Jupyter notebooks](https://jupyter.org/): Use quick launchers or [integrations guide](docs/extend.md) for web-based live editing of dashboards by sharing volume mounts between Jupyter and Streamlit
 
 * [Caddy](https://caddyserver.com/): Reverse proxy for custom URLs, [automatic LetsEncrypt TLS certificates](http://letsencrypt.org/), multiple sites on the same domain, pluggable authentication (see [integrations guide](docs/extend.md))
 
