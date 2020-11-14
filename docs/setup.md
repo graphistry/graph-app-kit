@@ -1,6 +1,6 @@
 # Setup graph-app-kit
 
-The below provides quick launchers for AWS-based deployments. See [manual setup](setup-manual.md) for alternative instructions.
+The below provides quick launchers for AWS-based deployments. See [manual setup](setup-manual.md) for alternative instructions, and check for database-specific integrations such as for [Amazon Neptune](neptune.md).
 
 ## 1. Launch graph-app-kit
 
