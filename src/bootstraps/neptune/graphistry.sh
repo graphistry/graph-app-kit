@@ -28,8 +28,8 @@ echo
 
 ./cloudformation-bootstrap.sh
 ./docker-container-build.sh
-./prepopulate-notebooks.sh graph-app-kit/public views
-./prepopulate-notebooks.sh graph-app-kit/private views
+./prepopulate-notebooks.sh graph-app-kit/public views ubuntu
+./prepopulate-notebooks.sh graph-app-kit/private views ubuntu
 ./graphistry-wait-healthy.sh
 ./swap-caddy.sh
 source ./graphistry-service-account.sh
