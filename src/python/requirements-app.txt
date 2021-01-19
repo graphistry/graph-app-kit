@@ -1,3 +1,2 @@
 ### your custom requirements here
 #protobuf==3.13.0
-pyTigerGraphBeta==0.0.9.4
