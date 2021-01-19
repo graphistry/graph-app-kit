@@ -131,11 +131,15 @@ def plot_url(nodes_df, edges_df):
         .nodes(nodes_df) \
         .bind(node='n') \
         .addStyle(bg={'color': 'white'}) \
-        .encode_point_color("color") \
-        .encode_edge_color("color") \
+        .encode_point_color("type", categorical_mapping={'User': 'orange', 
+                                                         'Transaction': '#CCC'},
+                                    default_mapping='black') \
+        .encode_edge_color("type", categorical_mapping={'User_Transfer_Transaction': 'black',
+                                                        'User_Recieve_Transaction_Rev': '#add836'},
+                                    default_mapping='black') \
         .encode_point_icon('type', categorical_mapping={'User': 'laptop',
                                                         'Transaction': 'server'},
-                           default_mapping='question')
+                                    default_mapping='question')
 
 
 # .encode_point_size('', ["blue", "yellow", "red"],  ,as_continuous=True)
@@ -239,23 +243,12 @@ def run_filters(user_id, conn):
             node_idf.append(to_ids[i])
             typef.append(to_types[i])
 
-    nodeType2color = {
-        'User': 0xFF740000,  # orange
-        'Transaction': 0xA5A5A500  # light gray
-    }
-
-    edgeType2color = {
-        'User_Transfer_Transaction': 0x00000000,    # black
-        'User_Recieve_Transaction_Rev': 0x60B9E000  # light blue
-    }
 
     nodes_df = pd.DataFrame({
         'n': node_idf,
         'type': typef,
         'size': 0.1
     })
-    nodes_df['color'] = nodes_df['type'].apply(lambda type_str: nodeType2color[type_str])
-    edges_df['color'] = edges_df['type'].apply(lambda type_str: edgeType2color[type_str])
 
     ############### END
 
