@@ -1,20 +1,16 @@
 import asyncio
 import graphistry
-import os
 import pandas as pd
 import streamlit as st
 from components import GraphistrySt, URLParam
-from neptune_helper import gremlin_helper, df_helper
 from css import all_css
 from util import getChild
 import time
-import altair as alt
 from TigerGraph_helper import tg_helper
 import plotly.express as px
+import pyTigerGraphBeta as tg
+import datetime
 
-from gremlin_python import statics
-from gremlin_python.process.graph_traversal import __
-from gremlin_python.process.traversal import WithOptions, T
 
 ############################################
 #
@@ -73,19 +69,19 @@ def custom_css():
 # https://docs.streamlit.io/en/stable/api.html#display-interactive-widgets
 def sidebar_area():
     conn = None
-    # q = conn.runInstalledQuery("mostDirectInfections")
-    # Most_infectious_IDS = q[0]['Answer']
-    # MI_List = [d['v_id'] for d in Most_infectious_IDS if 'v_id' in d]
     num_edges_init = urlParams.get_field('num_matches', 0.5)
     # MI_List.reverse()
     idList = [i for i in range(1, 500)]
     st.sidebar.header("TigerGraph Anti-Fraud")
+
+    # TigerGraph connection input fields
     tg_host = st.sidebar.text_input ('TigerGraph Host')
     tg_username = st.sidebar.text_input ('TigerGraph Username')
     tg_password = st.sidebar.text_input ('TigerGraph Password')
     tg_graphname = st.sidebar.text_input ('TigerGraph Graphname')
     tg_secret = st.sidebar.text_input('TigerGraph Secret')
     
+    # Connect to TigerGraph
     if st.sidebar.button("Connect"):
         try:
             conn = tg.TigerGraphConnection(host=tg_host, graphname=tg_graphname, username=tg_username, password=tg_password)
@@ -102,23 +98,12 @@ def sidebar_area():
 
             return {'user_id': user_id, 'conn': conn}
 
-        except:
+        except Exception as e:
+            st.sidebar.text(str(e))
             st.sidebar.error("Failed to Connect")
             return None
     
     return None
-    user_id = st.sidebar.selectbox(
-        'User ID ',
-        idList
-    )
-
-
-    # max_trust = st.sidebar.slider(
-    #     'Maximum Trust Score', min_value=0.01, max_value=1.00, value=num_edges_init)
-    # urlParams.set_field('max_trust', max_trust)
-    urlParams.set_field('user_id', user_id)
-
-    return {'user_id': user_id, 'conn': conn}
 
 
 def plot_url(nodes_df, edges_df):
@@ -146,15 +131,7 @@ def plot_url(nodes_df, edges_df):
                                default_mapping='question') \
             .settings(url_params={'play': 7000, 'dissuadeHubs': True})
 
-
-
-        # if not (node_label_col is None):
-        #     g = g.bind(point_title=node_label_col)
-
-        # if not (edge_label_col is None):
-        #     g = g.bind(edge_title=edge_label_col)
-
-        url = g.plot(render=False)
+        url = g.plot(render=False, as_files=True)
     except Exception as e:
         raise e
     toc = time.perf_counter()
@@ -165,23 +142,11 @@ def plot_url(nodes_df, edges_df):
     return url
 
 
-
-import pyTigerGraphBeta as tg
-import pandas as pd
-import datetime
-
-
 # Given filter settings, generate/cache/return dataframes & viz
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def run_filters(user_id, conn):
     global metrics
-    # global conn
 
-    # if conn is None:
-    #     conn = tg.TigerGraphConnection(host="https://fraud-streamlit.i.tgcloud.io", graphname="AntiFraud",
-    #                                    username="tigergraph", password="tigergraph")
-
-    # conn.getToken("tufp2os5skgljafj7ol4ikht2atc7rbj")
     logger.info("Installing Queries")
     res = conn.gsql(
     '''
@@ -346,11 +311,7 @@ def run_filters(user_id, conn):
         'trust': trustf,
         'size': 0.1
     })
-     # red
-    # [255(1-trustscore), 0, 0]
-    # green
-    # [0,255*trustscore,0]
-    #
+
     nodes_df['color'] = nodes_df.apply(lambda x: nodeType2color(x['type'], x['trust']), axis=1)
     edges_df['color'] = edges_df['type'].apply(lambda type_str: edgeType2color[type_str])
 
@@ -396,7 +357,6 @@ def run_filters(user_id, conn):
 
 
 def main_area(url, nodes, edges, user_id, conn):
-    # global conn
 
     logger.debug('rendering main area, with url: %s', url)
     GraphistrySt().render_url(url)
@@ -405,11 +365,7 @@ def main_area(url, nodes, edges, user_id, conn):
     amounts = []
     transfer_type = []
     results = None
-    # if conn is None:
-    #     conn = tg.TigerGraphConnection(host="https://fraud-streamlit.i.tgcloud.io", graphname="AntiFraud",
-    #                                    username="tigergraph", password="tigergraph")
-
-    # conn.getToken("tufp2os5skgljafj7ol4ikht2atc7rbj")
+   
     try:
         results = conn.runInstalledQuery("totalTransaction", params={"Source": user_id})[0]
     except Exception as e:
