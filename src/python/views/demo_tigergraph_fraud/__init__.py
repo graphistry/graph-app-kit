@@ -90,10 +90,13 @@ def sidebar_area():
             else:
                 conn.getToken(conn.createSecret())
             st.sidebar.success("Connnected Successfully")
+            
             user_id = st.sidebar.selectbox(
                 'User ID ',
                 idList
             )
+            st.sidebar.markdown("Try using ID 111 for an optimal experience!")
+            
             urlParams.set_field('user_id', user_id)
 
             return {'user_id': user_id, 'conn': conn}
