@@ -24,12 +24,16 @@ Extensions:
 
 * TigerGraph
 
+
 ## [2021.02.23]
 
 ### Added
 
 * Changelog
 * AMI enumeration script
+* Tests: flake8, docker build
+* CI: GHA
+* CI: Badges
 
 ### Changed
 
@@ -37,6 +41,10 @@ Extensions:
 * Dev docs: Tagging, building
 * Graphistry 2.35+ Support: Swaps in old < 2.34-style Caddy 1.x container as Graphistry 2.35's Caddy 2.x is currently tricky for auth reuse
 * Plotter auto-memoizes with `.plot(as_files=True, ...)`
+
+### Fixed
+
+* Flake8 warnings
 
 ### Breaking
 
