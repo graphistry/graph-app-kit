@@ -1,4 +1,7 @@
-[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/graphistry/graph-app-kit-st)](https://hub.docker.com/r/graphistry/graph-app-kit-st)
+![Build Status](https://github.com/graphistry/graph-app-kit/workflows/CI/badge.svg)
+[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/graphistry/graph-app-kit-st)](https://github.com/graphistry/pygraphistry/actions/workflows/ci.yml)
+![Publish Status](https://github.com/graphistry/graph-app-kit/workflows/Publish/badge.svg)
+[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/graphistry/graph-app-kit-st)](https://github.com/graphistry/pygraphistry/actions/workflows/publish-pypi.yml)
 
 [<img src="https://img.shields.io/badge/slack-Graphistry%20chat-yellow.svg?logo=slack">](https://join.slack.com/t/graphistry-community/shared_invite/zt-53ik36w2-fpP0Ibjbk7IJuVFIRSnr6g) 
 [![Twitter Follow](https://img.shields.io/twitter/follow/graphistry)](https://twitter.com/graphistry)
