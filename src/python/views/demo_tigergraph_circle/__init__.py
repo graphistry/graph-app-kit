@@ -97,8 +97,9 @@ def sidebar_area():
 
             return {'user_id': user_id, 'conn': conn}
         # FIXME: What is the expected exn?
-        except:  # noqa: E722
+        except Exception as e:  # noqa: E722
             st.sidebar.error("Failed to Connect")
+            st.sidebar.error(e)
             return None
 
     return None
