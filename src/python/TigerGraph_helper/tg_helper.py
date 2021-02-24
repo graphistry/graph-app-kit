@@ -1,4 +1,4 @@
-#Function to connect to TigerGraph
+# Function to connect to TigerGraph
 
 import os
 import logging
@@ -7,6 +7,7 @@ import pyTigerGraphBeta as tg
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
+
 def connect_to_tigergraph():
     if ('TIGERGRAPH_HOST' in os.environ and 'TIGERGRAPH_USERNAME' in os.environ and 'TIGERGRAPH_PASSWORD' in os.environ and 'TIGERGRAPH_GRAPHNAME' in os.environ):
         host = os.environ["TIGERGRAPH_HOST"]
@@ -14,7 +15,7 @@ def connect_to_tigergraph():
         password = os.environ["TIGERGRAPH_PASSWORD"]
         graphname = os.environ["TIGERGRAPH_GRAPHNAME"]
         conn = tg.TigerGraphConnection(host=host, graphname=graphname, username=username, password=password)
-        if ('TIGERGRAPH_SECRET' in os.environ and os.environ["TIGERGRAPH_SECRET"] != None):
+        if ('TIGERGRAPH_SECRET' in os.environ and os.environ["TIGERGRAPH_SECRET"] is not None):
             secret = os.environ["TIGERGRAPH_SECRET"]
             conn.getToken(secret)
         else:

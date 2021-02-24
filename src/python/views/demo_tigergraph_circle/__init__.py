@@ -67,19 +67,19 @@ def custom_css():
 # Given URL params, render left sidebar form and return combined filter settings
 # https://docs.streamlit.io/en/stable/api.html#display-interactive-widgets
 def sidebar_area():
-    
-    num_edges_init = urlParams.get_field('num_matches', 0.5)
+
+    # num_edges_init = urlParams.get_field('num_matches', 0.5)
     # MI_List.reverse()
     idList = [i for i in range(1, 500)]
 
-    #TigerGraph connection input fields
+    # TigerGraph connection input fields
     st.sidebar.header("TigerGraph Anti-Fraud")
-    tg_host = st.sidebar.text_input ('TigerGraph Host')
-    tg_username = st.sidebar.text_input ('TigerGraph Username')
-    tg_password = st.sidebar.text_input ('TigerGraph Password')
-    tg_graphname = st.sidebar.text_input ('TigerGraph Graphname')
+    tg_host = st.sidebar.text_input('TigerGraph Host')
+    tg_username = st.sidebar.text_input('TigerGraph Username')
+    tg_password = st.sidebar.text_input('TigerGraph Password')
+    tg_graphname = st.sidebar.text_input('TigerGraph Graphname')
     tg_secret = st.sidebar.text_input('TigerGraph Secret')
-    
+
     # Connect to TigerGraph
     if st.sidebar.button("Connect"):
         try:
@@ -96,11 +96,11 @@ def sidebar_area():
             urlParams.set_field('user_id', user_id)
 
             return {'user_id': user_id, 'conn': conn}
-
-        except:
+        # FIXME: What is the expected exn?
+        except:  # noqa: E722
             st.sidebar.error("Failed to Connect")
             return None
-    
+
     return None
 
     user_id = st.sidebar.selectbox(
@@ -131,7 +131,7 @@ def plot_url(nodes_df, edges_df):
         .nodes(nodes_df) \
         .bind(node='n') \
         .addStyle(bg={'color': 'white'}) \
-        .encode_point_color("type", categorical_mapping={'User': 'orange', 
+        .encode_point_color("type", categorical_mapping={'User': 'orange',
                                                          'Transaction': '#CCC'},
                                     default_mapping='black') \
         .encode_edge_color("type", categorical_mapping={'User_Transfer_Transaction': 'black',
@@ -161,14 +161,14 @@ def plot_url(nodes_df, edges_df):
 
 # Given filter settings, generate/cache/return dataframes & viz
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def run_filters(user_id, conn):
+def run_filters(user_id, conn):  # noqa: C901
     global metrics
 
     logger.info("Installing Queries")
     res = conn.gsql(
     '''
     use graph {}
-    ls 
+    ls
     '''.format(conn.graphname), options=[])
 
     ind = res.index('Queries:') + 1
@@ -176,12 +176,12 @@ def run_filters(user_id, conn):
     for query in res[ind:]:
         if 'totalTransaction' in query:
             installTran = False
-    
+
     if installTran:
         conn.gsql(
         '''
         use graph AntiFraud
-        CREATE QUERY totalTransaction(Vertex<User> Source) FOR GRAPH AntiFraud {  
+        CREATE QUERY totalTransaction(Vertex<User> Source) FOR GRAPH AntiFraud {
             start = {Source};
 
             transfer = SELECT tgt
@@ -192,7 +192,7 @@ def run_filters(user_id, conn):
 
             PRINT transfer, receive;
         }
-        Install query totalTransaction 
+        Install query totalTransaction
         ''', options=[])
 
     logger.info('Querying Tigergraph')
@@ -212,8 +212,10 @@ def run_filters(user_id, conn):
 
     for o in results:
         for s in o:
-            if {"from_id": s["e"]["from_id"], "to_id": s["e"]["to_id"], "amount": s["amount"], "time": s["ts"],
-                "type": s["e"]["e_type"]} not in out:
+            if {
+                "from_id": s["e"]["from_id"], "to_id": s["e"]["to_id"], "amount": s["amount"], "time": s["ts"],
+                "type": s["e"]["e_type"]
+            } not in out:
                 out.append(
                     {"from_id": s["e"]["from_id"], "to_id": s["e"]["to_id"], "amount": s["amount"], "time": s["ts"],
                      "type": s["e"]["e_type"]})
@@ -225,7 +227,7 @@ def run_filters(user_id, conn):
                 from_types.append(s['e']['from_type'])
                 to_types.append(s['e']['from_type'])
 
-    ############# BEGIN
+    # BEGIN
     edges_df = pd.DataFrame({
         'from_id': from_ids,
         'to_id': to_ids,
@@ -243,14 +245,13 @@ def run_filters(user_id, conn):
             node_idf.append(to_ids[i])
             typef.append(to_types[i])
 
-
     nodes_df = pd.DataFrame({
         'n': node_idf,
         'type': typef,
         'size': 0.1
     })
 
-    ############### END
+    # END
 
     try:
 
@@ -309,7 +310,7 @@ def main_area(url, nodes, edges, user_id, conn):
         print(e)
 
     # Create bar chart of transactions
-    if results != None:
+    if results is not None:
         for action in results:
             for transfer in results[action]:
                 dates.append(datetime.datetime.fromtimestamp(transfer['attributes']['ts']))
@@ -336,18 +337,19 @@ def main_area(url, nodes, edges, user_id, conn):
         try:
             for trace in bar.data:
                 trace.name = trace.name.split('=')[1].capitalize()
-        except:
+        # FIXME exepct exn?
+        except:  # noqa: E722
             for trace in bar.data:
                 trace.name = trace.name.capitalize()
 
         st.plotly_chart(bar, use_container_width=True)
 
     st.markdown(f'''<small>
-            TigerGraph Load Time (s): {float(metrics['tigergraph_time']):0.2f} | 
-            Graphistry Load Time (s): {float(metrics['graphistry_time']):0.2f} | 
-            Node Count: {metrics['node_cnt']} |  
-            Edge Count: {metrics['edge_cnt']} | 
-            Property Count: {metrics['prop_cnt']}  
+            TigerGraph Load Time (s): {float(metrics['tigergraph_time']):0.2f} |
+            Graphistry Load Time (s): {float(metrics['graphistry_time']):0.2f} |
+            Node Count: {metrics['node_cnt']} |
+            Edge Count: {metrics['edge_cnt']} |
+            Property Count: {metrics['prop_cnt']}
         </small>''', unsafe_allow_html=True)
 
 
@@ -370,7 +372,7 @@ def run_all():
         # Selective mark these as URL params as well
         if sidebar_filters is None:
             return
-       
+
         filter_pipeline_result = run_filters(**sidebar_filters)
 
         # Render main viz area based on computed filter pipeline results and sidebar settings if data is returned

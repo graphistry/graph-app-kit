@@ -69,18 +69,18 @@ def custom_css():
 # https://docs.streamlit.io/en/stable/api.html#display-interactive-widgets
 def sidebar_area():
     conn = None
-    num_edges_init = urlParams.get_field('num_matches', 0.5)
+    # num_edges_init = urlParams.get_field('num_matches', 0.5)
     # MI_List.reverse()
     idList = [i for i in range(1, 500)]
     st.sidebar.header("TigerGraph Anti-Fraud")
 
     # TigerGraph connection input fields
-    tg_host = st.sidebar.text_input ('TigerGraph Host')
-    tg_username = st.sidebar.text_input ('TigerGraph Username')
-    tg_password = st.sidebar.text_input ('TigerGraph Password')
-    tg_graphname = st.sidebar.text_input ('TigerGraph Graphname')
+    tg_host = st.sidebar.text_input('TigerGraph Host')
+    tg_username = st.sidebar.text_input('TigerGraph Username')
+    tg_password = st.sidebar.text_input('TigerGraph Password')
+    tg_graphname = st.sidebar.text_input('TigerGraph Graphname')
     tg_secret = st.sidebar.text_input('TigerGraph Secret')
-    
+
     # Connect to TigerGraph
     if st.sidebar.button("Connect"):
         try:
@@ -90,13 +90,13 @@ def sidebar_area():
             else:
                 conn.getToken(conn.createSecret())
             st.sidebar.success("Connnected Successfully")
-            
+
             user_id = st.sidebar.selectbox(
                 'User ID ',
                 idList
             )
             st.sidebar.markdown("Try using ID 111 for an optimal experience!")
-            
+
             urlParams.set_field('user_id', user_id)
 
             return {'user_id': user_id, 'conn': conn}
@@ -105,7 +105,7 @@ def sidebar_area():
             st.sidebar.text(str(e))
             st.sidebar.error("Failed to Connect")
             return None
-    
+
     return None
 
 
@@ -147,14 +147,14 @@ def plot_url(nodes_df, edges_df):
 
 # Given filter settings, generate/cache/return dataframes & viz
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def run_filters(user_id, conn):
+def run_filters(user_id, conn):  # noqa: C901
     global metrics
 
     logger.info("Installing Queries")
     res = conn.gsql(
     '''
     use graph {}
-    ls 
+    ls
     '''.format(conn.graphname), options=[])
 
     ind = res.index('Queries:') + 1
@@ -165,12 +165,12 @@ def run_filters(user_id, conn):
             installTran = False
         if 'fraudConnectivityGraph' in query:
             installFraud = False
-    
+
     if installTran:
         conn.gsql(
         '''
         use graph AntiFraud
-        CREATE QUERY totalTransaction(Vertex<User> Source) FOR GRAPH AntiFraud {  
+        CREATE QUERY totalTransaction(Vertex<User> Source) FOR GRAPH AntiFraud {
             start = {Source};
 
             transfer = SELECT tgt
@@ -181,18 +181,18 @@ def run_filters(user_id, conn):
 
             PRINT transfer, receive;
         }
-        Install query totalTransaction 
+        Install query totalTransaction
         ''', options=[])
-    
+
     if installFraud:
         conn.gsql(
         '''
         use graph AntiFraud
         CREATE QUERY fraudConnectivityGraph (VERTEX<User> inputUser) FOR GRAPH AntiFraud {
-            /* 
-            This query finds all connect users/payment cards/device .  
+            /*
+            This query finds all connect users/payment cards/device .
 
-            Starting with a user X find all other users connected to  
+            Starting with a user X find all other users connected to
             X through device token, payment instrument connected via transactions
 
             Sample input
@@ -202,14 +202,14 @@ def run_filters(user_id, conn):
             OrAccum<bool> @visited;
             SetAccum<edge> @@visResult;
 
-            Start (_) = {inputUser};  
+            Start (_) = {inputUser};
 
             // keep traverse for 3 steps
             WHILE Start.size()>0 limit 5 DO
                 Start = SELECT t
                     FROM Start:s-(:e)-:t
-                    WHERE t.@visited == false AND t != inputUser 
-                    ACCUM	
+                    WHERE t.@visited == false AND t != inputUser
+                    ACCUM
                     @@visResult += e,
                     @@trustS +=  (s -> s.trust_score),
                     @@trustD +=  (t -> t.trust_score)
@@ -223,8 +223,6 @@ def run_filters(user_id, conn):
         Install query fraudConnectivityGraph
         ''', options=[])
 
-        
-    
     logger.info('Querying Tigergraph')
     tic = time.perf_counter()
 
@@ -233,7 +231,7 @@ def run_filters(user_id, conn):
     results_trust_source = results_TG[0]['@@trustS']
     results_trust_destination = results_TG[1]['@@trustD']
 
-    trust = []
+    # trust = []
     from_ids = []
     to_ids = []
     types = []
@@ -259,19 +257,19 @@ def run_filters(user_id, conn):
         if from_ids[i] not in node_idf:
             try:
                 trustf.append(results_trust_source[str(from_ids[i])][0])
-            except:
+            # FIXME: What is the expected exn?
+            except:  # noqa: E722
                 trustf.append(0)
             node_idf.append(from_ids[i])
             typef.append(from_types[i])
         if to_ids[i] not in node_idf:
             try:
                 trustf.append(results_trust_destination[str(to_ids[i])][0])
-            except:
+            # FIXME: What is the expected exn?
+            except:  # noqa: E722
                 trustf.append(0)
             node_idf.append(to_ids[i])
             typef.append(to_types[i])
-
-
 
     def nodeType2color(node_type, trust):
         if node_type == 'User':
@@ -292,17 +290,17 @@ def run_filters(user_id, conn):
             return 0xFF00FF00  # Purple
         elif node_type == 'Device_Token':
             return 0x00FFFF00  # Light Blue
-        
+
         else:
             return 0xFFFFFF00
-    
 
+    # FIXME: Beter as g.encode_edge_color('type', categorical_mapping={'User_Transfer_Transaction': 'orange', ...})
     edgeType2color = {
-        'User_Transfer_Transaction': 0xFF740000,    # orange
-        'User_Recieve_Transaction_Rev': 0xA5A5A500, # light gray
-        'User_to_Payment': 0x42424200,              # dark gray
-        'User_to_Device': 0xF5B61700,               # yellow
-        'User_Referred_By_User': 0x60B9E000,        # light blue
+        'User_Transfer_Transaction': 0xFF740000,     # orange
+        'User_Recieve_Transaction_Rev': 0xA5A5A500,  # light gray
+        'User_to_Payment': 0x42424200,               # dark gray
+        'User_to_Device': 0xF5B61700,                # yellow
+        'User_Referred_By_User': 0x60B9E000,         # light blue
         'User_Recieve_Transaction': 0x0F0F0F00,
         'User_Transfer_Transaction_Rev': 0xFF00FF00,
         'User_Refer_User': 0xFF0F0F00
@@ -368,14 +366,14 @@ def main_area(url, nodes, edges, user_id, conn):
     amounts = []
     transfer_type = []
     results = None
-   
+
     try:
         results = conn.runInstalledQuery("totalTransaction", params={"Source": user_id})[0]
     except Exception as e:
         print(e)
 
     # Create bar chart of transactions
-    if results != None:
+    if results is not None:
         for action in results:
             for transfer in results[action]:
                 dates.append(datetime.datetime.fromtimestamp(transfer['attributes']['ts']))
@@ -402,18 +400,19 @@ def main_area(url, nodes, edges, user_id, conn):
         try:
             for trace in bar.data:
                 trace.name = trace.name.split('=')[1].capitalize()
-        except:
+        # FIXME: What is the expected exn?
+        except:  # noqa: E722
             for trace in bar.data:
                 trace.name = trace.name.capitalize()
 
         st.plotly_chart(bar, use_container_width=True)
 
     st.markdown(f'''<small>
-            TigerGraph Load Time (s): {float(metrics['tigergraph_time']):0.2f} | 
-            Graphistry Load Time (s): {float(metrics['graphistry_time']):0.2f} | 
-            Node Count: {metrics['node_cnt']} |  
-            Edge Count: {metrics['edge_cnt']} | 
-            Property Count: {metrics['prop_cnt']}  
+            TigerGraph Load Time (s): {float(metrics['tigergraph_time']):0.2f} |
+            Graphistry Load Time (s): {float(metrics['graphistry_time']):0.2f} |
+            Node Count: {metrics['node_cnt']} |
+            Edge Count: {metrics['edge_cnt']} |
+            Property Count: {metrics['prop_cnt']}
         </small>''', unsafe_allow_html=True)
 
 
@@ -436,7 +435,7 @@ def run_all():
         # Selective mark these as URL params as well
         if sidebar_filters is None:
             return
-            
+
         filter_pipeline_result = run_filters(**sidebar_filters)
 
         # Render main viz area based on computed filter pipeline results and sidebar settings if data is returned
