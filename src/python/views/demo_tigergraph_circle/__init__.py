@@ -166,6 +166,7 @@ def run_filters(user_id, conn):  # noqa: C901
     global metrics
 
     logger.info("Installing Queries")
+    logger.info('Graph name: %s, user_id: %s', conn.graphname, user_id)
     res = conn.gsql(
     '''
     use graph {}
