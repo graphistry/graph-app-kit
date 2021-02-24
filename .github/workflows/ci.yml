@@ -59,13 +59,9 @@ jobs:
       run: |
         cd src/python && ./bin/lint.sh
 
-    - name: Run pytests
-      run: |
-        cd src/python && ./bin/lint.sh
-
     - name: Core tests
       run: |
-        cd src/python && python -m pytest ./bin/test.sh
+        cd src/python && python -m pytest test
 
     - name: Build docker
       run: |
