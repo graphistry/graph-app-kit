@@ -34,14 +34,14 @@ def run():
 
 ############################################
 #
-#   CUSTOM CSS 
+#   CUSTOM CSS
 #
 ############################################
 # Have fun!
 
 def custom_css():
 
-    all_css() # our favorites
+    all_css()  # our favorites
 
 
 ############################################
@@ -51,12 +51,12 @@ def custom_css():
 ############################################
 # Given URL params, render left sidebar form and return combined filter settings
 
-##https://docs.streamlit.io/en/stable/api.html#display-interactive-widgets
+# #https://docs.streamlit.io/en/stable/api.html#display-interactive-widgets
 def sidebar_area():
     st.sidebar.title('Pick graph')
 
     n_init = urlParams.get_field('N', 100)
-    n = st.sidebar.number_input('Number of nodes', min_value=10, max_value=100000, value=n_init, step=20)    
+    n = st.sidebar.number_input('Number of nodes', min_value=10, max_value=100000, value=n_init, step=20)
     urlParams.set_field('N', n)
 
     base_url = os.environ['BASE_URL']
@@ -88,17 +88,20 @@ def sidebar_area():
     }
 
     filter_by_node_type_init = urlParams.get_field('filter_by_type', default='all')
-    filter_by_node_type = st.sidebar.selectbox('Filter nodes by:',
-        ('all', 'odd', 'even'),
-        index=('all', 'odd', 'even').index(filter_by_node_type_init),
-        format_func=(lambda option: option_to_label[option]))
+    filter_by_node_type = \
+        st.sidebar.selectbox(
+            'Filter nodes by:',
+            ('all', 'odd', 'even'),
+            index=('all', 'odd', 'even').index(filter_by_node_type_init),
+            format_func=(lambda option: option_to_label[option]))
     urlParams.set_field('filter_by_type', filter_by_node_type)
 
     filter_by_node_range_init = (
         urlParams.get_field('filter_by_node_range_min', default=0),
         urlParams.get_field('filter_by_node_range_max', default=n))
     logger.info('filter_by_node_range_init: %s :: %s', filter_by_node_range_init, type(filter_by_node_range_init))
-    filter_by_node_range = st.sidebar.slider('Filter for nodes in range:',
+    filter_by_node_range = st.sidebar.slider(
+        'Filter for nodes in range:',
         min_value=0, max_value=n, value=filter_by_node_range_init, step=1)
     urlParams.set_field('filter_by_node_range_min', filter_by_node_range[0])
     urlParams.set_field('filter_by_node_range_max', filter_by_node_range[1])
@@ -109,6 +112,7 @@ def sidebar_area():
         'node_type': filter_by_node_type,
         'node_range': filter_by_node_range
     }
+
 
 ############################################
 #
@@ -139,14 +143,13 @@ def run_filters(node_type, node_range, edges_df, n):
         filtered_edges_df = filtered_edges_df[ filtered_edges_df['s'] <= node_range[1] ]
         filtered_edges_df = filtered_edges_df[ filtered_edges_df['d'] <= node_range[1] ]
 
-    #include viz generation as part of cache
+    # include viz generation as part of cache
     url = plot_url(filtered_edges_df, n)
 
     return {
-        'edges_df': filtered_edges_df, 
+        'edges_df': filtered_edges_df,
         'url': url
     }
-
 
 
 ############################################
@@ -154,6 +157,7 @@ def run_filters(node_type, node_range, edges_df, n):
 #   VIZ
 #
 ############################################
+
 
 def plot_url(edges_df, n):
 
@@ -178,7 +182,6 @@ def plot_url(edges_df, n):
                 'bg': '%23' + 'f0f2f6'
             })\
             .plot(render=False)
-            
 
     logger.info('Generated viz, got back urL: %s', url)
 
@@ -207,7 +210,7 @@ def main_area(edges_df, url):
 def run_all():
 
     custom_css()
-    
+
     try:
 
         # Render sidebar and get current settings

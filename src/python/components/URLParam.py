@@ -3,7 +3,9 @@ import json, streamlit as st, urllib
 from util import getChild
 logger = getChild(__name__)
 
+
 class URLParam:
+
     def __init__(self, prefix='d_'):
         self.prefix = prefix
 
@@ -22,7 +24,7 @@ class URLParam:
         query_params = st.experimental_get_query_params()
         logger.debug('params at set: %s', query_params.items())
         logger.debug('rewriting field %s val %s as %s', field, val, urllib.parse.quote(json.dumps(val), safe=''))
-    
+
         query_params = st.experimental_set_query_params(**{
             **{k: v[0] for k, v in query_params.items()},
             **{field: urllib.parse.quote(json.dumps(val), safe='')}

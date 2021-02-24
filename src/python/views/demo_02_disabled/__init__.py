@@ -9,7 +9,7 @@ def info():
         'tags': ['demo', 'demo_intro']
     }
 
+
 def run():
     st.title('app2')
     st.markdown('hello! (disabled: not visible in menu)')
-    

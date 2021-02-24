@@ -1,6 +1,3 @@
-import pandas as pd
-
-
 def vertex_to_dict(vertex):
     d = {}
     for k in vertex.keys():

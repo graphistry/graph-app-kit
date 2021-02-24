@@ -40,21 +40,21 @@ def custom_css():
     all_css()
     st.markdown(
         """<style>
-        
-        </style>""",unsafe_allow_html=True)
+
+        </style>""", unsafe_allow_html=True)
 
 
 # Given URL params, render left sidebar form and return combined filter settings
-#https://docs.streamlit.io/en/stable/api.html#display-interactive-widgets
+# https://docs.streamlit.io/en/stable/api.html#display-interactive-widgets
 def sidebar_area():
 
-    #regular param (not in url)
-    #e = st.sidebar.number_input('Number of edges', min_value=10, max_value=100000, value=100, step=20)
+    # regular param (not in url)
+    # e = st.sidebar.number_input('Number of edges', min_value=10, max_value=100000, value=100, step=20)
 
-    #deep-linkable param (in url)
-    #n_init = urlParams.get_field('N', 100)
-    #n = st.sidebar.number_input('Number of nodes', min_value=10, max_value=100000, value=n_init, step=20)
-    #urlParams.set_field('N', n)
+    # deep-linkable param (in url)
+    # n_init = urlParams.get_field('N', 100)
+    # n = st.sidebar.number_input('Number of nodes', min_value=10, max_value=100000, value=n_init, step=20)
+    # urlParams.set_field('N', n)
 
     with st.sidebar:
 
@@ -70,7 +70,6 @@ def sidebar_area():
         urlParams.set_field('B', bank)
 
     return {'num_nodes': 1000000, 'num_edges': 1000000, 'bank': bank, 'bank_ids': bank_ids}
-
 
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True, hash_funcs={pd.DataFrame: lambda _: None})
@@ -96,36 +95,37 @@ def fetch_csv():
     return transactions_map_df
 
 
-#graph of (x in ids) -> y
+# graph of (x in ids) -> y
 def ego_edges(nodes, edges, ids, src, dst, node):
     df = edges
-    #ego<>neighbor
+    # ego<>neighbor
     direct = pd.concat(
         [ edges[:0] ] + [ df[(df[src] == id) | (df[dst] == id)] for id in ids ],
         ignore_index=True, sort=False)
-    
-    #ego | neighbor
-    ns = pd.concat([ 
+
+    # ego | neighbor
+    ns = pd.concat([
             direct[[src]].rename(columns={src: 'id'}),
             direct[[dst]].rename(columns={dst: 'id'})
         ], sort=False, ignore_index=True)\
         .drop_duplicates()
-    
-    #(ego|neighbor)<>(ego|neighbor)
+
+    # (ego|neighbor)<>(ego|neighbor)
     ego_edges = pd.concat([
         df.merge(ns.rename(columns={'id': src}), how='inner', on=src),
         df.merge(ns.rename(columns={'id': dst}), how='inner', on=dst)],
         ignore_index=True,
         sort=False).drop_duplicates()
-    
+
     neighborhood_ns = pd.DataFrame({'id': list(set(ego_edges[src].unique().tolist() + ego_edges[dst].unique().tolist()))})
-    
-    #ego|neighbor
+
+    # ego|neighbor
     ego_nodes = nodes.merge(neighborhood_ns.rename(columns={'id': node}), how='inner', on=node)
     return ego_nodes, ego_edges
 
+
 def bank_name_to_ids(df, bank, bank_ids):
-    
+
     filtered = df
 
     bank_name_filter = bank if len(bank) > 0 and not (bank == '(off)') and not (bank == '') else None
@@ -138,8 +138,9 @@ def bank_name_to_ids(df, bank, bank_ids):
         for id in bank_id_filter:
             hits = hits | (filtered['bank_id'] == id)
         filtered = filtered[ hits ]
-    
+
     return filtered['bank_id'].unique().tolist()
+
 
 # Given filter settings, generate/cache/return dataframes & viz
 @st.cache(suppress_st_warning=True, allow_output_mutation=True, hash_funcs={pd.DataFrame: lambda _: None})
@@ -147,9 +148,9 @@ def run_filters(num_nodes, num_edges, bank, bank_ids):
 
     transactions_map_df = fetch_csv()
 
-    #### GLOBAL STATS #####
+    # GLOBAL STATS
 
-    sample_df = transactions_map_df#.sample(10000)
+    sample_df = transactions_map_df  # .sample(10000)
 
     originator_stats_df = sample_df.groupby('originator_bank_id').agg({
         'begin_date': 'min',
@@ -172,15 +173,15 @@ def run_filters(num_nodes, num_edges, bank, bank_ids):
 
     nodes_df = pd.concat(
         [
-            sample_df[originator_cols]\
-                .rename(columns={c: c.replace("originator_", "") for c in originator_cols})\
-                .drop_duplicates(subset=['bank_id'])\
+            sample_df[originator_cols]
+                .rename(columns={c: c.replace("originator_", "") for c in originator_cols})
+                .drop_duplicates(subset=['bank_id'])
                 .assign(type='bank', entity_id=sample_df['originator_bank_id']),
-            sample_df[beneficiary_cols]\
-                .rename(columns={c: c.replace("beneficiary_", "") for c in beneficiary_cols})\
-                .drop_duplicates(subset=['bank_id'])\
-                .assign(type='bank')\
-                .assign(type='bank', entity_id=sample_df['beneficiary_bank_id'])      
+            sample_df[beneficiary_cols]
+                .rename(columns={c: c.replace("beneficiary_", "") for c in beneficiary_cols})
+                .drop_duplicates(subset=['bank_id'])
+                .assign(type='bank')
+                .assign(type='bank', entity_id=sample_df['beneficiary_bank_id'])
         ],
         ignore_index=True, sort=False)
 
@@ -189,14 +190,18 @@ def run_filters(num_nodes, num_edges, bank, bank_ids):
         .merge(originator_stats_df, on='bank_id', how='left')
     nodes_df['abbreviation'] = nodes_df['bank'].apply(lambda s: ''.join([x[:1] for x in s.split(" ")[:3]]))
 
-    nodes_df['sum_transactions'] = nodes_df['originator_amount_transactions_sum'].fillna(0) + nodes_df['beneficiary_amount_transactions_sum'].fillna(0)
-    nodes_df['number_transactions'] = nodes_df['originator_number_transactions_sum'].fillna(0) + nodes_df['beneficiary_number_transactions_sum'].fillna(0)
+    nodes_df['sum_transactions'] = \
+        nodes_df['originator_amount_transactions_sum'].fillna(0) \
+        + nodes_df['beneficiary_amount_transactions_sum'].fillna(0)
+    nodes_df['number_transactions'] = \
+        nodes_df['originator_number_transactions_sum'].fillna(0) \
+        + nodes_df['beneficiary_number_transactions_sum'].fillna(0)
 
     iso3611_df = fetch_iso3611()
     iso3_to_iso2 = {
         row['ISO3166-1-Alpha-3'].lower(): row['ISO3166-1-Alpha-2'].lower()
         for row in iso3611_df[['ISO3166-1-Alpha-2', 'ISO3166-1-Alpha-3']].to_dict(orient='records')
-        if ('ISO3166-1-Alpha-3' in row and type(row['ISO3166-1-Alpha-3']) == str) \
+        if ('ISO3166-1-Alpha-3' in row and type(row['ISO3166-1-Alpha-3']) == str)
             and ('ISO3166-1-Alpha-2' in row and type(row['ISO3166-1-Alpha-2']) == str)
     }
     nodes_df['iso2'] = nodes_df['iso'].apply(lambda v: iso3_to_iso2[v.lower()] if v.lower() in iso3_to_iso2 else '')
@@ -205,15 +210,17 @@ def run_filters(num_nodes, num_edges, bank, bank_ids):
         for iso2 in nodes_df['iso2'].unique()
     }
 
-    ##### PROJECTION ######
+    # PROJECTION
 
     ids = bank_name_to_ids(nodes_df, bank, bank_ids)
     ego_banks_df = nodes_df.merge(pd.DataFrame({'entity_id': ids}), how='inner')
-    nodes_df, sample_df = ego_edges(nodes_df, sample_df, ids, src='originator_bank_id', dst='beneficiary_bank_id', node='entity_id')
+    nodes_df, sample_df = ego_edges(
+        nodes_df, sample_df, ids,
+        src='originator_bank_id', dst='beneficiary_bank_id', node='entity_id')
 
-    ##### VIZ #####
+    # VIZ
 
-    #abbrv_to_abbrv = {x: x for x in nodes_df['abbreviation'].unique().tolist()}
+    # abbrv_to_abbrv = {x: x for x in nodes_df['abbreviation'].unique().tolist()}
     bank_to_bank = {x: x for x in nodes_df['bank'].unique().tolist()}
 
     g = graphistry.edges(sample_df).nodes(nodes_df)\
@@ -221,8 +228,16 @@ def run_filters(num_nodes, num_edges, bank, bank_ids):
         .bind(point_title='bank', point_size='sum_transactions')\
         .encode_point_icon('bank', as_text=True, categorical_mapping=bank_to_bank)\
         .encode_point_badge('iso2', 'TopRight', categorical_mapping=iso2_to_flags)\
-        .encode_point_color('beneficiary_amount_transactions_sum', palette=['white', 'pink', 'purple'], as_continuous=True, for_current=True)\
-        .encode_edge_color('amount_transactions', ["maroon", "red", "yellow", "white", "cyan"], as_continuous=True, for_current=True)\
+        .encode_point_color(
+            'beneficiary_amount_transactions_sum',
+            palette=['white', 'pink', 'purple'],
+            as_continuous=True,
+            for_current=True)\
+        .encode_edge_color(
+            'amount_transactions',
+            ["maroon", "red", "yellow", "white", "cyan"],
+            as_continuous=True,
+            for_current=True)\
         .addStyle(bg={'color': '#EEE'})\
         .settings(
             height=800,
@@ -235,7 +250,7 @@ def run_filters(num_nodes, num_edges, bank, bank_ids):
 
     graph_url = g.plot(render=False)
     return { 'nodes_df': g._nodes, 'edges_df': g._edges, 'graph_url': graph_url, 'ego_banks_df': ego_banks_df }
-    
+
 
 def main_area(num_nodes, num_edges, bank, bank_ids, nodes_df, edges_df, graph_url, ego_banks_df):
 
@@ -260,7 +275,7 @@ def main_area(num_nodes, num_edges, bank, bank_ids, nodes_df, edges_df, graph_ur
 def run_all():
 
     custom_css()
-    
+
     try:
 
         # Render sidebar and get current settings
@@ -276,5 +291,3 @@ def run_all():
     except Exception as exn:
         st.write('Error loading dashboard')
         st.write(exn)
-
-    
