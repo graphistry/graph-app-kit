@@ -33,8 +33,6 @@ edge_label_col = 'Destination_Type'
 metrics = {'tigergraph_time': 0, 'graphistry_time': 0,
            'node_cnt': 0, 'edge_cnt': 0, 'prop_cnt': 0}
 
-# conn = None
-
 
 # Define the name of the view
 def info():
@@ -68,45 +66,44 @@ def custom_css():
 # Given URL params, render left sidebar form and return combined filter settings
 # https://docs.streamlit.io/en/stable/api.html#display-interactive-widgets
 def sidebar_area():
-    conn = None
-    # num_edges_init = urlParams.get_field('num_matches', 0.5)
-    # MI_List.reverse()
-    idList = [i for i in range(1, 500)]
-    st.sidebar.header("TigerGraph Anti-Fraud")
 
-    # TigerGraph connection input fields
+    st.sidebar.subheader('Select account')
+    st.sidebar.text("Try using ID 111 for an optimal experience!")
+    idList = [i for i in range(1, 500)]
+    user_id = st.sidebar.selectbox('User ID ', idList)
+    urlParams.set_field('user_id', user_id)
+
+    # Optional, can replace with: conn = tg_helper.connect_to_tigergraph()
+    conn = None
+    st.sidebar.subheader('Optional: Override tigergraph.env')
     tg_host = st.sidebar.text_input('TigerGraph Host')
     tg_username = st.sidebar.text_input('TigerGraph Username')
-    tg_password = st.sidebar.text_input('TigerGraph Password')
+    tg_password = st.sidebar.text_input('TigerGraph Password', type='password')
+    tg_secret = st.sidebar.text_input('TigerGraph Secret', type='password')
     tg_graphname = st.sidebar.text_input('TigerGraph Graphname')
-    tg_secret = st.sidebar.text_input('TigerGraph Secret')
-
-    # Connect to TigerGraph
     if st.sidebar.button("Connect"):
         try:
-            conn = tg.TigerGraphConnection(host=tg_host, graphname=tg_graphname, username=tg_username, password=tg_password)
+            conn = tg.TigerGraphConnection(
+                host=tg_host, graphname=tg_graphname, username=tg_username, password=tg_password,
+                version=tg_helper.TIGERGRAPH_CONNECTION_VERSION)
             if tg_secret:
                 conn.getToken(tg_secret)
             else:
                 conn.getToken(conn.createSecret())
-            st.sidebar.success("Connnected Successfully")
-
-            user_id = st.sidebar.selectbox(
-                'User ID ',
-                idList
-            )
-            st.sidebar.markdown("Try using ID 111 for an optimal experience!")
-
-            urlParams.set_field('user_id', user_id)
-
-            return {'user_id': user_id, 'conn': conn}
-
-        except Exception as e:
-            st.sidebar.text(str(e))
+        # FIXME: What is the expected exn?
+        except Exception as e:  # noqa: E722
+            logger.error('Failed dynamic tg connection: %s', e, exc_info=True)
             st.sidebar.error("Failed to Connect")
+            st.sidebar.error(e)
             return None
+    else:
+        conn = tg_helper.connect_to_tigergraph()
+    if conn is None:
+        logger.error('Cannot run tg demo without creds')
+        st.write(RuntimeError('Demo requires a TigerGraph connection. Put creds into left sidebar, or fill in envs/tigergraph.env & restart'))
+        return None
 
-    return None
+    return {'user_id': user_id, 'conn': conn}
 
 
 def plot_url(nodes_df, edges_df):
@@ -151,11 +148,21 @@ def run_filters(user_id, conn):  # noqa: C901
     global metrics
 
     logger.info("Installing Queries")
-    res = conn.gsql(
-    '''
-    use graph {}
-    ls
-    '''.format(conn.graphname), options=[])
+    try:
+        res = conn.gsql(
+        '''
+        use graph {}
+        ls
+        '''.format(conn.graphname), options=[])
+    except SystemExit as e:
+        logger.error('Failed listing graph queries %s', e, exc_info=True)
+        st.write('Failed listing graph queries')
+        st.write(e)
+        raise e
+    except Exception as e:
+        logger.error('Failed on `use graph` test: %s', e, exc_info=True)
+        st.write(e)
+        raise e
 
     ind = res.index('Queries:') + 1
     installTran = True
@@ -428,11 +435,10 @@ def run_all():
 
     try:
 
-        # Render sidebar and get current settings
+        # Render sidebar, get current settings and TG connection
         sidebar_filters = sidebar_area()
 
-        # Compute filter pipeline (with auto-caching based on filter setting inputs)
-        # Selective mark these as URL params as well
+        # Stop if not connected to TG
         if sidebar_filters is None:
             return
 

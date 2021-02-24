@@ -1,15 +1,11 @@
-import asyncio
-import graphistry
-import pandas as pd
-import streamlit as st
+import asyncio, datetime, graphistry, pandas as pd, \
+    plotly.express as px, pyTigerGraphBeta as tg, \
+    streamlit as st, time
+
 from components import GraphistrySt, URLParam
 from css import all_css
-from util import getChild
-import time
 from TigerGraph_helper import tg_helper
-import plotly.express as px
-import pyTigerGraphBeta as tg
-import datetime
+from util import getChild
 
 ############################################
 #
@@ -31,9 +27,6 @@ edge_label_col = 'Destination_Type'
 # Setup a structure to hold metrics
 metrics = {'tigergraph_time': 0, 'graphistry_time': 0,
            'node_cnt': 0, 'edge_cnt': 0, 'prop_cnt': 0}
-
-conn = tg_helper.connect_to_tigergraph()
-
 
 # Define the name of the view
 def info():
@@ -68,54 +61,48 @@ def custom_css():
 # https://docs.streamlit.io/en/stable/api.html#display-interactive-widgets
 def sidebar_area():
 
-    # num_edges_init = urlParams.get_field('num_matches', 0.5)
-    # MI_List.reverse()
-    idList = [i for i in range(1, 500)]
+    logger.info('sidebar_area')
 
-    # TigerGraph connection input fields
-    st.sidebar.header("TigerGraph Anti-Fraud")
+    st.sidebar.subheader('Select account for 360 view')
+    idList = [i for i in range(1, 500)]
+    user_id = st.sidebar.selectbox('User ID ', idList)
+    urlParams.set_field('user_id', user_id)
+
+    # Optional, can replace with: conn = tg_helper.connect_to_tigergraph()
+    conn = None
+    st.sidebar.subheader('Optional: Override tigergraph.env')
     tg_host = st.sidebar.text_input('TigerGraph Host')
     tg_username = st.sidebar.text_input('TigerGraph Username')
-    tg_password = st.sidebar.text_input('TigerGraph Password')
+    tg_password = st.sidebar.text_input('TigerGraph Password', type='password')
+    tg_secret = st.sidebar.text_input('TigerGraph Secret', type='password')
     tg_graphname = st.sidebar.text_input('TigerGraph Graphname')
-    tg_secret = st.sidebar.text_input('TigerGraph Secret')
-
-    # Connect to TigerGraph
     if st.sidebar.button("Connect"):
         try:
-            conn = tg.TigerGraphConnection(host=tg_host, graphname=tg_graphname, username=tg_username, password=tg_password)
+            conn = tg.TigerGraphConnection(
+                host=tg_host, graphname=tg_graphname, username=tg_username, password=tg_password,
+                version=tg_helper.TIGERGRAPH_CONNECTION_VERSION)
             if tg_secret:
                 conn.getToken(tg_secret)
             else:
                 conn.getToken(conn.createSecret())
-            st.sidebar.success("Connnected Successfully")
-            user_id = st.sidebar.selectbox(
-                'User ID ',
-                idList
-            )
-            urlParams.set_field('user_id', user_id)
-
-            return {'user_id': user_id, 'conn': conn}
         # FIXME: What is the expected exn?
         except Exception as e:  # noqa: E722
+            logger.error('Failed dynamic tg connection: %s', e, exc_info=True)
             st.sidebar.error("Failed to Connect")
             st.sidebar.error(e)
             return None
+    else:
+        conn = tg_helper.connect_to_tigergraph()
+    if conn is None:
+        logger.error('Cannot run tg demo without creds')
+        st.write(RuntimeError('Demo requires a TigerGraph connection. Put creds into left sidebar, or fill in envs/tigergraph.env & restart'))
+        return None
 
-    return None
-
-    user_id = st.sidebar.selectbox(
-        'User ID ',
-        idList
-    )
-
-    urlParams.set_field('user_id', user_id)
-
+    st.sidebar.success("Connnected Successfully")
     return {'user_id': user_id, 'conn': conn}
 
 
 def plot_url(nodes_df, edges_df):
-    global metrics
 
     logger.info('Starting graphistry plot')
     tic = time.perf_counter()
@@ -143,7 +130,7 @@ def plot_url(nodes_df, edges_df):
                                     default_mapping='question')
 
 
-# .encode_point_size('', ["blue", "yellow", "red"],  ,as_continuous=True)
+    # .encode_point_size('', ["blue", "yellow", "red"],  ,as_continuous=True)
     # if not (node_label_col is None):
     #     g = g.bind(point_title=node_label_col)
 
@@ -163,15 +150,24 @@ def plot_url(nodes_df, edges_df):
 # Given filter settings, generate/cache/return dataframes & viz
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def run_filters(user_id, conn):  # noqa: C901
-    global metrics
 
     logger.info("Installing Queries")
     logger.info('Graph name: %s, user_id: %s', conn.graphname, user_id)
-    res = conn.gsql(
-    '''
-    use graph {}
-    ls
-    '''.format(conn.graphname), options=[])
+    try:
+        res = conn.gsql(
+        '''
+        use graph {}
+        ls
+        '''.format(conn.graphname), options=[])
+    except SystemExit as e:
+        logger.error('Failed listing graph queries %s', e, exc_info=True)
+        st.write('Failed listing graph queries')
+        st.write(e)
+        raise e
+    except Exception as e:
+        logger.error('Failed on `use graph` test: %s', e, exc_info=True)
+        st.write(e)
+        raise e
 
     ind = res.index('Queries:') + 1
     installTran = True
@@ -200,9 +196,11 @@ def run_filters(user_id, conn):  # noqa: C901
     logger.info('Querying Tigergraph')
     tic = time.perf_counter()
 
-    results = conn.runInstalledQuery("circleDetection", {"srcId": user_id}, sizeLimit=1000000000, timeout=120000)
-    results = results[0]['@@circleEdgeTuples']
+    raw_results = conn.runInstalledQuery("circleDetection", {"srcId": user_id}, sizeLimit=1000000000, timeout=120000)
+    results = raw_results[0]['@@circleEdgeTuples']
 
+
+    #FIXME: Automate
     out = []
     from_ids = []
     to_ids = []
@@ -211,7 +209,6 @@ def run_filters(user_id, conn):  # noqa: C901
     types = []
     from_types = []
     to_types = []
-
     for o in results:
         for s in o:
             if {
@@ -229,7 +226,6 @@ def run_filters(user_id, conn):  # noqa: C901
                 from_types.append(s['e']['from_type'])
                 to_types.append(s['e']['from_type'])
 
-    # BEGIN
     edges_df = pd.DataFrame({
         'from_id': from_ids,
         'to_id': to_ids,
@@ -253,10 +249,7 @@ def run_filters(user_id, conn):  # noqa: C901
         'size': 0.1
     })
 
-    # END
-
     try:
-
         res = nodes_df.values.tolist()
         toc = time.perf_counter()
         logger.info(f'Query Execution: {toc - tic:0.02f} seconds')
@@ -298,7 +291,7 @@ def run_filters(user_id, conn):  # noqa: C901
 
 def main_area(url, nodes, edges, user_id, conn):
 
-    logger.debug('rendering main area, with url: %s', url)
+    logger.info('rendering main area, with url: %s', url)
     GraphistrySt().render_url(url)
 
     dates = []
@@ -363,18 +356,20 @@ def main_area(url, nodes, edges, user_id, conn):
 
 
 def run_all():
+    logger.info('run_all')
+
     custom_css()
 
     try:
 
-        # Render sidebar and get current settings
+        # Render sidebar, get current settings and TG connection
         sidebar_filters = sidebar_area()
 
-        # Compute filter pipeline (with auto-caching based on filter setting inputs)
-        # Selective mark these as URL params as well
+        # Stop if not connected to TG
         if sidebar_filters is None:
             return
 
+        # Compute filter pipeline, with auto-caching based on filter setting inputs
         filter_pipeline_result = run_filters(**sidebar_filters)
 
         # Render main viz area based on computed filter pipeline results and sidebar settings if data is returned

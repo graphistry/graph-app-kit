@@ -3,6 +3,8 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+TIGERGRAPH_CONNECTION_VERSION = '3.1.0'
+
 def connect_to_tigergraph() -> Optional[dict]:
     if ('TIGERGRAPH_HOST' in os.environ and 'TIGERGRAPH_USERNAME' in os.environ \
         and 'TIGERGRAPH_PASSWORD' in os.environ and 'TIGERGRAPH_GRAPHNAME' in os.environ):
@@ -17,7 +19,7 @@ def connect_to_tigergraph() -> Optional[dict]:
             {**creds,
             'password': ''.join(['*' for x in creds['password']]) if creds['password'] is not None else ''})
 
-        conn = tg.TigerGraphConnection(**creds)
+        conn = tg.TigerGraphConnection(**creds, version=TIGERGRAPH_CONNECTION_VERSION)
 
         if ('TIGERGRAPH_SECRET' in os.environ and os.environ["TIGERGRAPH_SECRET"] is not None):
             logger.info('... Connected to TG, getting token via provided secret...')
