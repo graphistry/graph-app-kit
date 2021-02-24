@@ -41,6 +41,7 @@ x-production-options:
     - ../envs/graphistry.env
     - ../envs/neptune.env
     - ../envs/streamlit.env
+    - ../envs/tigergraph.env
     - .env
   #Warning: Loads into continer env, not used by compose envvar interpolation
   environment:

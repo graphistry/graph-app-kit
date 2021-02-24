@@ -1,7 +1,9 @@
-![Build Status](https://github.com/graphistry/graph-app-kit/workflows/CI/badge.svg)
-[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/graphistry/graph-app-kit-st)](https://github.com/graphistry/pygraphistry/actions/workflows/ci.yml)
-![Publish Status](https://github.com/graphistry/graph-app-kit/workflows/Publish/badge.svg)
-[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/graphistry/graph-app-kit-st)](https://github.com/graphistry/pygraphistry/actions/workflows/publish-pypi.yml)
+[ ![CI](https://github.com/graphistry/graph-app-kit/actions/workflows/ci.yml/badge.svg) ](https://github.com/graphistry/graph-app-kit/actions/workflows/ci.yml)
+[ ![Publish](https://github.com/graphistry/graph-app-kit/actions/workflows/publish.yml/badge.svg) ](https://github.com/graphistry/graph-app-kit/actions/workflows/publish.yml)
+[ ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/graphistry/graph-app-kit-st) ](https://hub.docker.com/repository/docker/graphistry/graph-app-kit-st/builds)
+
+[<img src="https://img.shields.io/badge/slack-Graphistry%20chat-yellow.svg?logo=slack">](https://join.slack.com/t/graphistry-community/shared_invite/zt-53ik36w2-fpP0Ibjbk7IJuVFIRSnr6g) 
+[![Twitter Follow](https://img.shields.io/twitter/follow/graphistry)](https://twitter.com/graphistry)
 
 [<img src="https://img.shields.io/badge/slack-Graphistry%20chat-yellow.svg?logo=slack">](https://join.slack.com/t/graphistry-community/shared_invite/zt-53ik36w2-fpP0Ibjbk7IJuVFIRSnr6g) 
 [![Twitter Follow](https://img.shields.io/twitter/follow/graphistry)](https://twitter.com/graphistry)
@@ -66,6 +68,7 @@ If GPUs are present, `graph-app-kit` leverages GPU cloud acceleration:
   
   * [AWS Neptune](https://aws.amazon.com/neptune/): [quick launch](docs/neptune.md) and [manual launch](docs/neptune-manual.md)
   * [TinkerPop Gremlin](https://tinkerpop.apache.org/): [query demos](https://github.com/graphistry/graph-app-kit/tree/master/src/python/views/demo_neptune_01_minimal_gremlin)
+  * [TigerGraph](https://www.tigergraph.com): [setup](docs/tigergraph.md)
 
   * Collaborations welcome!
 

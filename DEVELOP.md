@@ -10,6 +10,21 @@ docker-compose build
 docker-compose up
 ```
 
+## Test
+
+CI will trigger on pushes to PRs
+
+To test locally:
+
+```bash
+cd src/python
+./bin/lint.sh
+python3 -m pytest test
+```
+
+This is expected to change as full docker-based testing lands
+
+
 ## Base versions
 
 For faster AWS launches, we:
