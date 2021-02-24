@@ -14,3 +14,4 @@ sshtunnel==0.1.5
 
 ### TigerGraph
 pyTigerGraphBeta==0.0.9.4
+plotly==4.14.3  # for demos
