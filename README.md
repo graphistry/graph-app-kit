@@ -1,7 +1,7 @@
-![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/graphistry/graph-app-kit-st)
+[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/graphistry/graph-app-kit-st)](https://hub.docker.com/r/graphistry/graph-app-kit-st)
 
 [<img src="https://img.shields.io/badge/slack-Graphistry%20chat-yellow.svg?logo=slack">](https://join.slack.com/t/graphistry-community/shared_invite/zt-53ik36w2-fpP0Ibjbk7IJuVFIRSnr6g) 
-![Twitter Follow](https://img.shields.io/twitter/follow/graphistry)
+[![Twitter Follow](https://img.shields.io/twitter/follow/graphistry)](https://twitter.com/graphistry)
 
 # Welcome to graph-app-kit
 
@@ -12,25 +12,27 @@ Turn your graph data into a secure and interactive visual graph app in 15 minute
 
 ## Why
 
-This open source effort puts together patterns the Graphistry team has reused across many graph projects as teams went from Jupyter notebook experiments to deployed analyst tools. Whether building your first graph app, trying an idea,  or wanting to check a reference, this project aims to simplify the process. This means covering pieces like: Easy code editing and deployment, a project stucture ready for teams, built-in authentication, no need for custom JS/CSS at the start, batteries-included dependencies, and fast loading & visualization of large graphs.
+This open source effort puts together patterns the Graphistry team has reused across many graph projects as teams go from code-heavy Jupyter notebook experiments to deploying streamlined analyst tools. Whether building your first graph app, trying an idea, or wanting to check a reference, this project aims to simplify that process. It covers pieces like: Easy code editing and deployment, a project stucture ready for teams, built-in authentication, no need for custom JS/CSS at the start, batteries-included data + library dependencies, and fast loading & visualization of large graphs.
 
 ## Get started
 
-### Quick
+### Quick (Local code)
 
 ```bash
 git clone https://github.com/graphistry/graph-app-kit.git
 cd graph-app-kit/src/docker
 sudo docker-compose build
-# Optional: edit src/docker/.env, docker-compose.yml: Auth, ports, ...
+# Optional: edit src/docker/.env (API accounts), docker-compose.yml: Auth, ports, ...
 sudo docker-compose up -d
 sudo docker-compose logs -f -t --tail=100
-# Add src/python/views/your_custom_view/__init__.py
+# Add dashboards @ src/python/views/<your_custom_view>/__init__.py
 ```
 
-### Guides
+=> `http://localhost:8501/`
 
-1. [Quick launch](docs/setup.md): Preintegrated Docker, Graphistry, Streamlit, Jupyter, RAPIDS.ai (GPU)
+### Quick (Launchers)
+
+1. [AWS Quick launch](docs/setup.md): Preintegrated Docker, Graphistry, Streamlit, Jupyter, RAPIDS.ai (GPU)
   * Variants: [manual launch](docs/setup-manual.md), [Amazon Neptune](docs/neptune.md)
 2. [Add views](docs/views.md)
 3. [Main configurations and extensions](docs/extend.md): Database connectors, authentication, notebook-based editing, and more
