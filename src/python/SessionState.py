@@ -1,4 +1,4 @@
-### https://gist.github.com/tvst/036da038ab3e999a64497f42de966a92
+# https://gist.github.com/tvst/036da038ab3e999a64497f42de966a92
 
 """Hack to add per-session state to Streamlit.
 Usage
@@ -18,9 +18,9 @@ result:
 'Mary'
 """
 
-import streamlit as st
 from streamlit.report_thread import get_report_ctx
 from streamlit.server.server import Server
+
 
 class SessionState(object):
     def __init__(self, **kwargs):
@@ -47,11 +47,12 @@ def _get_session():
 
     if session_info is None:
         raise RuntimeError("Couldn't get your Streamlit Session object.")
-    
+
     return session_info.session
 
+
 def get(**kwargs):
-    
+
     this_session = _get_session()
 
     if not hasattr(this_session, '_custom_session_state'):

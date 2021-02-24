@@ -110,7 +110,7 @@ def plot_url(nodes_df, edges_df):
         })\
         .plot(render=False)
     toc = time.perf_counter()
-    metrics['graphistry_time'] = toc-tic
+    metrics['graphistry_time'] = toc - tic
     logger.info(f'Graphisty Time: {metrics["graphistry_time"]}')
     logger.info('Generated viz, got back urL: %s', url)
 
@@ -153,7 +153,7 @@ def run_filters(num_edges, num_matches, transient_id):
     toc = time.perf_counter()
     logger.info(f'Query Execution: {toc-tic:0.02f} seconds')
     logger.debug('Query Result Count: %s', len(res))
-    metrics['neptune_time'] = toc-tic
+    metrics['neptune_time'] = toc - tic
 
     nodes_df, edges_df = path_to_df(res)
 

@@ -1,0 +1,46 @@
+#Reuse graphistry's docker-compose setup.. except downgrade to caddy1 for auth support
+#Start _after_ graphistry
+
+version: '3.5'
+
+networks:
+  grph_net_external:
+    external:
+      name: grph_net
+
+x-production-options:
+  &production_opts
+  restart: unless-stopped
+  expose:
+    - "8080"
+  environment:
+    PORT: 8080
+    NODE_ENV: production
+    USE_LOCAL_USER: "false"
+    ACME_AGREE: "true"
+  networks:
+    - grph_net_external
+
+services:
+  caddy:
+    << : *production_opts
+    image: graphistry/caddy:v2.30.28
+    expose:
+      - "80"
+      - "443"
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - ENABLE_TELEMETRY=false
+      - ACME_AGREE=true
+    volumes:
+      - ./data/config/Caddyfile:/etc/Caddyfile
+      - ./data/config/caddy:/root/.caddy
+    healthcheck:
+      interval: 300s
+      start_period: 60s
+      retries: 3
+      timeout: 30s
+      #TODO define local path without muddying Caddyfile
+      test: sh -c 'curl -f http://nginx/healthz'

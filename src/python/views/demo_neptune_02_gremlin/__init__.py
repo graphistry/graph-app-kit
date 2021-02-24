@@ -163,7 +163,7 @@ def plot_url(nodes_df, edges_df):
         })\
         .plot(render=False)
     toc = time.perf_counter()
-    metrics['graphistry_time'] = toc-tic
+    metrics['graphistry_time'] = toc - tic
     logger.info(f'Graphisty Time: {metrics["graphistry_time"]}')
     logger.info('Generated viz, got back urL: %s', url)
 
@@ -208,7 +208,7 @@ def run_filters(num_edges, state, city):
     toc = time.perf_counter()
     logger.info(f'Query Execution: {toc-tic:0.02f} seconds')
     logger.debug('Query Result Count: %s', len(res))
-    metrics['neptune_time'] = toc-tic
+    metrics['neptune_time'] = toc - tic
 
     nodes_df, edges_df = path_to_df(res)
 
@@ -267,11 +267,11 @@ def main_area(url, nodes, edges, state):
     st.dataframe(bar_chart_data.set_index(group_label).T)
 
     st.markdown(f'''<small>
-            Neptune Load Time (s): {float(metrics['neptune_time']):0.2f} | 
-            Graphistry Load Time (s): {float(metrics['graphistry_time']):0.2f} | 
-            Node Count: {metrics['node_cnt']} |  
-            Edge Count: {metrics['edge_cnt']} | 
-            Property Count: {metrics['prop_cnt']}  
+            Neptune Load Time (s): {float(metrics['neptune_time']):0.2f} |
+            Graphistry Load Time (s): {float(metrics['graphistry_time']):0.2f} |
+            Node Count: {metrics['node_cnt']} |
+            Edge Count: {metrics['edge_cnt']} |
+            Property Count: {metrics['prop_cnt']}
         </small>''', unsafe_allow_html=True)
 
 

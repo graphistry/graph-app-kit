@@ -1,0 +1,68 @@
+name: CI
+#description:
+#  On every PR push,
+#  Skipped if PR has label 'skip-ci'
+
+on:
+
+  #Regular dev
+  push:
+  pull_request:
+
+
+  #Enable UI-driven branch testing
+  workflow_dispatch:
+
+  #Test main bidaily @ 1a
+  schedule:
+    - cron: '0 1 1-31/2 * *'
+
+
+jobs:
+
+  authorize-collaborators:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: octokit/request-action@v2.0.0
+      with:
+        route: GET /repos/:repository/collaborators/${{ github.actor }}
+        repository: ${{ github.repository }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
+  test-core-build:
+
+    needs: [ authorize-collaborators ]
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [ 3.7 ]
+
+    steps:
+
+    - name: Checkout repo
+      uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install deps
+      run: pip install flake8 pytest tox
+
+    - name: Lint with flake8
+      run: |
+        cd src/python && ./bin/lint.sh
+
+    - name: Core tests
+      run: |
+        cd src/python && python -m pytest test
+
+    - name: Build docker
+      run: |
+        cd src/docker && docker-compose build

@@ -17,7 +17,9 @@ class GraphistrySt:
             **({'token': os.environ['GRAPHISTRY_TOKEN']} if 'GRAPHISTRY_TOKEN' in os.environ else {}),
             **({'protocol': os.environ['GRAPHISTRY_PROTOCOL']} if 'GRAPHISTRY_PROTOCOL' in os.environ else {}),
             **({'server': os.environ['GRAPHISTRY_SERVER']} if 'GRAPHISTRY_SERVER' in os.environ else {}),
-            **({'client_protocol_hostname': os.environ['GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME']} if 'GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME' in os.environ else {}),
+            **({'client_protocol_hostname': os.environ['GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME']}
+                if 'GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME' in os.environ
+                else {}),
             **overrides
         }
         if not (('username' in cfg) and ('password' in cfg)) and not ('token' in cfg):
@@ -36,7 +38,7 @@ class GraphistrySt:
 
     def plot(self, g):
         if PyGraphistry._is_authenticated:
-            url = g.plot(render=False)
+            url = g.plot(as_files=True, render=False)  # TODO: Remove as_files=True when becomes default
             self.render_url(url)
         else:
 
@@ -48,12 +50,12 @@ class GraphistrySt:
         try:
             graphistry.register()
             return True
-        except:
+        except:  # noqa: E722
             if verbose:
-                st.write(Exception('Not logged in for Graphistry plots: Get free GPU account at graphistry.com/get-started and plug into src/docker/.env using template at envs/graphistry.env'))
+                st.write(Exception("""Not logged in for Graphistry plots:
+                    Get free GPU account at graphistry.com/get-started and
+                    plug into src/docker/.env using template at envs/graphistry.env"""))
             return False
 
 
-
 GraphistrySt()
-
