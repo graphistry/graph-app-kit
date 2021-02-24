@@ -28,6 +28,7 @@ edge_label_col = 'Destination_Type'
 metrics = {'tigergraph_time': 0, 'graphistry_time': 0,
            'node_cnt': 0, 'edge_cnt': 0, 'prop_cnt': 0}
 
+
 # Define the name of the view
 def info():
     return {
@@ -129,7 +130,6 @@ def plot_url(nodes_df, edges_df):
                                                         'Transaction': 'server'},
                                     default_mapping='question')
 
-
     # .encode_point_size('', ["blue", "yellow", "red"],  ,as_continuous=True)
     # if not (node_label_col is None):
     #     g = g.bind(point_title=node_label_col)
@@ -199,8 +199,7 @@ def run_filters(user_id, conn):  # noqa: C901
     raw_results = conn.runInstalledQuery("circleDetection", {"srcId": user_id}, sizeLimit=1000000000, timeout=120000)
     results = raw_results[0]['@@circleEdgeTuples']
 
-
-    #FIXME: Automate
+    # FIXME: Automate
     out = []
     from_ids = []
     to_ids = []

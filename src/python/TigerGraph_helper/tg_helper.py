@@ -3,10 +3,12 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+
 TIGERGRAPH_CONNECTION_VERSION = '3.1.0'
 
+
 def connect_to_tigergraph() -> Optional[dict]:
-    if ('TIGERGRAPH_HOST' in os.environ and 'TIGERGRAPH_USERNAME' in os.environ \
+    if ('TIGERGRAPH_HOST' in os.environ and 'TIGERGRAPH_USERNAME' in os.environ
         and 'TIGERGRAPH_PASSWORD' in os.environ and 'TIGERGRAPH_GRAPHNAME' in os.environ):
 
         creds = {
@@ -26,7 +28,7 @@ def connect_to_tigergraph() -> Optional[dict]:
             secret = os.environ["TIGERGRAPH_SECRET"]
             conn.getToken(secret)
         else:
-            #FIXME: This times out in practice, maybe TG 3.0 -> 3.1 version issues?
+            # FIXME: This times out in practice, maybe TG 3.0 -> 3.1 version issues?
             logger.info('... Connected to TG, creating secret and getting token...')
             conn.getToken(conn.createSecret())
 
