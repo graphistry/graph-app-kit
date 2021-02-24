@@ -2,6 +2,7 @@ import streamlit as st
 
 # For copy/paste, 04_simple is probably better
 
+
 def info():
     return {
         'id': 'app_03',
@@ -13,4 +14,3 @@ def info():
 def run():
     st.title('app3')
     st.markdown('hello! (minimal)')
-    

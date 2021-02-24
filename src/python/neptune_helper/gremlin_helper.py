@@ -15,7 +15,6 @@ logger.setLevel(logging.DEBUG)
 
 def connect_to_neptune():
     """Creates a connection to Neptune and returns the traversal source"""
-    envok = True
     if ('NEPTUNE_READER_HOST' in os.environ and 'NEPTUNE_READER_PORT' in os.environ
             and 'NEPTUNE_READER_PROTOCOL' in os.environ):
         server = os.environ["NEPTUNE_READER_HOST"]

@@ -1,5 +1,6 @@
 import streamlit as st
 
+
 # Full width for main area
 # https://discuss.streamlit.io/t/custom-render-widths/81/6
 def max_main_width():
@@ -15,11 +16,12 @@ def max_main_width():
                 padding-top: 0;
                 margin-top: 0;
             }}
-            </style>    
+            </style>
         """,
-            unsafe_allow_html=True)
+        unsafe_allow_html=True)
 
-#Hide dev menu
+
+# Hide dev menu
 def hide_dev_menu():
     hide_streamlit_style = """
     <style>
@@ -27,7 +29,7 @@ def hide_dev_menu():
     footer {visibility: hidden;}
     </style>
     """
-    st.markdown(hide_streamlit_style, unsafe_allow_html=True) 
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 
 def all_css(is_max_main_width=True, is_hide_dev_menu=True):

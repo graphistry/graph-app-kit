@@ -3,11 +3,12 @@ import importlib, os, streamlit as st
 from util import getChild
 logger = getChild(__name__)
 
-#loads all views/<app>/__init__.py and tracks active as URL param "?view_index=<info()['id']>"
-#  includes modules with methods run() 
+
+# loads all views/<app>/__init__.py and tracks active as URL param "?view_index=<info()['id']>"
+#  includes modules with methods run()
 #  and excludes if ('enabled' in info() and info()['enabled'] == False)
 class AppPicker:
-    VIEW_APP_ID_VAR="view_index"
+    VIEW_APP_ID_VAR = "view_index"
 
     # include: if non-empty, include if any tags match
     # exclude: exclude if any tag matches
@@ -32,11 +33,10 @@ class AppPicker:
                 return False
         return True
 
-
     # () -> {'id' -> { 'name': str, 'id': str, 'module': Module } }
     def list_modules(self):
         modules_by_id = {}
-        for view_folder in sorted([view.split('/')[-1] for (view,_,_) in os.walk('/apps/views') if view != '/apps/views']):
+        for view_folder in sorted([view.split('/')[-1] for (view, _, _) in os.walk('/apps/views') if view != '/apps/views']):
             try:
                 mod = importlib.import_module(f'views.{view_folder}')
                 if hasattr(mod, 'run'):
@@ -51,20 +51,20 @@ class AppPicker:
                     }
                     if self.check_included(nfo_resolved):
                         modules_by_id[mod_id] = nfo_resolved
-            except:
-                logger.debug('Module loader ignoring file views/%s due to import failure; safe to ignore for .swp etc files',
-                    view_folder, exc_info=True)
+            except:  # noqa: E722
+                logger.debug(
+                    'Module loader ignoring file views/%s due to import failure; safe to ignore for .swp etc files',
+                    view_folder,
+                    exc_info=True)
         sorted_mods = sorted(modules_by_id.values(), key=lambda nfo: nfo['id'])
         for i in range(len(sorted_mods)):
             sorted_mods[i]['index'] = i
         return modules_by_id
-        
-    
+
     # () -> ? str
     def get_maybe_active_view_id(self, query_params):
         maybe_default_view_id = query_params[self.VIEW_APP_ID_VAR][0] if self.VIEW_APP_ID_VAR in query_params else None
         return maybe_default_view_id
-
 
     # () -> ? { 'name': str, 'id': str, 'module': Module }
     def get_and_set_active_app(self):
@@ -78,7 +78,7 @@ class AppPicker:
 
         view = None
         if len(modules_by_id.keys()) == 0:
-            pass        
+            pass
         else:
             if len(modules_by_id.keys()) == 1:
                 view_id = list(modules_by_id.values())[0]['id']
@@ -100,7 +100,7 @@ class AppPicker:
 
         mods = self.list_modules()
         view = self.get_and_set_active_app()
-        
+
         if len(mods.keys()) == 0:
             st.sidebar.header('Create src/views/myapp/__init__.py::run()')
         elif len(mods.keys()) == 1:
