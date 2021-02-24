@@ -36,7 +36,7 @@ class GraphistrySt:
 
     def plot(self, g):
         if PyGraphistry._is_authenticated:
-            url = g.plot(render=False)
+            url = g.plot(as_files=True, render=False)  # TODO: Remove as_files=True when becomes default
             self.render_url(url)
         else:
 
