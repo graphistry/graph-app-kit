@@ -1,4 +1,4 @@
-streamlit==0.70.0
+streamlit==0.77.0
 protobuf==3.13.0
 graphistry==0.14.0
 
@@ -9,5 +9,5 @@ graphistry==0.14.0
 ################
 
 ### Neptune
-gremlinpython==3.4.8
+gremlinpython==3.4.10
 sshtunnel==0.1.5
