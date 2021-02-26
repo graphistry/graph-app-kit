@@ -6,35 +6,44 @@ The below provides quick launchers for AWS-based deployments. See [manual setup]
 
 **Option 1 - Full (Recommended):**
 
+[![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/core/graphistry.yml)
+  
+  * If AWS reports `Please select another region`, use the `Select a Region` dropdown in the top right menu
+
+Launches:
+
   * GPU instance
   * Web-based live editing
-  * Included: Graphistry, public + private Streamlit dashboards, Jupyter notebooks, RAPIDS.ai Python GPU ecosystem
-
-  [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/core/graphistry.yml)
-  
-  If AWS reports `Please select another region`, use the `Select a Region` dropdown in the top right menu.
+  * Core toolkit: Graphistry, public + private Streamlit dashboards, Jupyter notebooks, RAPIDS.ai Python GPU ecosystem
 
   Tenants launching GPUs for the first time may need to [request 4+ vCPU of g4, p3, or p4 capacity](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-resource-limits.html)
 
 **Option 2 - Minimal:**
 
-  * CPU instance
-  * Author views from your terminal
-  * Included: Public Streamlit dashboards linked against a remote Graphistry account
-  * Not included: Local Graphistry, private dashboards, Jupyter, RAPIDS.ai
+Steps:
 
-  Get a free or self-managed [Graphistry server account](https://www.graphistry.com/get-started) with username+pass then [launch a minimal stack](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/core/graphistry.yml)
-  
-  If AWS reports `Please select another region`, use the `Select a Region` dropdown in the top right menu.
+* Get a free or self-managed [Graphistry server account](https://www.graphistry.com/get-started) with username+pass 
+* [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/core/graphistry.yml)
+  *  If AWS reports `Please select another region`, use the `Select a Region` dropdown in the top right menu.
+ 
+
+
+Launches:
+
+  * AWS CPU-mode instance + hub.graphistry.com account
+  * Edit dashboard views from your terminal
+  * Included: Public Streamlit dashboards linked against a remote Graphistry account
+  * Not included: Local Graphistry (GPU), private dashboards, Jupyter, RAPIDS.ai (GPU)
+
 
 ----
 
 1. **Launch configuration: Details parameters**
 
-  1. Set stack name to anything, such as `graph-app-kit-a`
-  1. Set `VPC` to one that is web-accessible
-  1. Set `Subnet` to a web-accessible subnet in the VPC ("`subnet-...`")
-  1. Set `GraphAppKitKeyPair` to any where you have the SSH private.key
+  * Set stack name to anything, such as `graph-app-kit-a`
+  * Set `VPC` to one that is web-accessible
+  * Set `Subnet` to a web-accessible subnet in the VPC ("`subnet-...`")
+  * Set `GraphAppKitKeyPair` to any where you have the SSH private.key
 
   If using the minimal template, fill in details for your Graphistry account
 
