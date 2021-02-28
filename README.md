@@ -1,9 +1,17 @@
 [ ![CI](https://github.com/graphistry/graph-app-kit/actions/workflows/ci.yml/badge.svg) ](https://github.com/graphistry/graph-app-kit/actions/workflows/ci.yml)
 [ ![Publish](https://github.com/graphistry/graph-app-kit/actions/workflows/publish.yml/badge.svg) ](https://github.com/graphistry/graph-app-kit/actions/workflows/publish.yml)
 [ ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/graphistry/graph-app-kit-st) ](https://hub.docker.com/repository/docker/graphistry/graph-app-kit-st/builds)
+✔️ Linux
+✔️ OS X
+❌ Windows ([#39](https://github.com/graphistry/graph-app-kit/issues/39))
+
 
 [<img src="https://img.shields.io/badge/slack-Graphistry%20chat-yellow.svg?logo=slack">](https://join.slack.com/t/graphistry-community/shared_invite/zt-53ik36w2-fpP0Ibjbk7IJuVFIRSnr6g) 
 [![Twitter Follow](https://img.shields.io/twitter/follow/graphistry)](https://twitter.com/graphistry)
+
+
+
+https://github.com/graphistry/graph-app-kit/issues/39
 
 # Welcome to graph-app-kit
 
@@ -16,26 +24,47 @@ Turn your graph data into a secure and interactive visual graph app in 15 minute
 
 This open source effort puts together patterns the Graphistry team has reused across many graph projects as teams go from code-heavy Jupyter notebook experiments to deploying streamlined analyst tools. Whether building your first graph app, trying an idea, or wanting to check a reference, this project aims to simplify that process. It covers pieces like: Easy code editing and deployment, a project stucture ready for teams, built-in authentication, no need for custom JS/CSS at the start, batteries-included data + library dependencies, and fast loading & visualization of large graphs.
 
+## What
+
+* **Minimal core**: The barebones dashboard server. In provides a StreamLit docker-compose container with PyData ecosystem libraries and examples of visualizing data from various systems. Install it, plug in credentials to various web services like cloud databases and a free [Graphistry Hub](https://hub.graphistry.com) visualization account, and launch.
+
+* **Full core**: Initially for AWS, the full core bundles adds to the docker-compose system: Accounts, Jupyter notebooks for authoring, serves StreamLit dashboards with both public + private zones, and runs Graphistry/RAPIDS locally on the same server. Launch with on click via the Cloud Formation template.
+
+* **Full core + DB**: DB-specific variants are the same as minimal/full, and add simpler DB-specific quick launching/connecting.
+
 ## Get started
 
-### Quick (Local code)
+### Quick (Local code) - minimal core + third-party connectors
 
 ```bash
+# Minimal core
 git clone https://github.com/graphistry/graph-app-kit.git
 cd graph-app-kit/src/docker
 sudo docker-compose build
-# Optional: edit src/docker/.env (API accounts), docker-compose.yml: Auth, ports, ...
+
+# Optional: Edit src/docker/.env (API accounts), docker-compose.yml: Auth, ports, ...
+
+# Launch
 sudo docker-compose up -d
 sudo docker-compose logs -f -t --tail=100
-# Add dashboards @ src/python/views/<your_custom_view>/__init__.py
 ```
 
 => `http://localhost:8501/`
 
-### Quick (Launchers)
+To [add views](docs/views.md) and relaunch:
 
-1. [AWS Quick launch](docs/setup.md): Preintegrated Docker, Graphistry, Streamlit, Jupyter, RAPIDS.ai (GPU)
-  * Variants: [manual launch](docs/setup-manual.md), [Amazon Neptune](docs/neptune.md)
+```bash
+# Add dashboards @ src/python/views/<your_custom_view>/__init__.py
+
+sudo docker-compose up -d --force-recreate
+```
+
+### Quick Launchers - minimal/full core
+
+1. [Quick launch](docs/setup.md) variants:
+  * [Manual minimal/full](docs/setup-manual.md): 
+  * [Automatic minimal/full](docs/setup.md): 
+  * Database-specific manual/automatic minimal/full: [Amazon Neptune](docs/neptune.md), [TigerGraph](docs/tigergraph.md)
 2. [Add views](docs/views.md)
 3. [Main configurations and extensions](docs/extend.md): Database connectors, authentication, notebook-based editing, and more
 
