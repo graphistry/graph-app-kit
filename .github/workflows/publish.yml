@@ -31,7 +31,7 @@ jobs:
 
   publish:
     name: Upload to Amazon S3
-    if: github.event.action != "labaeled" || github.event.label.name == 'publish'
+    if: github.event.action != 'labeled' || github.event.label.name == 'publish'
     runs-on: ubuntu-latest
 
     steps:
