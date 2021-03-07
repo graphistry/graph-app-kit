@@ -24,6 +24,9 @@ Extensions:
 
 * TigerGraph
 
+### Added
+
+* CI: Publish cloud formaton templates to s3 on merge (https://github.com/graphistry/graph-app-kit/pull/48)
 
 ## [2021.02.23]
 

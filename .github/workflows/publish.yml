@@ -1,8 +1,23 @@
 name: Publish
 
 on:
+
+  #Merge
+  push:
+    branches:
+      - master
+
+  #Label
   pull_request:
     types: [labeled]
+
+
+  #Enable UI-driven branch testing
+  workflow_dispatch:
+
+  #Test main bidaily @ 1a
+  schedule:
+    - cron: '0 1 1-31/2 * *'
 
 jobs:
 
@@ -16,7 +31,7 @@ jobs:
 
   publish:
     name: Upload to Amazon S3
-    if: github.event.label.name == 'publish'
+    if: github.event.action != "labaeled" || github.event.label.name == 'publish'
     runs-on: ubuntu-latest
 
     steps:
@@ -36,4 +51,4 @@ jobs:
         aws s3 cp src/bootstraps/core/minimal.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/core/minimal.yml"
         aws s3 cp src/bootstraps/neptune/graphistry.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/neptune/graphistry.yml"
         aws s3 cp src/bootstraps/neptune/minimal.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/neptune/minimal.yml"
-        
+
