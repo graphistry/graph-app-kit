@@ -45,5 +45,4 @@ See [current tags](https://hub.docker.com/repository/docker/graphistry/graph-app
 
 * Docker rebuilds on merge to main
 * Push main tag ('v1.2.3') for building named versions
-* CloudFormation templates upload upon a PR being labeled "publish"
-
+* CloudFormation templates uploaded to S3 upon a PR being labeled "publish", merge-to-main, or explicit GHA call
