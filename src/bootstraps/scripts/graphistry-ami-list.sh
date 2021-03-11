@@ -4,7 +4,7 @@ set -e
 #
 # List Graphistry AMIs for yml
 #
-# Run: $ VERSION=2.36.6 ./graphistry-ami-list.sh
+# Run: $ VERSION=2.36.6-11.0 ./graphistry-ami-list.sh
 #
 # Output: Non-zero return code on failure, and on success:
 #

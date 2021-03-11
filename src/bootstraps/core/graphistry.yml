@@ -30,7 +30,7 @@ Parameters:
     Default: 'g4dn.xlarge'
     Description: "Enter a RAPIDS.ai-compatible GPU instance type. Ex: g4dn.xlarge"
 
-#2.35.9-11.0
+#2.36.6-11.0
 #Generated with: src/bootstraps/scripts/graphistry-ami-list.sh
 Mappings: 
   RegionMap: 

@@ -33,7 +33,7 @@ Parameters:
     Type: String
     Description: "Enter the Neptune Cluster Read Endpoint URL. Ex: abc.def.ghi.neptune.amazonaws.com"
 
-#2.35.9-11.0
+#2.36.6-11.0
 #Generated with: src/bootstraps/scripts/graphistry-ami-list.sh
 Mappings:
   RegionMap:
