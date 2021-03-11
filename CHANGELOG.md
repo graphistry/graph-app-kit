@@ -20,13 +20,26 @@ Extensions:
 
 ## [Development]
 
-### Adding
+### Changed
 
-* TigerGraph
+* CI: Graphistry AMI list generator takes VERSION parameter
+* Infra: Upgrade to Graphistry 2.36.6
+
+### Docs
+
+* CI: Graphistry AMI list generator usage
+
+## [2021.03.06]
 
 ### Added
 
-* CI: Publish cloud formaton templates to s3 on merge (https://github.com/graphistry/graph-app-kit/pull/48)
+* CI: Publish cloud formation templates to s3 on merge (https://github.com/graphistry/graph-app-kit/pull/48)
+
+## [2021.02.24]
+
+#### Added
+
+* TigerGraph support (https://github.com/graphistry/graph-app-kit/pull/36)
 
 ## [2021.02.23]
 
