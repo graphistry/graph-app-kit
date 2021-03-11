@@ -24,12 +24,16 @@ python3 -m pytest test
 
 This is expected to change as full docker-based testing lands
 
-
-## Base versions
+## Aligned base versions
 
 For faster AWS launches, we:
+
 - Keep the docker base (docker-compose.yml::GRAPHISTRY_FORGE_BASE_VERSION) in sync w/ AWS version
-- Update aws version (bootstraps/*/graphistry.yml) by finding AMIs via bootstraps/scripts/graphistry-ami-list.sh
+
+- Update aws version (bootstraps/*/graphistry.yml) by pointing to that version's region AMIs via bootstraps/scripts/graphistry-ami-list.sh
+  * Run `src/bootstraps/scripts $ VERSION=2.36.6 ./graphistry-ami-list.sh`
+  * Paste into `src/bootstraps/core,neptune/graphistry.yml`
+  * Test via using branch's yml's url, or copy-paste into cloud formation
 
 ## Automated Builds
 

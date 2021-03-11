@@ -1,11 +1,26 @@
 #!/bin/bash
 set -e
 
-###List Graphistry AMIs for yml
+#
+# List Graphistry AMIs for yml
+#
+# Run: $ VERSION=2.36.6 ./graphistry-ami-list.sh
+#
+# Output: Non-zero return code on failure, and on success:
+#
+#eu-north-1:
+#  "HVM64": "ami-007f7e0cbb31804ca"
+#ap-south-1:
+#  "HVM64": "ami-0771ea144a8bcc05b"
+#eu-west-3:
+#  "HVM64": "ami-0bf29fec2ad97b43b"
+# ...
+#
+# ------------
 
 AWS=*
 BASE=graphistry-standalone-2???-??-??T??-??-??Z-v
-VERSION=2.35.9-11.0
+VERSION=${VERSION:-2.35.9-11.0}
 SUFFIX=*
 GREP_INCLUDE="aws-marketplace/graphistry-standalone"  # There were some surprise namespaces 
 
