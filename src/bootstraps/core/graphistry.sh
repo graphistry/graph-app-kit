@@ -36,7 +36,6 @@ echo "Got SERVICE_USER ${SERVICE_USER}, SERVICE_PASS"
 echo '===== Configuring graph-app-kit with Graphistry service account and Neptune ====='
 ( \
     cd ../../docker \
-    && echo "GRAPH_VIEWS=${GRAPHISTRY_HOME}/data/notebooks/graph-app-kit/public/views" \
     && echo "GRAPHISTRY_USERNAME=${SERVICE_USER}" \
     && echo "GRAPHISTRY_PASSWORD=${SERVICE_PASS}" \
     && echo "GRAPHISTRY_PROTOCOL=http" \
@@ -47,8 +46,14 @@ echo '----- Reuse public graph-app-kit .env as private .env'
 sudo cp "${GAK_PUBLIC}/src/docker/.env" "${GAK_PRIVATE}/src/docker/.env"
 
 echo '----- Finish pub vs. priv .env specialization'
-echo "BASE_PATH=public/dash/" | sudo tee -a "${GAK_PUBLIC}/src/docker/.env"
-echo "BASE_PATH=private/dash/" | sudo tee -a "${GAK_PRIVATE}/src/docker/.env"
+( \
+  echo "BASE_PATH=public/dash/"  \
+  && echo "GRAPH_VIEWS=${GRAPHISTRY_HOME}/data/notebooks/graph-app-kit/public/views" \
+) | sudo tee -a "${GAK_PUBLIC}/src/docker/.env"
+( \
+  echo "BASE_PATH=private/dash/"  \
+  && echo "GRAPH_VIEWS=${GRAPHISTRY_HOME}/data/notebooks/graph-app-kit/private/views" \
+) | sudo tee -a "${GAK_PRIVATE}/src/docker/.env"
 
 echo '----- Launching graph-app-kit as streamlit-pub/priv:8501'
 ( \

@@ -27,7 +27,6 @@ Steps:
   *  If AWS reports `Please select another region`, use the `Select a Region` dropdown in the top right menu.
  
 
-
 Launches:
 
   * AWS CPU-mode instance + hub.graphistry.com account
@@ -102,6 +101,47 @@ Go to your public Streamlit dashboard and start exploring: http://[the.public.ip
   * Installed at `/home/ubuntu/graph-app-kit/public/graph-app-kit`
   * Run as `src/docker $ docker-compose up -d streamlit`
 
-## 4. Next steps
+## 4. Optional - administer
+
+Advanced users can SSH into the server to manipulate individual services:
+
+### System visibility
+
+```bash
+# launch logs
+tail -f /var/log/cloud-init-output.log -n 1000
+
+# app logs
+sudo docker ps
+sudo docker logs -f -t --tail=1 MY_CONTAINER
+
+# stats
+sudo htop
+sudo iftop
+top
+```
+
+### Graphistry
+
+For more advanced Graphistry administration, so the [Graphistry admin docs repo](https://github.com/graphistry/graphistry-cli)
+
+```bash
+# restart a graphistry container
+cd graphistry && sudo docker-compose restart MY_CONTAINER  # do *not* run it's caddy (v2)
+
+# restart caddy (Caddy 1 override over Graphistry's Caddy 2)
+cd graphistry && sudo docker-compose -f docker-compose.gak.graphistry.yml up -d caddy
+```
+
+### Streamlit
+
+Use `docker-compose` project names (`-p the_name`) to distinguish your public vs private dashboards:
+
+```bash
+cd graph-app-kit/public/graph-app-kit && docker-compose -p pub run -d --name streamlit-pub streamlit
+cd graph-app-kit/private/graph-app-kit && docker-compose -p priv run -d --name streamlit-priv streamlit
+```
+
+## 5. Next steps
 
 Continue to the instructions for [creating custom views](views.md) and [adding common extensions](extend.md) like TLS, public/private dashboards, and more

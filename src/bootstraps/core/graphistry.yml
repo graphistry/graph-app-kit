@@ -30,42 +30,42 @@ Parameters:
     Default: 'g4dn.xlarge'
     Description: "Enter a RAPIDS.ai-compatible GPU instance type. Ex: g4dn.xlarge"
 
-#2.35.9-11.0
+#2.36.6-11.0
 #Generated with: src/bootstraps/scripts/graphistry-ami-list.sh
 Mappings: 
   RegionMap: 
     eu-north-1:
-      "HVM64": "ami-020db5b9468605b1b"
+      "HVM64": "ami-007f7e0cbb31804ca"
     ap-south-1:
-      "HVM64": "ami-0da292ae7221b4712"
+      "HVM64": "ami-0771ea144a8bcc05b"
     eu-west-3:
-      "HVM64": "ami-097617b9ab348bd7d"
+      "HVM64": "ami-0bf29fec2ad97b43b"
     eu-west-2:
-      "HVM64": "ami-0fe4d7af59713cc8b"
+      "HVM64": "ami-03801ca4648205427"
     eu-west-1:
-      "HVM64": "ami-04c579438e71c9b4e"
+      "HVM64": "ami-0bcd749f1d0a1dfe6"
     ap-northeast-2:
-      "HVM64": "ami-0a647fc9d83aaa798"
+      "HVM64": "ami-0851b639bbe404677"
     ap-northeast-1:
-      "HVM64": "ami-09408fd12167b1ddc"
+      "HVM64": "ami-007b0de4d538562dc"
     sa-east-1:
-      "HVM64": "ami-0881a3b8d12b49dd0"
+      "HVM64": "ami-0ef63be746e7a24bc"
     ca-central-1:
-      "HVM64": "ami-0046f23296157202d"
+      "HVM64": "ami-05183e0beb7303c26"
     ap-southeast-1:
-      "HVM64": "ami-04a449007e7a22792"
+      "HVM64": "ami-0a5195b33c77678be"
     ap-southeast-2:
-      "HVM64": "ami-02a981824c38b66dd"
+      "HVM64": "ami-0f89327925bd9a8ea"
     eu-central-1:
-      "HVM64": "ami-010c9a3be1f3ae351"
+      "HVM64": "ami-0103e61885346f05f"
     us-east-1:
-      "HVM64": "ami-0322bad99c5e1eec8"
+      "HVM64": "ami-0a6659acaf427e811"
     us-east-2:
-      "HVM64": "ami-07915b33d57ebde27"
+      "HVM64": "ami-04b7d03027f1bf5d0"
     us-west-1:
-      "HVM64": "ami-07d59135fe7222642"
+      "HVM64": "ami-08e1eb5246688bfa2"
     us-west-2:
-      "HVM64": "ami-0fb7bf940df96836e"
+      "HVM64": "ami-033ef56997e62c46b"
 
 Resources:
   GraphAppKitSecurityGroup:

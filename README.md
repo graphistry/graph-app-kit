@@ -11,8 +11,6 @@
 
 
 
-https://github.com/graphistry/graph-app-kit/issues/39
-
 # Welcome to graph-app-kit
 
 Turn your graph data into a secure and interactive visual graph app in 15 minutes! 
@@ -61,11 +59,42 @@ sudo docker-compose up -d --force-recreate
 
 ### Quick Launchers - minimal/full core
 
-1. [Quick launch](docs/setup.md) variants:
-  * [Manual minimal/full](docs/setup-manual.md): 
-  * [Automatic minimal/full](docs/setup.md): 
-  * Database-specific manual/automatic minimal/full: [Amazon Neptune](docs/neptune.md), [TigerGraph](docs/tigergraph.md)
+1. Quick launch options:
+
+**Full**: [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=region#/stacks/new?stackName=graph_app_kit_full&templateURL=https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/core/graphistry.yml)
+
+* Public + protected Streamlit dashboards, Jupyter notebooks + editing, Graphistry, RAPIDS
+* Login to web UI as `admin` / `i-instanceid` -> file uploader, notebooks, ...
+* Dashboards: `/public/dash` and `/private/dash`
+* [More info](docs/setup.md)
+
+Admin:
+
+```bash
+# launch logs
+tail -f /var/log/cloud-init-output.log -n 1000
+
+# app logs
+sudo docker ps
+sudo docker logs -f -t --tail=1 MY_CONTAINER
+
+# restart a graphistry container
+cd graphistry && sudo docker-compose restart MY_CONTAINER
+
+# restart caddy (Caddy 1 override)
+cd graphistry && sudo docker-compose -f docker-compose.gak.graphistry.yml up -d caddy
+
+# run streamlit
+cd graph-app-kit/public/graph-app-kit && docker-compose -p pub run -d --name streamlit-pub streamlit
+cd graph-app-kit/private/graph-app-kit && docker-compose -p priv run -d --name streamlit-priv streamlit
+```
+
+**Minimal**: Open Streamlit, ssh to connect/add [free Graphistry Hub username/pass](https://www.graphistry.com/get-started):
+
+**Database-specific**: [Amazon Neptune](docs/neptune.md), [TigerGraph](docs/tigergraph.md)
+
 2. [Add views](docs/views.md)
+
 3. [Main configurations and extensions](docs/extend.md): Database connectors, authentication, notebook-based editing, and more
 
 ## The pieces

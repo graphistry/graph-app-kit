@@ -12,7 +12,11 @@ docker-compose up
 
 ## Test
 
+### CI
+
 CI will trigger on pushes to PRs
+
+### Local
 
 To test locally:
 
@@ -24,12 +28,22 @@ python3 -m pytest test
 
 This is expected to change as full docker-based testing lands
 
+### AWS
 
-## Base versions
+* Modify `src/bootstraps/core/graphistry.yml` on the checkout step do use the branch:  `git clone -b mybranch`
+* Push your branch
+* In CloudFormation, upload your modified `graphistry.yml``
+
+## Aligned base versions
 
 For faster AWS launches, we:
+
 - Keep the docker base (docker-compose.yml::GRAPHISTRY_FORGE_BASE_VERSION) in sync w/ AWS version
-- Update aws version (bootstraps/*/graphistry.yml) by finding AMIs via bootstraps/scripts/graphistry-ami-list.sh
+
+- Update aws version (bootstraps/*/graphistry.yml) by pointing to that version's region AMIs via bootstraps/scripts/graphistry-ami-list.sh
+  * Run `src/bootstraps/scripts $ VERSION=2.36.6-11.0 ./graphistry-ami-list.sh`
+  * Paste into `src/bootstraps/core,neptune/graphistry.yml`
+  * Update `src/docker/docker-compose.yml::GRAPHISTRY_FORGE_BASE_VERSION`
 
 ## Automated Builds
 
