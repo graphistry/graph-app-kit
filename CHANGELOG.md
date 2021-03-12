@@ -17,8 +17,13 @@ Extensions:
 * [TigerGraph](https://docs.tigergraph.com/faqs/change-log-1)
 * [AWS Neptune](https://docs.aws.amazon.com/neptune/latest/userguide/doc-history.html)
 
-
 ## [Development]
+
+### Adding
+
+See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
+
+## [2021.03.11]
 
 ### Changed
 
@@ -28,6 +33,12 @@ Extensions:
 ### Docs
 
 * CI: Graphistry AMI list generator usage
+* README: Removed dangling link
+* README: Quicklaunch links and admin commands
+
+### Fixed
+
+* Private Streamlit dashboards instance now bound to Jupyter notebook private dashboards folder. Was incorrectly using the public folder: https://github.com/graphistry/graph-app-kit/pull/51/commits/3872de053b7d2888ce271acf395f112491742606
 
 ## [2021.03.06]
 
