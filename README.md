@@ -11,8 +11,6 @@
 
 
 
-https://github.com/graphistry/graph-app-kit/issues/39
-
 # Welcome to graph-app-kit
 
 Turn your graph data into a secure and interactive visual graph app in 15 minutes! 
