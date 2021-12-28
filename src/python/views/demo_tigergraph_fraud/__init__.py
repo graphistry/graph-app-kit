@@ -8,7 +8,7 @@ from util import getChild
 import time
 from TigerGraph_helper import tg_helper
 import plotly.express as px
-import pyTigerGraphBeta as tg
+import pyTigerGraph as tg
 import datetime
 
 

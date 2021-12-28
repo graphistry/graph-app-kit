@@ -1,4 +1,4 @@
-import logging, os, pyTigerGraphBeta as tg
+import logging, os, pyTigerGraph as tg
 from typing import Optional
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
