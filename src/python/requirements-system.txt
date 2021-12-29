@@ -13,5 +13,5 @@ gremlinpython==3.4.10
 sshtunnel==0.1.5
 
 ### TigerGraph
-pyTigerGraphBeta  # Unpinned as TG Cloud is rapidly moving
+pyTigerGraph  # Unpinned as TG Cloud is rapidly moving
 plotly==4.14.3  # for demos

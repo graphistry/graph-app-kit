@@ -1,5 +1,5 @@
 import asyncio, datetime, graphistry, pandas as pd, \
-    plotly.express as px, pyTigerGraphBeta as tg, \
+    plotly.express as px, pyTigerGraph as tg, \
     streamlit as st, time
 
 from components import GraphistrySt, URLParam
