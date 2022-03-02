@@ -34,6 +34,10 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 
 * Infra: New `docker-compose.override.yml` symlink mode (WIP)
 
+### Fixed
+
+* Infra: Replaced failing GHA collaborators-only with repo setting
+
 ## [2021.03.11]
 
 ### Changed
