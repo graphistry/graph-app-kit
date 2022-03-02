@@ -27,7 +27,6 @@ jobs:
     - uses: octokit/request-action@v2.0.0
       with:
         route: GET /repos/graphistry/graph-app-kit/collaborators/${{ github.actor }}
-        repository: graphistry/graph-app-kit
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
