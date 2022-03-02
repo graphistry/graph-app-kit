@@ -1,0 +1,73 @@
+########################################################################################################################
+#
+# Experimental: Add streamlit service + mount views/ into jupyter
+#
+# - Symlink as `${GRAPHISTRY_HOME}/data/config/graph-app-kit
+# - Symlink `${GRAPHISTRY_HOME}/docker-compose.override.yml` as src/docker/override/docker-compose.override.yml
+# - Start graphistry
+#
+########################################################################################################################
+#
+# Ex: Assuming `graphistry` and `graph-app-kit` are siblings: 
+#
+# graphistry$ ln -s ../graph-app-kit/src/docker/override/docker-compose.override.yml docker-compose.override.yml
+# graphistry$ ln -s "`pwd`/../graph-app-kit/" data/config/graph-app-kit
+# graphistry$ docker-compose up -d
+#
+########################################################################################################################
+#
+services:
+
+  # Add graph-app-kit to notebook mounts
+  notebook:
+    volumes:
+      #graphistry
+      - ./data/notebooks:/home/graphistry/notebooks
+      - ./data/dask-shared:/dask-shared
+      - ./data/dask-shared:/home/graphistry/dask-shared
+      #graph-app-kit
+      - ../graph-app-kit/src/python/views:/home/graphistry/graph-app-kit-src-views
+
+  streamlit:
+    restart: unless-stopped
+    networks:
+      - grph_net
+    #Warning: Loads into continer env, not used by compose envvar interpolation
+    environment:
+      - BASE_PATH=${BASE_PATH:-dashboard/}
+      - BASE_URL=${BASE_URL:-http://localhost:8501/dashboard}
+      - GRAPH_VIEWS=${GRAPH_VIEWS:-../python/views}
+    #Warning: Loads into continer env, not used by compose envvar interpolation
+    env_file:
+      - ./data/config/graph-app-kit/src/envs/docker.env
+      - ./data/config/graph-app-kit/src/envs/general.env
+      - ./data/config/graph-app-kit/src/envs/graphistry.env
+      - ./data/config/graph-app-kit/src/envs/neptune.env
+      - ./data/config/graph-app-kit/src/envs/streamlit.env
+      - ./data/config/graph-app-kit/src/envs/tigergraph.env
+      - ./data/config/graph-app-kit/src/docker/.env
+    image: graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}
+    command: --server.baseUrlPath="$BASE_PATH" /apps/entrypoint.py
+    labels:
+      autoheal: "false"
+    build:
+      args:
+        - DOCKER_TAG=${DOCKER_TAG:-latest}
+        - BUILDKIT_INLINE_CACHE=1
+        - GRAPHISTRY_FORGE_BASE_VERSION=${GRAPHISTRY_FORGE_BASE_VERSION:-v2.38.10-11.0}
+      context: ..
+      dockerfile: ./docker/Dockerfile
+      cache_from:
+        - graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}
+    ports:
+      - "${ST_PUBLIC_PORT:-8501}:8501"
+    volumes:
+      - ../graph-app-kit/src/python:/apps
+      - ${GRAPH_VIEWS:-../graph-app-kit/src/python/views}:/apps/views
+      - ${NEPTUNE_KEY_PATH:-/tmp/mt.pem}:/secrets/neptune-reader.pem
+    healthcheck:
+      test: ["CMD", "curl", "-Lf", "http://localhost:8501/${BASE_PATH}healthz"]
+      interval: 30s
+      timeout: 30s
+      retries: 10
+      start_period: 10s
