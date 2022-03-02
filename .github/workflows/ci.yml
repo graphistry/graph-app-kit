@@ -20,20 +20,8 @@ on:
 
 jobs:
 
-  authorize-collaborators:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: octokit/request-action@v2.0.0
-      with:
-        route: GET /repos/graphistry/graph-app-kit/collaborators/${{ github.actor }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
   test-core-build:
 
-    needs: [ authorize-collaborators ]
     runs-on: ubuntu-latest
 
     strategy:
