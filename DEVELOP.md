@@ -41,6 +41,7 @@ For faster AWS launches, we:
 - Keep the docker base (docker-compose.yml::GRAPHISTRY_FORGE_BASE_VERSION) in sync w/ AWS version
 
 - Update aws version (bootstraps/*/graphistry.yml) by pointing to that version's region AMIs via bootstraps/scripts/graphistry-ami-list.sh
+  * Setup: `apt-get install awscli jq` and `aws configure`
   * Run `src/bootstraps/scripts $ VERSION=2.36.6-11.0 ./graphistry-ami-list.sh`
   * Paste into `src/bootstraps/core,neptune/graphistry.yml`
   * Update `src/docker/docker-compose.yml::GRAPHISTRY_FORGE_BASE_VERSION`
