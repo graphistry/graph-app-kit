@@ -23,6 +23,21 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+## [2022.03.02]
+
+### Changed
+
+* Infra: Upgrade to Graphistry 2.38.10 base
+* Infra: Unpinned plotly and updated protobuf, streamlit
+
+### Added
+
+* Infra: New `docker-compose.override.yml` symlink mode (WIP)
+
+### Fixed
+
+* Infra: Replaced failing GHA collaborators-only with repo setting
+
 ## [2021.03.11]
 
 ### Changed
