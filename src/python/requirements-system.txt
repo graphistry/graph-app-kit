@@ -1,6 +1,6 @@
 streamlit==1.6.0
 protobuf==3.18
-graphistry==0.20.5
+graphistry==0.21.2
 
 ################
 #

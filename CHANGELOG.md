@@ -23,6 +23,18 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+## [2022.03.13]
+
+### Changed
+
+* GraphistrySt: Switched from unsafe mode markdown to component
+* PyGraphistry: Updated to 0.21.2
+
+### Breaking
+
+* UI: Switch default to wide mode
+
+
 ## [2022.03.02]
 
 ### Changed

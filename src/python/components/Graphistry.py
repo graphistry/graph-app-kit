@@ -1,4 +1,4 @@
-import graphistry, os, streamlit as st
+import graphistry, os, streamlit as st, streamlit.components.v1 as components
 from graphistry import PyGraphistry
 
 from util import getChild
@@ -33,8 +33,13 @@ class GraphistrySt:
     def render_url(self, url):
         if self.test_login():
             logger.debug('rendering main area, with url: %s', url)
-            iframe = '<iframe src="' + url + '", height="800", width="100%" allow="fullscreen"></iframe>'
-            st.markdown(iframe, unsafe_allow_html=True)
+            #iframe = '<iframe src="' + url + '", height="800", width="100%" style="position: absolute" allow="fullscreen"></iframe>'
+            #st.markdown(iframe, unsafe_allow_html=True)
+            components.iframe(
+                src=url,
+                height=800,
+                scrolling=True
+            )
 
     def plot(self, g):
         if PyGraphistry._is_authenticated:
