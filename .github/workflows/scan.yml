@@ -95,8 +95,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      DOCKER_IMAGE: graphistry/graphistry-graph-app-kit-st
-      DOCKER_IMAGE_SHORT: graphistry-graph-app-kit-st
+      DOCKER_IMAGE: graphistry/graph-app-kit-st
+      DOCKER_IMAGE_SHORT: graph-app-kit-st
       VERSION: latest
     steps:
 
