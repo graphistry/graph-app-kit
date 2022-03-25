@@ -1,0 +1,163 @@
+name: Scan
+#description:
+#  Daily 4a CVE report
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * *'
+
+jobs:
+
+  cancel_outstanding:
+    name: Detect and cancel outstanding runs of this workflow
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-security-scan') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Cancel Previous Runs
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-cancel') }}
+        uses: styfle/cancel-workflow-action@0.4.0
+        with:
+          access_token: ${{ github.token }}
+
+  scan_base:
+    name: Scan base Graphistry container
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-security-scan') }}
+    needs: [  ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        # 11.4 too big for now
+        CUDA_SHORT_VERSION: ['11.0']
+    steps:
+
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: version envvars
+        run: |
+          echo "VERSION=latest" >> $GITHUB_ENV
+          echo "CUDA_SHORT_VERSION=${{ matrix.CUDA_SHORT_VERSION }}" >> $GITHUB_ENV
+          ( rm -f CUDA_SHORT_VERSION || echo ok ) && ( echo ${{ matrix.CUDA_SHORT_VERSION }} > CUDA_SHORT_VERSION )
+
+      - name: buildkit envvars
+        run: |
+          echo "COMPOSE_DOCKER_CLI_BUILD=1" >> $GITHUB_ENV
+          echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
+
+      - name: free space
+        run: |
+          sudo docker images
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: install grype
+        run: |
+          make grype
+
+      - name: scan 
+        env:
+          DOCKER_IMAGE: graphistry/graphistry-forge-base
+          DOCKER_IMAGE_SHORT: graphistry-forge-base
+          VERSION: latest
+        run: |
+          grype ${DOCKER_IMAGE}:${VERSION}-${CUDA_SHORT_VERSION} \
+            --only-fixed \
+            -o sarif \
+            > ${DOCKER_IMAGE_SHORT}-${CUDA_SHORT_VERSION}.json
+          echo "========== SARIF REPORT =========="
+          cat ${DOCKER_IMAGE_SHORT}-${CUDA_SHORT_VERSION}.json
+
+      - name: upload SARIF report
+        env:
+          DOCKER_IMAGE: graphistry/graphistry-forge-base
+          DOCKER_IMAGE_SHORT: graphistry-forge-base
+          VERSION: latest
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${DOCKER_IMAGE_SHORT}-${CUDA_SHORT_VERSION}.json
+          # category differentiates multiple results for one commit
+          category: ${DOCKER_IMAGE_SHORT}-${VERSION}-${CUDA_SHORT_VERSION}
+
+      - name: fail on fixable severe vulnerabilities
+        env:
+          DOCKER_IMAGE: graphistry/graphistry-forge-base
+          DOCKER_IMAGE_SHORT: graphistry-forge-base
+          VERSION: latest
+        run: |
+          grype ${DOCKER_IMAGE}:${VERSION}-${CUDA_SHORT_VERSION} \
+            --only-fixed \
+            --fail-on high \
+            -o template -t .grype/grype.friendly.tmpl
+
+
+  scan_gak:
+    name: Scan graph-app-kit container
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-security-scan') }}
+    needs: [  ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        # 11.4 too big for now
+        CUDA_SHORT_VERSION: ['11.0']
+    steps:
+
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: version envvars
+        run: |
+          echo "VERSION=latest" >> $GITHUB_ENV
+          echo "CUDA_SHORT_VERSION=${{ matrix.CUDA_SHORT_VERSION }}" >> $GITHUB_ENV
+          ( rm -f CUDA_SHORT_VERSION || echo ok ) && ( echo ${{ matrix.CUDA_SHORT_VERSION }} > CUDA_SHORT_VERSION )
+
+      - name: buildkit envvars
+        run: |
+          echo "COMPOSE_DOCKER_CLI_BUILD=1" >> $GITHUB_ENV
+          echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
+
+      - name: free space
+        run: |
+          sudo docker images
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: install grype
+        run: |
+          make grype
+
+      - name: scan 
+        env:
+          DOCKER_IMAGE: graphistry/graphistry-graph-app-kit-st
+          DOCKER_IMAGE_SHORT: graphistry-graph-app-kit-st
+          VERSION: latest
+        run: |
+          grype ${DOCKER_IMAGE}:${VERSION}-${CUDA_SHORT_VERSION} \
+            --only-fixed \
+            -o sarif \
+            > ${DOCKER_IMAGE_SHORT}-${CUDA_SHORT_VERSION}.json
+          echo "========== SARIF REPORT =========="
+          cat ${DOCKER_IMAGE_SHORT}-${CUDA_SHORT_VERSION}.json
+
+      - name: upload SARIF report
+        env:
+          DOCKER_IMAGE: graphistry/graphistry-graph-app-kit-st
+          DOCKER_IMAGE_SHORT: graphistry-graph-app-kit-st
+          VERSION: latest
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${DOCKER_IMAGE_SHORT}-${CUDA_SHORT_VERSION}.json
+          # category differentiates multiple results for one commit
+          category: ${DOCKER_IMAGE_SHORT}-${VERSION}-${CUDA_SHORT_VERSION}
+
+      - name: fail on fixable severe vulnerabilities
+        env:
+          DOCKER_IMAGE: graphistry/graphistry-graph-app-kit-st
+          DOCKER_IMAGE_SHORT: graphistry-graph-app-kit-st
+          VERSION: latest
+        run: |
+          grype ${DOCKER_IMAGE}:${VERSION}-${CUDA_SHORT_VERSION} \
+            --only-fixed \
+            --fail-on high \
+            -o template -t .grype/grype.friendly.tmpl

@@ -1,0 +1,26 @@
+#####
+#
+# DEFAULTS: https://github.com/anchore/grype
+#
+#####
+
+#####
+#
+# OVERRIDES
+#
+#####
+
+# a list of globs to exclude from scanning, for example:
+# exclude:
+#   - '/etc/**'
+#   - './out/**/*.json'
+# same as --exclude ; GRYPE_EXCLUDE env var
+#exclude: []
+#exclude:
+#  - ''
+
+
+search:
+
+  indexed-archives: false
+    
