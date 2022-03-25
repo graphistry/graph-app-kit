@@ -98,19 +98,10 @@ jobs:
       DOCKER_IMAGE: graphistry/graphistry-graph-app-kit-st
       DOCKER_IMAGE_SHORT: graphistry-graph-app-kit-st
       VERSION: latest
-    strategy:
-      matrix:
-        # 11.4 too big for now
-        CUDA_SHORT_VERSION: ['11.0']
     steps:
 
       - name: checkout
         uses: actions/checkout@v2
-
-      - name: version envvars
-        run: |
-          echo "CUDA_SHORT_VERSION=${{ matrix.CUDA_SHORT_VERSION }}" >> $GITHUB_ENV
-          ( rm -f CUDA_SHORT_VERSION || echo ok ) && ( echo ${{ matrix.CUDA_SHORT_VERSION }} > CUDA_SHORT_VERSION )
 
       - name: buildkit envvars
         run: |
@@ -128,22 +119,22 @@ jobs:
 
       - name: scan 
         run: |
-          grype ${DOCKER_IMAGE}:${VERSION}-${CUDA_SHORT_VERSION} \
+          grype ${DOCKER_IMAGE}:${VERSION} \
             --only-fixed \
             -o sarif \
-            > ${DOCKER_IMAGE_SHORT}-${CUDA_SHORT_VERSION}.json
+            > ${DOCKER_IMAGE_SHORT}.json
           echo "========== SARIF REPORT =========="
-          cat ${DOCKER_IMAGE_SHORT}-${CUDA_SHORT_VERSION}.json
+          cat ${DOCKER_IMAGE_SHORT}.json
 
       - name: upload SARIF report
         uses: github/codeql-action/upload-sarif@v1
         with:
-          sarif_file: ${DOCKER_IMAGE_SHORT}-${CUDA_SHORT_VERSION}.json
-          category: ${DOCKER_IMAGE_SHORT}-${VERSION}-${CUDA_SHORT_VERSION}
+          sarif_file: ${DOCKER_IMAGE_SHORT}.json
+          category: ${DOCKER_IMAGE_SHORT}-${VERSION}
 
       - name: fail on fixable severe vulnerabilities
         run: |
-          grype ${DOCKER_IMAGE}:${VERSION}-${CUDA_SHORT_VERSION} \
+          grype ${DOCKER_IMAGE}:${VERSION} \
             --only-fixed \
             --fail-on high \
             -o template -t .grype/grype.friendly.tmpl
