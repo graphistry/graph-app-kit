@@ -16,6 +16,12 @@ docker-compose up
 
 CI will trigger on pushes to PRs
 
+### Security scans
+
+We use [Grype](https://github.com/anchore/grype) to check for issues in both the base Graphistry container and the added `g-a-k` layers
+
+Scans run daily
+
 ### Local
 
 To test locally:

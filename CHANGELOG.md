@@ -23,6 +23,8 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+* CI Docker image scans using Grype
+
 ## [2022.03.13]
 
 ### Changed
