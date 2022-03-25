@@ -70,15 +70,11 @@ jobs:
           cat ${DOCKER_IMAGE_SHORT}-${CUDA_SHORT_VERSION}.json
 
       - name: upload SARIF report
-        env:
-          DOCKER_IMAGE: graphistry/graphistry-forge-base
-          DOCKER_IMAGE_SHORT: graphistry-forge-base
-          VERSION: latest
         uses: github/codeql-action/upload-sarif@v1
         with:
-          sarif_file: ${DOCKER_IMAGE_SHORT}-${CUDA_SHORT_VERSION}.json
+          sarif_file: graphistry-forge-base-11.0.json
           # category differentiates multiple results for one commit
-          category: ${DOCKER_IMAGE_SHORT}-${VERSION}-${CUDA_SHORT_VERSION}
+          category: graphistry-forge-base-latest-11.0
 
       - name: fail on fixable severe vulnerabilities
         run: |
@@ -129,8 +125,8 @@ jobs:
       - name: upload SARIF report
         uses: github/codeql-action/upload-sarif@v1
         with:
-          sarif_file: ${DOCKER_IMAGE_SHORT}.json
-          category: ${DOCKER_IMAGE_SHORT}-${VERSION}
+          sarif_file: graph-app-kit-st.json
+          category: graph-app-kit-st-11.0
 
       - name: fail on fixable severe vulnerabilities
         run: |
