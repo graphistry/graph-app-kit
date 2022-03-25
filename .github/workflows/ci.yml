@@ -20,7 +20,21 @@ on:
 
 jobs:
 
+  cancel_outstanding:
+    name: Detect and cancel outstanding runs of this workflow
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-ci') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Cancel Previous Runs
+        if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-cancel') }}
+        uses: styfle/cancel-workflow-action@0.4.0
+        with:
+          access_token: ${{ github.token }}
+
   test-core-build:
+
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-ci') }}
 
     runs-on: ubuntu-latest
 
