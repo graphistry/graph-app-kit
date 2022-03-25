@@ -27,6 +27,10 @@ jobs:
     needs: [  ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      DOCKER_IMAGE: graphistry/graphistry-forge-base
+      DOCKER_IMAGE_SHORT: graphistry-forge-base
+      VERSION: latest
     strategy:
       matrix:
         # 11.4 too big for now
@@ -50,17 +54,13 @@ jobs:
       - name: free space
         run: |
           sudo docker images
-          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+          sudo make gha.free-space.quick
 
       - name: install grype
         run: |
-          make grype
+          sudo make grype
 
       - name: scan 
-        env:
-          DOCKER_IMAGE: graphistry/graphistry-forge-base
-          DOCKER_IMAGE_SHORT: graphistry-forge-base
-          VERSION: latest
         run: |
           grype ${DOCKER_IMAGE}:${VERSION}-${CUDA_SHORT_VERSION} \
             --only-fixed \
@@ -81,10 +81,6 @@ jobs:
           category: ${DOCKER_IMAGE_SHORT}-${VERSION}-${CUDA_SHORT_VERSION}
 
       - name: fail on fixable severe vulnerabilities
-        env:
-          DOCKER_IMAGE: graphistry/graphistry-forge-base
-          DOCKER_IMAGE_SHORT: graphistry-forge-base
-          VERSION: latest
         run: |
           grype ${DOCKER_IMAGE}:${VERSION}-${CUDA_SHORT_VERSION} \
             --only-fixed \
@@ -98,6 +94,10 @@ jobs:
     needs: [  ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      DOCKER_IMAGE: graphistry/graphistry-graph-app-kit-st
+      DOCKER_IMAGE_SHORT: graphistry-graph-app-kit-st
+      VERSION: latest
     strategy:
       matrix:
         # 11.4 too big for now
@@ -109,7 +109,6 @@ jobs:
 
       - name: version envvars
         run: |
-          echo "VERSION=latest" >> $GITHUB_ENV
           echo "CUDA_SHORT_VERSION=${{ matrix.CUDA_SHORT_VERSION }}" >> $GITHUB_ENV
           ( rm -f CUDA_SHORT_VERSION || echo ok ) && ( echo ${{ matrix.CUDA_SHORT_VERSION }} > CUDA_SHORT_VERSION )
 
@@ -121,17 +120,13 @@ jobs:
       - name: free space
         run: |
           sudo docker images
-          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+          sudo make gha.free-space.quick
 
       - name: install grype
         run: |
-          make grype
+          sudo make grype
 
       - name: scan 
-        env:
-          DOCKER_IMAGE: graphistry/graphistry-graph-app-kit-st
-          DOCKER_IMAGE_SHORT: graphistry-graph-app-kit-st
-          VERSION: latest
         run: |
           grype ${DOCKER_IMAGE}:${VERSION}-${CUDA_SHORT_VERSION} \
             --only-fixed \
@@ -141,21 +136,12 @@ jobs:
           cat ${DOCKER_IMAGE_SHORT}-${CUDA_SHORT_VERSION}.json
 
       - name: upload SARIF report
-        env:
-          DOCKER_IMAGE: graphistry/graphistry-graph-app-kit-st
-          DOCKER_IMAGE_SHORT: graphistry-graph-app-kit-st
-          VERSION: latest
         uses: github/codeql-action/upload-sarif@v1
         with:
           sarif_file: ${DOCKER_IMAGE_SHORT}-${CUDA_SHORT_VERSION}.json
-          # category differentiates multiple results for one commit
           category: ${DOCKER_IMAGE_SHORT}-${VERSION}-${CUDA_SHORT_VERSION}
 
       - name: fail on fixable severe vulnerabilities
-        env:
-          DOCKER_IMAGE: graphistry/graphistry-graph-app-kit-st
-          DOCKER_IMAGE_SHORT: graphistry-graph-app-kit-st
-          VERSION: latest
         run: |
           grype ${DOCKER_IMAGE}:${VERSION}-${CUDA_SHORT_VERSION} \
             --only-fixed \
