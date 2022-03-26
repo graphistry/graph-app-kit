@@ -132,5 +132,5 @@ jobs:
         run: |
           grype ${DOCKER_IMAGE}:${VERSION} \
             --only-fixed \
-            --fail-on high \
+            --fail-on critical \
             -o template -t .grype/grype.friendly.tmpl
