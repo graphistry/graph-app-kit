@@ -16,8 +16,8 @@
 #   - './out/**/*.json'
 # same as --exclude ; GRYPE_EXCLUDE env var
 #exclude: []
-#exclude:
-#  - ''
+exclude:
+  - '/opt/conda/envs/rapids/lib/python3.8/site-packages/dask_sql/jar/DaskSQL.jar'
 
 
 search:
