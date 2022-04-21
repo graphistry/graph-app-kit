@@ -1,4 +1,4 @@
-ARG DOCKER_TAG=latest
+ARG DOCKER_TAG=latest-11.4
 ARG GRAPHISTRY_FORGE_BASE_VERSION=latest-11.4
 FROM graphistry/graphistry-forge-base:${GRAPHISTRY_FORGE_BASE_VERSION}
 
