@@ -36,9 +36,12 @@ This is expected to change as full docker-based testing lands
 
 ## Aligned base versions
 
-For faster AWS launches, we:
+For faster AWS launches and Graphistry Enterprise, we:
 
-- Keep the docker base (docker-compose.yml::GRAPHISTRY_FORGE_BASE_VERSION) in sync w/ AWS version
+- Keep the docker base in sync w/ AWS version & enterprise version:
+  * docker-compose.yml: `GRAPHISTRY_FORGE_BASE_VERSION`
+  * Dockerfile: `GRAPHISTRY_FORGE_BASE_VERSION`
+  * Set both to the appropriate Graphistry (or sufficient Python) base, e.g., `v2.39.12-11.4`
 
 - Update aws version (bootstraps/*/graphistry.yml) by pointing to that version's region AMIs via bootstraps/scripts/graphistry-ami-list.sh
   * Setup: `apt-get install awscli jq` and `aws configure`
@@ -46,17 +49,29 @@ For faster AWS launches, we:
   * Paste into `src/bootstraps/core,neptune/graphistry.yml`
   * Update `src/docker/docker-compose.yml::GRAPHISTRY_FORGE_BASE_VERSION`
 
-## Automated Builds
+## DockerHub Automated Builds
 
-Managed via DockerHub automated builds
+Managed via DockerHub automates tagged builds
 
-* Master merge updates tag `latest`
-* Git tags ('v1.2.3') publish to the DockerHub repo for each service
-* Failed builds do not publish
+Ahead of time:
+
+* Ensure you've set `GRAPHISTRY_FORGE_BASE_VERSION` in the `Dockerfile` (not just the `docker-compose.yml`)
+* Merged into master
+
+Publish:
+
+1. `git tag 2.39.12`
+  * Use a tag that corresponds to the Graphistry version, or some suffix (`2.39.12.1`)
+  * Note lack of `v`
+2. `git push --tags`
+
+DockerHub automatic builds will:
+* publish as tag `v2.39.12-11.4`: note addition of `v` and `-11.4`
+* publish as tag `latest`
 
 See [current tags](https://hub.docker.com/repository/docker/graphistry/graph-app-kit-st)
 
-## Publish
+## AWS Publish action
 
 * Docker rebuilds on merge to main
 * Push main tag ('v1.2.3') for building named versions
