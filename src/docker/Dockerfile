@@ -1,5 +1,5 @@
 ARG DOCKER_TAG=latest
-ARG GRAPHISTRY_FORGE_BASE_VERSION=latest
+ARG GRAPHISTRY_FORGE_BASE_VERSION=v2.39.12-11.4
 FROM graphistry/graphistry-forge-base:${GRAPHISTRY_FORGE_BASE_VERSION}
 
 EXPOSE 8501
@@ -35,6 +35,7 @@ gatherUsageStats = false\n\
 ENV BASE_URL=http://localhost:8501/dashboard
 ENV BASE_PATH=dashboard/
 ENV LOG_LEVEL=ERROR
+COPY python/ /apps/
 
 COPY docker/entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
