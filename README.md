@@ -1,6 +1,7 @@
+[ ![Version](https://img.shields.io/docker/v/graphistry/graph-app-kit-st?logo=docker) ](https://hub.docker.com/r/graphistry/graph-app-kit-st/tags)
 [ ![CI](https://github.com/graphistry/graph-app-kit/actions/workflows/ci.yml/badge.svg) ](https://github.com/graphistry/graph-app-kit/actions/workflows/ci.yml)
 [ ![Publish](https://github.com/graphistry/graph-app-kit/actions/workflows/publish.yml/badge.svg) ](https://github.com/graphistry/graph-app-kit/actions/workflows/publish.yml)
-[ ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/graphistry/graph-app-kit-st) ](https://hub.docker.com/repository/docker/graphistry/graph-app-kit-st/builds)
+[ ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/graphistry/graph-app-kit-st?logo=docker) ](https://hub.docker.com/repository/docker/graphistry/graph-app-kit-st/builds)
 ✔️ Linux
 ✔️ OS X
 ❌ Windows ([#39](https://github.com/graphistry/graph-app-kit/issues/39))
