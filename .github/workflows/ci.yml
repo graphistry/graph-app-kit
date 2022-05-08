@@ -61,6 +61,8 @@ jobs:
       matrix:
         flavor: [ 'dc', 'dc.cpu' ]
 
+    steps:
+
     - name: Build docker
       env:
           COMPOSE_DOCKER_CLI_BUILD: 1
