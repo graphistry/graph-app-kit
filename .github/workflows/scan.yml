@@ -27,6 +27,9 @@ jobs:
     needs: [  ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      COMPOSE_DOCKER_CLI_BUILD: 1
+      DOCKER_BUILDKIT: 1
     strategy:
       matrix:
         # 11.4 too big for now
@@ -41,11 +44,6 @@ jobs:
           echo "VERSION=latest" >> $GITHUB_ENV
           echo "CUDA_SHORT_VERSION=${{ matrix.CUDA_SHORT_VERSION }}" >> $GITHUB_ENV
           ( rm -f CUDA_SHORT_VERSION || echo ok ) && ( echo ${{ matrix.CUDA_SHORT_VERSION }} > CUDA_SHORT_VERSION )
-
-      - name: buildkit envvars
-        run: |
-          echo "COMPOSE_DOCKER_CLI_BUILD=1" >> $GITHUB_ENV
-          echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
 
       - name: free space
         run: |
@@ -98,6 +96,9 @@ jobs:
     needs: [  ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      COMPOSE_DOCKER_CLI_BUILD: 1
+      DOCKER_BUILDKIT: 1
     strategy:
       matrix:
         # 11.4 too big for now
@@ -112,11 +113,6 @@ jobs:
           echo "VERSION=latest" >> $GITHUB_ENV
           echo "CUDA_SHORT_VERSION=${{ matrix.CUDA_SHORT_VERSION }}" >> $GITHUB_ENV
           ( rm -f CUDA_SHORT_VERSION || echo ok ) && ( echo ${{ matrix.CUDA_SHORT_VERSION }} > CUDA_SHORT_VERSION )
-
-      - name: buildkit envvars
-        run: |
-          echo "COMPOSE_DOCKER_CLI_BUILD=1" >> $GITHUB_ENV
-          echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
 
       - name: free space
         run: |
