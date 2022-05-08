@@ -19,11 +19,9 @@ Extensions:
 
 ## [Development]
 
-### Adding
-
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
-## [2022.05.07]
+## [2.39.14 - 2022.05.07]
 
 ### Added
 
