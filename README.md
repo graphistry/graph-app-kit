@@ -31,19 +31,30 @@ This open source effort puts together patterns the Graphistry team has reused ac
 
 ## Get started
 
-### Quick (Local code) - minimal core + third-party connectors
+### Quick (Local code) - full GPU core + third-party connectors
+
+**Note**: Base image includes Nvidia RAPIDS and AI dependencies so is quite large, see CPU alternative for a lightweight alternativve
+
+**Note**: Use `sudo` for docker-compose commands if your configuration requires it and is giving permission error
 
 ```bash
 # Minimal core
 git clone https://github.com/graphistry/graph-app-kit.git
 cd graph-app-kit/src/docker
-sudo docker-compose build
+
+# Enable docker buildkit
+# ... or run docker-compose via provided alias script `./dc`
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
+
+# Build
+docker-compose build
 
 # Optional: Edit src/docker/.env (API accounts), docker-compose.yml: Auth, ports, ...
 
 # Launch
-sudo docker-compose up -d
-sudo docker-compose logs -f -t --tail=100
+docker-compose up -d
+docker-compose logs -f -t --tail=100
 ```
 
 => `http://localhost:8501/`
@@ -53,7 +64,19 @@ To [add views](docs/views.md) and relaunch:
 ```bash
 # Add dashboards @ src/python/views/<your_custom_view>/__init__.py
 
-sudo docker-compose up -d --force-recreate
+docker-compose up -d --force-recreate
+```
+
+### Quick (Local code) - minimal CPU core + third-party connectors
+
+Same commands as above, but use `./dc.cpu`, which aliases `docker-compose -f docker-compose.yml -f override/cpu.override.yml`:
+
+```bash
+git clone https://github.com/graphistry/graph-app-kit.git
+cd graph-app-kit/src/docker
+./dc.cpu build
+...
+./dc.cpu up
 ```
 
 ### Quick Launchers - minimal/full core
