@@ -28,7 +28,7 @@ echo " * INSTANCE_ID: $INSTANCE_ID"
 echo
 
 ./docker-aws.sh
-./docker-container-build.sh
+DC_ALIAS='./dc.cpu' ./docker-container-build.sh
 
 echo '===== Configuring graph-app-kit with Graphistry account ====='
 ( \
@@ -44,7 +44,7 @@ echo '===== Configuring graph-app-kit with Graphistry account ====='
 echo '----- Launching graph-app-kit as streamlit-pub:8501'
 ( \
   cd "${GAK_PUBLIC}/src/docker" \
-  && sudo /usr/local/bin/docker-compose up -d streamlit \
+  && (sudo ./dc.cpu up -d streamlit) \
 )
 
 ./hello-end.sh "$SCRIPT"
