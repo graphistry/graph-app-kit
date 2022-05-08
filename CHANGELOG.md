@@ -21,7 +21,7 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
-## [2.39.14 - 2022.05.07]
+## [2.39.13 - 2022.05.07]
 
 ### Added
 
@@ -39,6 +39,10 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 
 * cpu mode
 * aliases of `./dc` and `./dc.cpu`
+
+### Breaking
+
+* Temporarily switch dockerhub build to CPU minimal while too-large base image kinks get worked out 
 
 ## [2022.03.13]
 
