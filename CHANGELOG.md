@@ -23,6 +23,25 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+## [2022.05.07]
+
+### Added
+
+* opt-in to minimal CPU-only base image 
+* alias in `src/docker`: `./dc`, `./dc.cpu`
+* test python 3.7, 3.8, 3.9
+* test cpu and gpu docker building
+
+### Changed
+
+* build now uses buildkit
+* minimal
+
+### Docs
+
+* cpu mode
+* aliases of `./dc` and `./dc.cpu`
+
 ## [2022.03.13]
 
 ### Changed
