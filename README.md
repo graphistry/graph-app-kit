@@ -23,7 +23,7 @@ This open source effort puts together patterns the Graphistry team has reused ac
 
 ## What
 
-* **Minimal core**: The barebones dashboard server. In provides a StreamLit docker-compose container with PyData ecosystem libraries and examples of visualizing data from various systems. Install it, plug in credentials to various web services like cloud databases and a free [Graphistry Hub](https://hub.graphistry.com) visualization account, and launch.
+* **Minimal core**: The barebones dashboard server. In provides a StreamLit docker-compose container with PyData ecosystem libraries and examples of visualizing data from various systems. Install it, plug in credentials to various web services like cloud databases and a free [Graphistry Hub](https://hub.graphistry.com) visualization account, and launch. It does not have GPU ETL and GPU AI libraries.
 
 * **Full core**: Initially for AWS, the full core bundles adds to the docker-compose system: Accounts, Jupyter notebooks for authoring, serves StreamLit dashboards with both public + private zones, and runs Graphistry/RAPIDS locally on the same server. Launch with on click via the Cloud Formation template.
 
@@ -126,12 +126,13 @@ cd graph-app-kit/private/graph-app-kit && docker-compose -p priv run -d --name s
 * Prebuilt Python project structure ready for prototyping
 * [Streamlit](https://www.streamlit.io/) quick self-serve dashboarding
 * [Graphistry](https://www.graphistry.com/get-started) point-and-click GPU-accelerated visual graph analytics
-* Data frames: Data wrangling via [Pandas](https://pandas.pydata.org/), [Apache Arrow](https://arrow.apache.org/), [RAPIDS](https://rapids.ai/) (ex: [cuDF](https://github.com/rapidsai/cudf)), including handling formats such as CSV, XLS, JSON, Parquet, and more
+* Data frames: Data wrangling via [Pandas](https://pandas.pydata.org/)and [Apache Arrow](https://arrow.apache.org/), including handling formats such as CSV, XLS, JSON, Parquet, and more
+
 * Standard Docker and docker-compose cross-platform deployment
 
-### GPU acceleration (optional)
+### GPU acceleration (optional) - Full
 
-If GPUs are present, `graph-app-kit` leverages GPU cloud acceleration:
+For non-minimal installs, if GPUs are present, `graph-app-kit` leverages GPU cloud acceleration:
 
 * GPU Analytics:  [RAPIDS](https://www.rapids.ai) and CUDA already setup for use if run with an Nvidia docker runtime - cudf GPU dataframes, [BlazingSQL](https://www.blazingsql.com) GPU SQL, cuGraph GPU graph algorithms, cuML libraries, and more
 
