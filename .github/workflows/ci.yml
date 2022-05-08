@@ -61,6 +61,11 @@ jobs:
       matrix:
         flavor: [ 'dc', 'dc.cpu' ]
 
+    steps:
+
+    - name: Checkout repo
+      uses: actions/checkout@v2
+
     - name: Build docker
       env:
           COMPOSE_DOCKER_CLI_BUILD: 1
