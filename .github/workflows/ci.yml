@@ -49,6 +49,21 @@ jobs:
       run: |
         cd src/python && python -m pytest test
 
+  test-docker:
+
+    runs-on: ubuntu-latest
+
+    env:
+      COMPOSE_DOCKER_CLI_BUILD: 1
+      DOCKER_BUILDKIT: 1    
+
+    strategy:
+      matrix:
+        flavor: [ 'dc', 'dc.cpu' ]
+
     - name: Build docker
+      env:
+          COMPOSE_DOCKER_CLI_BUILD: 1
+          DOCKER_BUILDKIT: 1
       run: |
-        cd src/docker && docker-compose build
+        cd src/docker && ./${{ matrix.flavor }} build
