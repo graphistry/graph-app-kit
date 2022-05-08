@@ -1,9 +1,8 @@
 import graphistry, os, pandas as pd, streamlit as st
-from time import sleep
-
 from components import GraphistrySt, URLParam
+from graphistry import PyGraphistry
 from css import all_css
-
+from time import sleep
 from util import getChild
 
 ############################################
@@ -198,7 +197,29 @@ def plot_url(edges_df, n):
 def main_area(edges_df, url):
 
     logger.debug('rendering main area, with url: %s', url)
-    GraphistrySt().render_url(url)
+    gst = GraphistrySt()
+    if PyGraphistry._is_authenticated:
+        gst.render_url(url)
+    else:
+        st.title("Welcome to graph-app-kit!")
+        st.write("""
+            This particular demo requires configuring your graph-app-kit with service credentials for
+            accessing your Graphistry server
+
+            If this is the first time you are seeing graph-app-kit, it is Graphistry's open-source extension
+            of the https://streamlit.io/ low-code Python dashboarding tool. It adds:
+              * Optional Docker, Docker Compose, and AWS CloudFormation self-hosted quick launchers
+              * Multiple dashboard support
+              * Optional GPU & AI dependencies (Nvidia driver, RAPIDS, PyTorch) aligned with Graphistry releases
+              * Graph computing dependencies (Gremlin, TigerGraph, ...)
+              * A Graphistry plotting component
+
+            Starting with Graphistry 2.39, graph-app-kit comes prebundled:
+              * Public and staff-only Private dashboards
+              * Control access via User -> Admin port -> DJANGO-WAFFLE -> Flags"
+              * ... then edit to desired visibility for flag_show_public_dashboard, flag_show_private_dashboard
+              * ... and optionally prevent running of the services via your docker-compose.override.yml
+        """)
 
 
 ############################################
