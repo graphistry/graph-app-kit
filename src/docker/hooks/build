@@ -9,4 +9,4 @@ echo "pwd: `pwd`"
 echo "DOCKER_TAG: ${DOCKER_TAG}" # => src/docker
 echo "IMAGE_NAME: ${IMAGE_NAME}" # => graphistry/graph-app-kit-st
 
-docker-compose -f docker-compose.yml -f cpu.override.yml build
+docker-compose -f docker-compose.yml -f override/cpu.override.yml build
