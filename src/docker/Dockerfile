@@ -1,6 +1,14 @@
+# Default to big image, but allow thin cpu override
 ARG DOCKER_TAG=latest
 ARG GRAPHISTRY_FORGE_BASE_VERSION=v2.39.12-11.4
-FROM graphistry/graphistry-forge-base:${GRAPHISTRY_FORGE_BASE_VERSION}
+ARG PYTHON_VERSION=3.8
+ARG BASE_IMAGE=graphistry/graphistry-forge-base:${GRAPHISTRY_FORGE_BASE_VERSION}
+FROM python:$PYTHON_VERSION as cpu_base
+
+ARG DOCKER_TAG=latest
+ARG GRAPHISTRY_FORGE_BASE_VERSION=v2.39.12-11.4
+ARG BASE_IMAGE=graphistry/graphistry-forge-base:${GRAPHISTRY_FORGE_BASE_VERSION}
+FROM $BASE_IMAGE
 
 EXPOSE 8501
 
@@ -8,13 +16,15 @@ EXPOSE 8501
 WORKDIR /app
 
 COPY python/conda-app.sh ./
-RUN source activate rapids && ./conda-app.sh
+RUN { source activate rapids || echo ok ; } && ./conda-app.sh
 
 COPY python/requirements-system.txt ./
-RUN source activate rapids && pip install -r requirements-system.txt
+RUN --mount=type=cache,target=/root/.cache \
+    { source activate rapids || echo ok ; } && pip install -r requirements-system.txt
 
 COPY python/requirements-app.txt ./
-RUN source activate rapids && pip install -r requirements-app.txt
+RUN --mount=type=cache,target=/root/.cache  \
+    { source activate rapids || echo ok ; } && pip install -r requirements-app.txt
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8

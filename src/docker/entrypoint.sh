@@ -43,4 +43,4 @@ echo -e "\
 
 cat /root/.streamlit/config.toml
 
-source activate rapids && echo "pwd: `pwd`" && find . && streamlit run "$@"
+{ source activate rapids || echo ok ; } && echo "pwd: `pwd`" && find . && streamlit run "$@"

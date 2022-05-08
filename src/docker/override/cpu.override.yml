@@ -1,0 +1,7 @@
+services:
+  streamlit:
+    image: graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}
+    build:
+      args:
+        BASE_IMAGE: cpu_base
+
