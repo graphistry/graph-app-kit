@@ -35,8 +35,10 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
           COMPOSE_DOCKER_CLI_BUILD: 1
-        working-directory: src/docker
-        run: docker-compose -f docker-compose.yml -f override/cpu.override.yml build
+        
+        run: |
+            cd src/docker 
+            docker-compose -f docker-compose.yml -f override/cpu.override.yml build
 
       - name: tag the image
         run: docker tag graphistry/graph-app-kit-st:v$RELEASE_VERSION-11.4 && docker tag graphistry/graph-app-kit-st:latest
