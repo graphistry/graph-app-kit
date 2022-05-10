@@ -20,7 +20,9 @@ jobs:
 
       - name: checkout repo
         uses: actions/checkout@v2
-      - run: echo "RELEASE_VERSION=${{git describe --tags --abbrev=0}}" >> $GITHUB_ENV
+
+      - name: get most recent tag
+        run: echo "RELEASE_VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
 
       - name: check env
         run: |
