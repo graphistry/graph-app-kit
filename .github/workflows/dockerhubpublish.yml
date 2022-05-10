@@ -18,10 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - id: get_version
+      - name: Set env
         uses: battila7/get-version-action@v2
-
-      - name: Set env  
+        
       - run: echo "RELEASE_VERSION=${{ steps.get_version.outputs.version-without-v }}" >> $GITHUB_ENV
 
 
