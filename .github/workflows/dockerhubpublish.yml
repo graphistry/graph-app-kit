@@ -28,6 +28,8 @@ jobs:
         run: |
           echo $RELEASE_VERSION
           echo ${{ env.RELEASE_VERSION }}
+          echo "git describe"
+          echo $(git describe)
 
       - name: Login to DockerHub
         uses: docker/login-action@v2
