@@ -3,7 +3,7 @@ name: build&publishtoDockerHub
 on:
   push:
     tags:
-      - '[0-9]+.[0-9]+.[0-9]+[-.a-zA-Z0-0]*'
+      - '[0-9]+.[0-9]+.[0-9]+[-.a-zA-Z0-9]*'
 
 
 jobs:
