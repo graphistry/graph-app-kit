@@ -18,14 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Get tag
-        id: tag
-        uses: dawidd6/action-get-tag@v1
-        with:
-        # Optionally strip `v` prefix
-          strip_v: true
-      - name: Use tag
-        run: echo "RELEASE_VERSION=${{steps.tag.outputs.tag}}" >> $GITHUB_ENV
+      - name: checkout repo
+        uses: actions/checkout@v2
+
+        run: echo "RELEASE_VERSION=${{git describe --tags `git rev-list --tags --max-count=1`}}" >> $GITHUB_ENV
 
       - name: check env
         run: |
@@ -38,8 +34,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: checkout
-        uses: actions/checkout@v2
+
               
       - name: Build Graph-App-Kit
         env:
