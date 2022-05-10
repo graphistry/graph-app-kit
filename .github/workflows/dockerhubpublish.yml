@@ -28,7 +28,9 @@ jobs:
         run: |
           echo $RELEASE_VERSION
           echo ${{ env.RELEASE_VERSION }}
-          echo "git describe"
+          echo " git fetch --prune --unshallow --tags...."
+          echo "$(git fetch --prune --unshallow --tags)"
+          echo "git describe..."
           echo $(git describe)
 
       - name: Login to DockerHub
