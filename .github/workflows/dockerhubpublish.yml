@@ -14,7 +14,7 @@ on:
         default: 1
 
 jobs:
-  docker-login:
+  docker-build-publish:
     runs-on: ubuntu-latest
     steps:
 
@@ -35,7 +35,7 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
           COMPOSE_DOCKER_CLI_BUILD: 1
-        working-directory: ./src/docker
+        working-directory: src/docker
         run: docker-compose -f docker-compose.yml -f override/cpu.override.yml build
 
       - name: tag the image
