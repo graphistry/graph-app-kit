@@ -1,0 +1,37 @@
+name: build&publishtoDockerHub
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+[.-a-zA-Z0-0]*'
+
+
+jobs:
+  docker-login:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: check env
+        run: |
+          echo $RELEASE_VERSION
+          echo ${{ env.RELEASE_VERSION }}
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Build Graph-App-Kit
+        env:
+          DOCKER_BUILDKIT: 1
+          COMPOSE_DOCKER_CLI_BUILD: 1
+        run: docker-compose -f src/docker/docker-compose.yml -f src/docker/override/cpu.override.yml build
+
+      - name: tag the image
+        run: docker tag graphistry/graph-app-kit-st:v$RELEASE_VERSION-11.4 && docker tag graphistry/graph-app-kit-st:latest
+
+      - name: Publish Graph-App-Kit to DockerHub
+        run: docker push graphistry/graph-app-kit-st:v$RELEASE_VERSION-11.4 && docker push graphistry/graph-app-kit-st:latest

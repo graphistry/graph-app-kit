@@ -1,3 +1,5 @@
+version: "3.5"
+
 services:
   streamlit:
     image: graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}
