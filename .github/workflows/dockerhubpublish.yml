@@ -18,11 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Set env
-        uses: battila7/get-version-action@v2
-        
-      - run: echo "RELEASE_VERSION=${{ steps.get_version.outputs.version-without-v }}" >> $GITHUB_ENV
-
+      - name: Get tag
+        id: tag
+        uses: dawidd6/action-get-tag@v1
+        with:
+        # Optionally strip `v` prefix
+          strip_v: true
+      - name: Use tag
+        run: echo "RELEASE_VERSION=${{steps.tag.outputs.tag}}" >> $GITHUB_ENV
 
       - name: check env
         run: |
@@ -34,7 +37,10 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
+
+      - name: checkout
+        uses: actions/checkout@v2
+              
       - name: Build Graph-App-Kit
         env:
           DOCKER_BUILDKIT: 1
