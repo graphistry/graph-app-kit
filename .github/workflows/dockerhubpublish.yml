@@ -18,10 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Set env
+      - id: get_version
         uses: battila7/get-version-action@v2
-        
-      - run: echo "RELEASE_VERSION=${{ steps.get_version.outputs.version }}" >> $GITHUB_ENV
+
+      - name: Set env  
+      - run: echo "RELEASE_VERSION=${{ steps.get_version.outputs.version-without-v }}" >> $GITHUB_ENV
 
 
       - name: check env
