@@ -21,6 +21,7 @@ jobs:
       - name: checkout repo
         uses: actions/checkout@v2
 
+      - name: get tag pass to ENV
         run: echo "RELEASE_VERSION=${{git describe --tags `git rev-list --tags --max-count=1`}}" >> $GITHUB_ENV
 
       - name: check env
