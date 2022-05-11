@@ -20,9 +20,11 @@ jobs:
 
       - name: checkout repo
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: get most recent tag
-        run: echo "RELEASE_VERSION=$(git fetch 'refs/tags/*:refs/tags*')" >> $GITHUB_ENV
+        run: echo "RELEASE_VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
 
       - name: check env
         run: |
