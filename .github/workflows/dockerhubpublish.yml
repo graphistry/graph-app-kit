@@ -47,7 +47,7 @@ jobs:
         
         run: |
           cd src/docker \
-          && docker-compose -f docker-compose.yml -f override/cpu.override.yml build
+          && docker-compose -f docker-compose.yml build
 
       - name: tag the image
         run: docker tag graphistry/graph-app-kit-st:latest graphistry/graph-app-kit-st:v${{ env.RELEASE_VERSION }}-11.4
