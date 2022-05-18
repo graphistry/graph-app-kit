@@ -54,7 +54,7 @@ x-build-kwargs:
   args:
     - DOCKER_TAG=${DOCKER_TAG:-latest}
     - BUILDKIT_INLINE_CACHE=1
-    - GRAPHISTRY_FORGE_BASE_VERSION=${GRAPHISTRY_FORGE_BASE_VERSION:-v2.39.12-11.4}
+    - GRAPHISTRY_FORGE_BASE_VERSION=${GRAPHISTRY_FORGE_BASE_VERSION:-v2.39.14-11.4}
 
 
 ############################################################
