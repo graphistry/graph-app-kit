@@ -57,10 +57,10 @@ jobs:
         
         run: |
           cd src/docker \
-          && GRAPHISTRY_FORGE_BASE_VERSION=v${{ env.RELEASE_VERSION }}-{{ env.CUDA_SHORT_VERSION }} docker-compose -f docker-compose.yml build
+          && GRAPHISTRY_FORGE_BASE_VERSION=v${{ env.RELEASE_VERSION }}-${{ env.CUDA_SHORT_VERSION }} docker-compose -f docker-compose.yml build
 
       - name: tag the image
-        run: docker tag graphistry/graph-app-kit-st:latest graphistry/graph-app-kit-st:v${{ env.RELEASE_VERSION }}-{{ env.CUDA_SHORT_VERSION }}
+        run: docker tag graphistry/graph-app-kit-st:latest graphistry/graph-app-kit-st:v${{ env.RELEASE_VERSION }}-${{ env.CUDA_SHORT_VERSION }}
 
       - name: Publish Graph-App-Kit to DockerHub
-        run: docker push graphistry/graph-app-kit-st:v${{ env.RELEASE_VERSION }}-{{ env.CUDA_SHORT_VERSION }} && docker push graphistry/graph-app-kit-st:latest
+        run: docker push graphistry/graph-app-kit-st:v${{ env.RELEASE_VERSION }}-${{ env.CUDA_SHORT_VERSION }} && docker push graphistry/graph-app-kit-st:latest
