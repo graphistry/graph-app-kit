@@ -13,14 +13,15 @@ on:
         required: true
         default: 1
 
+
+jobs:
+  docker-build-publish:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         CUDA_SHORT_VERSION: ['11.0', '11.4']
       fail-fast: true
 
-jobs:
-  docker-build-publish:
-    runs-on: ubuntu-latest
     steps:
 
       - name: checkout repo
