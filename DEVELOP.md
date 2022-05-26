@@ -69,7 +69,7 @@ DockerHub automatic builds will:
 * publish as tag `v2.39.12-11.4`: note addition of `v` and `-11.4`
 * publish as tag `latest`
 
-See [current tags](https://hub.docker.com/repository/docker/graphistry/graph-app-kit-st)
+See [current tags](https://hub.docker.com/r/graphistry/graph-app-kit-st/tags) and available [base tags](https://hub.docker.com/r/graphistry/graphistry-forge-base/tags)
 
 ## AWS Publish action
 
