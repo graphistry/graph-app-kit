@@ -24,7 +24,6 @@ jobs:
   scan_base:
     name: Scan base Graphistry container
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-security-scan') }}
-    needs: [  ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -45,14 +44,10 @@ jobs:
           echo "CUDA_SHORT_VERSION=${{ matrix.CUDA_SHORT_VERSION }}" >> $GITHUB_ENV
           ( rm -f CUDA_SHORT_VERSION || echo ok ) && ( echo ${{ matrix.CUDA_SHORT_VERSION }} > CUDA_SHORT_VERSION )
 
-      - name: free space
+      - name: install grype
         run: |
           sudo docker images
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
-
-      - name: install grype
-        run: |
-          make grype
 
       - name: scan 
         env:
@@ -93,7 +88,6 @@ jobs:
   scan_gak:
     name: Scan graph-app-kit container
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-security-scan') }}
-    needs: [  ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -114,14 +108,10 @@ jobs:
           echo "CUDA_SHORT_VERSION=${{ matrix.CUDA_SHORT_VERSION }}" >> $GITHUB_ENV
           ( rm -f CUDA_SHORT_VERSION || echo ok ) && ( echo ${{ matrix.CUDA_SHORT_VERSION }} > CUDA_SHORT_VERSION )
 
-      - name: free space
+      - name: install grype
         run: |
           sudo docker images
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
-
-      - name: install grype
-        run: |
-          make grype
 
       - name: scan 
         env:
