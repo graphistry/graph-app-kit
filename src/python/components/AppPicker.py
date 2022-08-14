@@ -102,7 +102,9 @@ class AppPicker:
         view = self.get_and_set_active_app()
 
         if len(mods.keys()) == 0:
-            st.sidebar.header('Create src/views/myapp/__init__.py::run()')
+            st.sidebar.header('No modules found')
+            st.sidebar.write('Create/mount a views folder')
+            st.sidebar.write('Ex: File with signature src/views/myapp/__init__.py::run()')
         elif len(mods.keys()) == 1:
             pass
         else:
