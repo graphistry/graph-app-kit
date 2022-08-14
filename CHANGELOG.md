@@ -21,6 +21,14 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+## [2.39.25 - 2022.08.14]
+
+### Changed
+
+* Update dependency PyGraphistry 0.27.1
+* Update dependency Streamlit to 1.12.0
+* Update RAPIDS-ecosystem packages (2022.04)
+
 ## [2.39.13 - 2022.05.07]
 
 ### Added
