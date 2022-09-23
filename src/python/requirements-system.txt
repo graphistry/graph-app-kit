@@ -1,5 +1,5 @@
 streamlit==1.12.0
-protobuf==3.18
+protobuf==3.18.3
 graphistry==0.27.1
 
 ################
