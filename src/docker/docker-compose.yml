@@ -69,8 +69,6 @@ services:
     << : *production_opts
     image: graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}-${CUDA_SHORT_VERSION:-11.4}
     command: --server.baseUrlPath="$BASE_PATH" /apps/entrypoint.py
-    labels:
-      autoheal: "false"
     build:
       << : *build_kwargs
       context: ..
@@ -79,8 +77,6 @@ services:
         - graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}-${CUDA_SHORT_VERSION:-11.4}
     ports:
       - "${ST_PUBLIC_PORT:-8501}:8501"
-    labels:
-      autoheal: "true"
     volumes:
       - ../python:/apps
       - ${GRAPH_VIEWS:-../python/views}:/apps/views
@@ -93,14 +89,3 @@ services:
       timeout: 30s
       retries: 10
       start_period: 10s
-
-  autoheal:
-    << : *production_opts
-    image: willfarrell/autoheal:v0.7.0
-    environment:
-      - AUTOHEAL_CONTAINER_LABEL=autoheal
-      - DOCKER_SOCK=/var/run/docker.sock
-      - AUTOHEAL_INTERVAL=60
-      - CURL_TIMEOUT=60
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock

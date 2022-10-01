@@ -50,8 +50,6 @@ services:
       - ./data/config/graph-app-kit/src/docker/.env
     image: graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}
     command: --server.baseUrlPath="$BASE_PATH" /apps/entrypoint.py
-    labels:
-      autoheal: "false"
     build:
       args:
         - DOCKER_TAG=${DOCKER_TAG:-latest}

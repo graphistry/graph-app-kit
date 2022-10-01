@@ -29,6 +29,10 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 * Infra: externally overridable src/streamlit/{config.toml,credentials.toml}
 * Infra: Update GPU base to 2.39
 
+### Breaking
+
+* Infra: Removed autoheal service and labels
+
 
 ## [2.39.25 - 2022.08.14]
 
