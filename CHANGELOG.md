@@ -26,7 +26,7 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 * Infra: env var USE_DOCKER=true
 * Infra: env var PYTHONPATH=/apps/views
 * Infra: env var FAVICON_URL
-
+* Infra: externally overridable src/streamlit/{config.toml,credentials.toml}
 
 
 ## [2.39.25 - 2022.08.14]

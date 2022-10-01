@@ -28,18 +28,6 @@ RUN --mount=type=cache,target=/root/.cache  \
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
-RUN mkdir -p /root/.streamlit \
-&& bash -c 'echo -e "\
-[general]\n\
-email = \"\"\n\
-" > /root/.streamlit/credentials.toml' \
-&& bash -c 'echo -e "\
-[server]\n\
-enableXsrfProtection = false\n\ 
-enableCORS = false\n\
-[browser]\n\
-gatherUsageStats = false\n\
-" > /root/.streamlit/config.toml'
 
 #Note no trailing slash
 ENV BASE_URL=http://localhost:8501/dashboard

@@ -23,24 +23,24 @@ echo ""
 
 
 mkdir -p /root/.streamlit
-rm -f /root/.streamlit/credentials.toml
-echo -e "\
-    [general]\n\
-    email = \"\"\n\
-    " > /root/.streamlit/credentials.toml
 
-cat  /root/.streamlit/credentials.toml
+rm -f /root/.streamlit/credentials.toml
+cp /root/gak/credentials.toml /root/.streamlit/credentials.toml
+
 
 rm -f /root/.streamlit/config.toml
+cp /root/gak/config.toml /root/.streamlit/config.toml
+
 echo -e "\
-    [server]\n\
-    enableXsrfProtection = false\n\
-    enableCORS = false\n\
     baseUrlPath = \"$BASE_PATH\"\n\
-    [browser]\n\
-    gatherUsageStats = false\n\
-    " > /root/.streamlit/config.toml
+    " >> /root/.streamlit/config.toml
 
-cat /root/.streamlit/config.toml
 
-{ source activate rapids || echo ok ; } && echo "pwd: `pwd`" && find . && streamlit run "$@"
+#&& ( \
+#    cd /apps/views/DT \
+#    && GRAPHISTRY_USERNAME=leotest2 GRAPHISTRY_PASSWORD=accountaccount \
+#    python3 -m text_utils.pipeline -n pfas -i 0 -s 0 \
+#) \
+
+{ source activate rapids || echo ok ; } \
+    && echo "pwd: `pwd`" && find . && streamlit run "$@"

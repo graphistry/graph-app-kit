@@ -85,6 +85,8 @@ services:
       - ../python:/apps
       - ${GRAPH_VIEWS:-../python/views}:/apps/views
       - ${NEPTUNE_KEY_PATH:-/tmp/mt.pem}:/secrets/neptune-reader.pem
+      - ../streamlit/config.toml:/root/gak/config.toml
+      - ../streamlit/credentials.toml:/root/gak/credentials.toml
     healthcheck:
       test: ["CMD", "curl", "-Lf", "http://localhost:8501/${BASE_PATH}healthz"]
       interval: 30s
