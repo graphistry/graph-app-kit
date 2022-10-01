@@ -49,6 +49,7 @@ x-production-options:
     - BASE_URL=${BASE_URL:-http://localhost:8501/dashboard}
     - GRAPH_VIEWS=${GRAPH_VIEWS:-../python/views}
     - USE_DOCKER=True
+    - PYTHONPATH=${DOCKER_PYTHONPATH:-/apps/views/}
 x-build-kwargs:
   &build_kwargs
   args:
