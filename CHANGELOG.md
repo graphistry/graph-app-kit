@@ -25,6 +25,7 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 
 * Infra: env var USE_DOCKER=true
 * Infra: env var PYTHONPATH=/apps/views
+* Infra: env var FAVICON_URL
 
 
 
