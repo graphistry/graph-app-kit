@@ -27,6 +27,7 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 * Infra: env var PYTHONPATH=/apps/views
 * Infra: env var FAVICON_URL
 * Infra: externally overridable src/streamlit/{config.toml,credentials.toml}
+* Infra: Update GPU base to 2.39
 
 
 ## [2.39.25 - 2022.08.14]
