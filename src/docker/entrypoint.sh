@@ -24,16 +24,19 @@ echo ""
 
 mkdir -p /root/.streamlit
 
-rm -f /root/.streamlit/credentials.toml
-cp /root/gak/credentials.toml /root/.streamlit/credentials.toml
+if [[ -f "/root/gak/credentials.toml" ]]; then
+    echo "Found custom credentials.toml, overriding default"
+    cp /root/gak/credentials.toml /root/.streamlit/credentials.toml
+fi
 
 
-rm -f /root/.streamlit/config.toml
-cp /root/gak/config.toml /root/.streamlit/config.toml
-
-echo -e "\
+if [[ -f "/root/gak/config.toml" ]]; then
+    echo "Found custom config.toml, overriding default"
+    cp /root/gak/config.toml /root/.streamlit/config.toml
+    echo -e "\
     baseUrlPath = \"$BASE_PATH\"\n\
     " >> /root/.streamlit/config.toml
+fi
 
 
 #&& ( \

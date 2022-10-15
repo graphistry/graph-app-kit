@@ -36,6 +36,11 @@ ENV LOG_LEVEL=ERROR
 COPY python/ /apps/
 
 COPY docker/entrypoint.sh /entrypoint.sh
+
+#Default in case not dynamically mounted
+COPY streamlit/credentials.toml /root/.streamlit/credentials.toml
+COPY streamlit/config.toml /root/.streamlit/config.toml
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/apps/entrypoint.py"]
 
