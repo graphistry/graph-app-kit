@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 from components import AppPicker
 
 page_title_str = "Graph dashboard"
@@ -6,7 +7,7 @@ st.set_page_config(
     layout="wide",  # Can be "centered" or "wide". In the future also "dashboard", etc.
     initial_sidebar_state="auto",  # Can be "auto", "expanded", "collapsed"
     page_title=page_title_str,  # String or None. Strings get appended with "• Streamlit".
-    page_icon='none.png',  # String, anything supported by st.image, or None.
+    page_icon=os.environ.get('FAVICON_URL', 'https://hub.graphistry.com/pivot/favicon/favicon.ico'),  # String, anything supported by st.image, or None.
 )
 
 # loads all views/<app>/__init__.py and tracks active as URL param "?view_index=<info()['id']>"

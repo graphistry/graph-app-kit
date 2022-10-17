@@ -1,0 +1,16 @@
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+#base="dark"
+#primaryColor="#00ff98"
+#secondaryBackgroundColor="#182333"
+#textColor="#dae5fd"
+
+
+### must be last: entrypoint appends baseUrlPath = \"$BASE_PATH\"\n\
+[server]
+enableXsrfProtection = false
+enableCORS = false
+baseUrlPath = "$BASE_PATH"
