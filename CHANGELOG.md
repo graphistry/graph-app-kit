@@ -28,6 +28,7 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 * Infra: env var FAVICON_URL
 * Infra: externally overridable src/streamlit/{config.toml,credentials.toml}
 * Infra: Update GPU base to 2.39.27
+* Infra: Update actions/checkout GHA from v2 (deprecated) to v3
 
 ### Breaking
 
