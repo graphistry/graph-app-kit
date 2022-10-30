@@ -33,9 +33,6 @@ fi
 if [[ -f "/root/gak/config.toml" ]]; then
     echo "Found custom config.toml, overriding default"
     cp /root/gak/config.toml /root/.streamlit/config.toml
-    echo -e "\
-    baseUrlPath = \"$BASE_PATH\"\n\
-    " >> /root/.streamlit/config.toml
 fi
 
 
