@@ -27,11 +27,16 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 * Infra: env var PYTHONPATH=/apps/views
 * Infra: env var FAVICON_URL
 * Infra: externally overridable src/streamlit/{config.toml,credentials.toml}
-* Infra: Update GPU base to 2.39
+* Infra: Update GPU base to 2.39.27
+* Infra: Update actions/checkout GHA from v2 (deprecated) to v3
 
 ### Breaking
 
-* Infra: Removed autoheal service and labels
+* Infra: Removed autoheal service and labels (likely OK for most users)
+
+### Fixed
+
+* toml: Fixed startup for users of new startup system (master)
 
 
 ## [2.39.25 - 2022.08.14]
