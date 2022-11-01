@@ -36,11 +36,5 @@ if [[ -f "/root/gak/config.toml" ]]; then
 fi
 
 
-#&& ( \
-#    cd /apps/views/DT \
-#    && GRAPHISTRY_USERNAME=leotest2 GRAPHISTRY_PASSWORD=accountaccount \
-#    python3 -m text_utils.pipeline -n pfas -i 0 -s 0 \
-#) \
-
 { source activate rapids || echo ok ; } \
     && echo "pwd: `pwd`" && find . && streamlit run "$@"
