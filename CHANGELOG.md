@@ -23,7 +23,9 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 
 ### Changed
 
-CUDA base now 11.5
+* Infra: CUDA base now 11.5
+* Infra: Optimized runner
+* Infra: Remove now-unnecessary free space step
 
 ### Added
 
