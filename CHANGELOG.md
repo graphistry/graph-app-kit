@@ -21,6 +21,10 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+### Changed
+
+CUDA base now 11.5
+
 ### Added
 
 * Infra: env var USE_DOCKER=true

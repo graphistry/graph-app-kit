@@ -67,14 +67,14 @@ x-build-kwargs:
 services:
   streamlit:
     << : *production_opts
-    image: graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}-${CUDA_SHORT_VERSION:-11.4}
+    image: graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}-${CUDA_SHORT_VERSION:-11.5}
     command: --server.baseUrlPath="$BASE_PATH" /apps/entrypoint.py
     build:
       << : *build_kwargs
       context: ..
       dockerfile: ./docker/Dockerfile
       cache_from:
-        - graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}-${CUDA_SHORT_VERSION:-11.4}
+        - graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}-${CUDA_SHORT_VERSION:-11.5}
     ports:
       - "${ST_PUBLIC_PORT:-8501}:8501"
     volumes:
