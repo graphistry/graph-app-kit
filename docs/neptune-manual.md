@@ -34,7 +34,7 @@ NEPTUNE_READER_HOST=<Insert Neptune DBClusterReadEndpoint like abc.xyz.mno.neptu
 NEPTUNE_READER_PORT=8182
 ```
 
-For additional Neptune template options, see [src/envs/neptune.env](src/envs/neptune.env).
+For additional Neptune template options, see [src/envs/neptune.env](../src/envs/neptune.env).
 
 Reset and restart your `graph-app-kit` container: 
 
