@@ -24,15 +24,14 @@ jobs:
   scan_base:
     name: Scan base Graphistry container
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-security-scan') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-cores
     timeout-minutes: 30
     env:
       COMPOSE_DOCKER_CLI_BUILD: 1
       DOCKER_BUILDKIT: 1
     strategy:
       matrix:
-        # 11.4 too big for now
-        CUDA_SHORT_VERSION: ['11.0']
+        CUDA_SHORT_VERSION: ['11.5']
     steps:
 
       - name: checkout
@@ -88,15 +87,14 @@ jobs:
   scan_gak:
     name: Scan graph-app-kit container
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-security-scan') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-cores
     timeout-minutes: 30
     env:
       COMPOSE_DOCKER_CLI_BUILD: 1
       DOCKER_BUILDKIT: 1
     strategy:
       matrix:
-        # 11.4 too big for now
-        CUDA_SHORT_VERSION: ['11.0']
+        CUDA_SHORT_VERSION: ['11.5']
     steps:
 
       - name: checkout

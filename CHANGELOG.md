@@ -21,6 +21,12 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+### Changed
+
+* Infra: CUDA base now 11.5
+* Infra: Optimized runner
+* Infra: Remove now-unnecessary free space step
+
 ### Added
 
 * Infra: env var USE_DOCKER=true
