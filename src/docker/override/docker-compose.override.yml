@@ -14,7 +14,7 @@ version: "3.5"
 #
 # graphistry$ ln -s ../graph-app-kit/src/docker/override/docker-compose.override.yml docker-compose.override.yml
 # graphistry$ ln -s "`pwd`/../graph-app-kit/" data/config/graph-app-kit
-# graphistry$ docker-compose up -d
+# graphistry$ docker compose up -d
 #
 ########################################################################################################################
 #
