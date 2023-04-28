@@ -143,7 +143,8 @@ def plot_url(nodes_df, edges_df):
 
 
 # Given filter settings, generate/cache/return dataframes & viz
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+#@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def run_filters(user_id, conn):  # noqa: C901
     global metrics
 

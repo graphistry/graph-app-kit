@@ -189,7 +189,8 @@ def path_to_df(p):
 
 
 # Given filter settings, generate/cache/return dataframes & viz
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+#@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def run_filters(num_edges, state, city):
     global metrics
     g, conn = gremlin_helper.connect_to_neptune()

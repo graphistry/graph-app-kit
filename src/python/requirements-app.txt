@@ -1,2 +1,16 @@
 ### your custom requirements here
-#protobuf==3.13.0
+black
+flake8
+graphistry[ai]
+ipython
+isort
+jupyter
+mypy
+natsort
+networkx
+numpy
+pytest
+python-dotenv
+splunk-sdk
+streamlit
+typeguard
