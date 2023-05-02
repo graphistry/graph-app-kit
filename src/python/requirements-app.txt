@@ -1,13 +1,4 @@
 ### your custom requirements here
-black
-flake8
-graphistry[ai]
-ipython
-isort
-jupyter
-mypy
-natsort
-networkx
 numpy
 pytest
 python-dotenv

@@ -1,0 +1,40 @@
+.block-container {
+    padding-top: 0rem;
+    padding-bottom: 0rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.main {
+    align-items: left;
+}
+
+h2 {
+    padding-top: 0rem;
+    padding-bottom: 0.5rem;
+}
+
+[data-testid="stSidebar"] {
+    width: 300px !important;
+}
+
+.e1fqkh3o4 {
+    padding-top: 3.2rem;
+    padding-bottom: 0rem;
+    padding-left: 0rem;
+    padding-right: 0rem;
+}
+
+/* Hide the Built with streamlit header/footer */
+header {
+    display: none !important;
+}
+
+footer {
+    display: none !important;
+}
+
+hr {
+    margin-block-start: 0.1rem;
+    margin-block-end: 0.1rem;
+}

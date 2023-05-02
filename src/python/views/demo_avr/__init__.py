@@ -1,30 +1,33 @@
-import logging
-import os
-import random
-from typing import Any, Dict, List, Union
-
-import numpy as np
-import pandas as pd
-import streamlit as st
-
-from natsort import natsorted
-from numbers import Number
-from streamlit.components import v1 as components
-from streamlit.logger import get_logger
-from typeguard import typechecked
-
-# from avr_helper.marlowe import AVRMarlowe
-# from avr_helper.splunk import SplunkConnection
-from views.demo_avr.marlowe import AVRMarlowe
-from views.demo_avr.splunk import SplunkConnection
-
-#############################################
-# demo simple code: 
-
 import graphistry, pandas as pd, streamlit as st
 from components import GraphistrySt, URLParam
 from css import all_css
 from util import getChild
+
+import logging
+import os
+import random
+from datetime import datetime, time
+from typing import Any, Dict, List, Optional, Union
+
+import dateutil.parser as dp
+import numpy as np
+
+from graphistry.Plottable import Plottable
+from streamlit.components import v1 as components
+from streamlit.logger import get_logger
+
+from views.demo_avr.marlowe import (
+    AVR_SAFE_COLUMNS,
+    FEATURE_COLUMNS,
+    AVRDataResource,
+    AVRMarlowe,
+    AVRMissingData,
+)
+
+from views.demo_avr.splunk import SplunkConnection
+
+CSS_PATH = "/apps/views/demo_avr/app.css"
+
 
 ############################################
 #
@@ -33,11 +36,13 @@ from util import getChild
 ############################################
 #  Controls how entrypoint.py picks it up
 
-
 app_id = 'demo_avr'
 logger = getChild(app_id)
 urlParams = URLParam(app_id)
 
+INDEX: str = "avr_59k"
+#SAMPLE_SIZE = 1000
+QUERY_SIZE = 1000
 
 def info():
     return {
@@ -45,7 +50,6 @@ def info():
         'name': 'Incident Group Explorer',
         'tags': ['demo', 'demo_intro']
     }
-
 
 def run():
     run_all()
@@ -61,99 +65,183 @@ def run():
 # Have fun!
 def custom_css():
     all_css()
-    st.markdown(
-        """<style>
+    
+    with open(CSS_PATH, "r") as f:
+        st.markdown(
+            f"""<style>{f.read()}</style>""",
+            unsafe_allow_html=True,
+        )
 
-        </style>""", unsafe_allow_html=True)
 
 
 # Given URL params, render left sidebar form and return combined filter settings
 # https://docs.streamlit.io/en/stable/api.html#display-interactive-widgets
-def sidebar_area(clusters):
+def sidebar_area(cluster_id, general_probability, cluster_select_values):
+    # Write a description in the sidebar
+    st.sidebar.markdown(
+        '<p style="font-size: 14px">Nodes: Alerts, colored by attack category</p>',
+        unsafe_allow_html=True,
+    )
+    st.sidebar.markdown(
+        '<p style="font-size: 14px">Edges: Link alerts by similarity</p>',
+        unsafe_allow_html=True,
+    )
 
-    # Get the query params for all our widget initial values
-    query_params = st.experimental_get_query_params()
+    st.sidebar.divider()
+
+    # Use any query parameter for general_cluster to fill the selectbox
+    pre_selected_index = 0
+    try:
+        pre_selected_index = cluster_select_values.index(str(cluster_id))
+        logger.debug(
+            f"We DID get a pre-selected-cluster ID. It's index is '{pre_selected_index}', its value is {cluster_select_values[pre_selected_index]}\n"
+        )
+    except ValueError as e:
+        logger.error("URL cluster_id does not appear in sample :(")
+        logger.exception(e)
+        pre_selected_index = 0  # "None"
+
+    start_date = st.sidebar.date_input("Start Date", value=datetime(2019, 3, 11))
+    start_time = st.sidebar.time_input("Start Time", time(0, 00))
+    end_date = st.sidebar.date_input("End Date", value=datetime(2019, 3, 18))
+    end_time = st.sidebar.time_input("End Time", time(0, 00))
+
+    logger.debug(
+        f"start_date={start_date} start_time={start_time} end_date={end_date} end_time={end_time}\n"
+    )
+
+    start_datetime = dp.parse(f"{start_date} {start_time}")
+    end_datetime = dp.parse(f"{end_date} {end_time}")
+
+    st.sidebar.divider()
+
+    # # Create an advanced section of the menu you have to pop open
+    # with st.expander("Advanced", expanded=True):
 
     # Get the cluster ID from the sidebar
-    cluster_id = st.sidebar.selectbox(
-        "Primary Correlation ID",
-        clusters,
+    cluster_id: Optional[Union[str, int, List]] = st.sidebar.selectbox(
+        label="Primary Correlation ID",
+        options=cluster_select_values,
+        index=pre_selected_index,
         key="cluster_id",
     )
 
-    if cluster_id and isinstance(cluster_id, str) and cluster_id not in ("", "None"):
-        cluster_id = int(cluster_id)
+    # Get the cluster confidence from the sidebar
+    general_probability: Optional[float] = st.sidebar.slider(
+        label="Minimum Cluster Probability",
+        min_value=0.0,
+        max_value=1.0,
+        value=general_probability,
+        step=0.1,
+        key="general_probability",
+    )
 
-    with st.sidebar.expander("Advanced"):
-        # Get the cluster confidence from the sidebar
-        general_probability = st.sidebar.slider(
-            "Minimum Cluster Probability", 0.0, 1.0, 0.0, 0.1, key="general_probability"
-        )
-
-        st.sidebar.button("Refresh")
+    # Query parameters from a shared URL
+    query_params: Dict[str, Any] = st.experimental_get_query_params()
 
     # Finally, set any query params that have changed
-    if cluster_id and (cluster_id is not None) and (cluster_id not in ("None", "")):
+    logger.debug(f"Almost final query_params: {query_params}\n")
+    if cluster_id and (str(cluster_id) not in ("None", "")):
         query_params["cluster_id"] = [cluster_id]
+    elif "cluster_id" in query_params:
+        query_params.pop("cluster_id")
 
+    if general_probability and (str(general_probability) not in ("None", "")):
+        query_params["general_probability"] = [general_probability]
+    elif "general_probability" in query_params:
+        query_params.pop("general_probability")
+
+    logger.debug(f"Final query_params: {query_params}\n")
     st.experimental_set_query_params(**query_params)
 
-    return
+    return {'cluster_id': cluster_id, 'general_probability': general_probability, 'start_datetime': start_datetime, 'end_datetime': end_datetime}
 
 # Given filter settings, generate/cache/return dataframes & viz
-#@st.cache(suppress_st_warning=True, allow_output_mutation=True)
-@st.cache_data
-def run_filters(splunk_edf): 
-    
+def run_filters(splunk_client, cluster_id, general_probability, start_datetime, end_datetime): 
+
+    query_dict: Dict[str, Union[str, float, List[str]]] = {
+        "general_cluster": str(cluster_id),
+        "general_probability": (">=", general_probability),
+        "DetectTime": [(">=", start_datetime.isoformat()), ("<=", end_datetime.isoformat())],
+    }
+
+    filter_query = SplunkConnection.build_query(
+        INDEX, query_dict=query_dict, fields=list(AVR_SAFE_COLUMNS.keys())
+    )
+    logger.debug(f"filter_query: {filter_query}\n")
+    splunk_edf: pd.DataFrame = splunk_client.one_shot_splunk(filter_query, count=QUERY_SIZE)
+
+    data_resource: AVRDataResource = AVRDataResource(
+        edf=splunk_edf,
+        feature_columns=FEATURE_COLUMNS,
+        debug=True,
+    )
+
+    investigation_id: str = os.getenv("PIVOT_URL_INVESTIGATION_ID")
+    app_now_time: str = os.getenv("APP_NOW_TIME")
+    logger.debug(f"investigation_id={investigation_id} app_now_time={app_now_time}\n")
+
+    #
+    # Bring in standard graphistry environment variables: Set in .env --> docker-compose.yml --> os.getenv(key) --> AVRMarlowe.register()
+    #
+
+    logger.info("Configuring environment variables...\n")
     graphistry_username: str = os.getenv("GRAPHISTRY_USERNAME")
     graphistry_password: str = os.getenv("GRAPHISTRY_PASSWORD")
     graphistry_protocol: str = os.getenv("GRAPHISTRY_PROTOCOL")
-    graphistry_host: str = os.getenv("GRAPHISTRY_HOSTNAME")
-    #print(graphistry_username, graphistry_password, graphistry_protocol, graphistry_host)
+    graphistry_server: str = os.getenv("GRAPHISTRY_SERVER")
+    graphistry_client_protocol_hostname: Optional[str] = os.getenv(
+        "GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME"
+    )
+    logger.debug(
+        f"graphistry_username={graphistry_username}, graphistry_password={graphistry_password}, graphistry_protocol={graphistry_protocol},"
+        + f" graphistry_server={graphistry_server}, graphistry_client_protocol_hostname={graphistry_client_protocol_hostname}\n"
+    )
 
-    # Get the query params for all our widget initial values
-    query_params = st.experimental_get_query_params()
+    LOOKBACK_PERIOD = "-30d"  # For the link to the Visual Playbook
 
-    cluster_id = query_params.get("cluster_id")
-    general_probability = query_params.get("general_probability")    
+    try:
+        data_resource.trim_to_safe_cols(inplace=True)
+        data_resource.clean_edge_list(inplace=True)
+        data_resource.featurize_edges()
+        data_resource.add_pivot_url_column(
+            investigation_id=investigation_id,
+            graphistry_protocol=graphistry_protocol, 
+            graphistry_server=graphistry_server,
+            unix_time=AVRDataResource.iso_to_unix(app_now_time),
+            lookback_period=LOOKBACK_PERIOD,
+        )
+    except AVRMissingData as e:
+        logger.error(f"Total records received from Splunk: {len(splunk_edf):,}\n")
+        st.error("Your query returned no records.", icon="🚨")
+        logger.exception(e, stack_info=True)
 
-    if cluster_id and isinstance(cluster_id, int):
-        splunk_edf = splunk_edf[splunk_edf["general_cluster"] == cluster_id]
-        assert len(splunk_edf > 0)
+    # If we got data back...
+    if len(data_resource.edf) > 0:
+        with st.spinner("Generating graph..."):
+            # Generate the graph
+            marlowe: AVRMarlowe = AVRMarlowe(data_resource=data_resource)
+            # marlowe.register(
+            #     api=3,
+            #     protocol=graphistry_protocol,
+            #     server=graphistry_server,
+            #     username=graphistry_username,
+            #     password=graphistry_password,
+            #     client_protocol_hostname=graphistry_client_protocol_hostname,
+            # )
+            g: Plottable = marlowe.umap()
+            graph_url: str = g.plot(render=False)
 
-    if general_probability and isinstance(general_probability, Number):
-        splunk_edf = splunk_edf[splunk_edf["general_probability"] > general_probability]
+        # components.iframe(src=graph_url, height=HEIGHT, width=WIDTH, scrolling=True)
+    else:
+        st.error("Your query returned no records.", icon="🚨")
 
-    with st.spinner("Generating graph..."):
-        # 0 is a valid cluster ID
-        if (cluster_id != 0) and (not cluster_id) or (cluster_id in ("None", "")):
-            # We don't have a filter - sample
-            splunk_edf = splunk_edf.sample(n=1000) if len(splunk_edf.index) > 1000 else splunk_edf
-        # We do have a filter - make sure the data isn't excessive
-        else:
-            max_edf = min(len(splunk_edf.index), 1000)
-            splunk_edf = splunk_edf[:max_edf]
+    return {'splunk_edf': splunk_edf, 'graph_url': graph_url}
 
-        # Generate the graph
-        marlowe = AVRMarlowe(edf=splunk_edf)
-        # not needed: 
-        # marlowe.register(
-        #     api=3,
-        #     username=graphistry_username,
-        #     protocol=graphistry_protocol,
-        #     password=graphistry_password,
-        #     host=graphistry_host,
-        #     client_protocol_hostname="heracles",
-        #     debug=True,
-        # )
-        graph_url = marlowe.umap(render=False)
-
-
-    return graph_url
-
-def main_area(graph_url): 
+def main_area(splunk_edf, graph_url): 
     logger.debug('rendering main area, with url: %s', graph_url)
-    GraphistrySt().render_url(graph_url)
+    with st.spinner("Generating graph..."):
+        GraphistrySt().render_url(graph_url)
     
 
 ############################################
@@ -173,115 +261,56 @@ def run_all():
         logger = get_logger(__name__)
         logger.setLevel(logging.WARNING)
 
-        HEIGHT = 800
-        WIDTH = 1300
-
         # Reproducible samples
         SEED = 31337
         random.seed = SEED
         np.random.seed = SEED
 
+        SAMPLE_SIZE = 1000
+        QUERY_SIZE = 1000
+
         splunk_username: str = os.getenv("SPLUNK_USERNAME")
         splunk_password: str = os.getenv("SPLUNK_PASSWORD")
         splunk_host: str = os.getenv("SPLUNK_HOST")
-        print(splunk_username, splunk_password, splunk_host)
-
-        AVR_SAFE_COLUMNS: Dict[str, Any] = {
-            "DetectTime": "datetime",
-            "Category": str,
-            "ID": str,
-            "Node_SW": str,
-            "Node_Type": str,
-            "Node_Name": str,
-            "Source_Port": str,
-            "Source_IP4": str,
-            "Source_Proto": str,
-            "Target_Port": str,
-            "Target_IP4": str,
-            "Target_Proto": str,
-            "Source_IP4_Subnet_16": str,
-            "Source_IP4_Subnet_24": str,
-            "Target_IP4_Subnet_16": str,
-            "Target_IP4_Subnet_24": str,
-            "x": float,
-            "y": float,
-            "general_cluster": int,
-            "general_probability": float,
-            "specific_cluster": int,
-            "specific_probability": float,
-        }
-
-        st.markdown(
-            """
-                <style>
-                    .block-container {
-                        padding-top: 1rem;
-                        padding-bottom: 0rem;
-                        padding-left: 5rem;
-                        padding-right: 5rem;
-                    }
-                    .main { align-items: left; }
-                    .block-container {
-                        padding-left: 2rem;
-                        padding-right: 2rem;
-                    }
-                    header { display: none !important; }
-                    footer { display: none !important; }
-                </style>
-                """,
-            unsafe_allow_html=True,
+        logger.debug(
+            f"splunk_username={splunk_username}, splunk_password={splunk_password}, splunk_host={splunk_host}\n"
         )
 
-        # st.header(TITLE)
 
-        # Get the query params for all our widget initial values
-        query_params = st.experimental_get_query_params()
-
-        # Process the canonical cluster / incident ID
-        cluster_id: Union[None, str, int] = preprocess_cluster_id(
-            query_params.get("cluster_id"), query_params
-        )
-
-        # Get the Splunk data, extract cluster IDs for the select box
-        splunk_client: SplunkConnection = cache_splunk_client(
+        # Instantiate, connect and cache the Splunk client as a reusable resource
+        splunk_client: Union[SplunkConnection, Any] = cache_splunk_client(
             splunk_username, splunk_password, splunk_host
         )
-        query_field_str: str = " ".join(AVR_SAFE_COLUMNS)
-        query: str = f'search index="avr_59k" | fields {query_field_str}'
-        splunk_edf: pd.DataFrame = splunk_client.one_shot_splunk(query, count=1000)
 
-        # Drop unnecessary fields
-        splunk_edf = splunk_edf.drop(
-            columns=[
-                "_bkt",
-                "_cd",
-                "_raw",
-                "_time",
-            ],
-            axis=1,
+        # Query parameters from a shared URL
+        query_params: Dict[str, Any] = st.experimental_get_query_params()
+
+        # Log what we got
+        logger.debug(f"Initial query_params: {query_params}\n")
+
+        # Process the canonical cluster / incident ID and its probability - remove the list and get the value, deal with nulls
+        cluster_id: Optional[Union[str, int]] = process_query_param(
+            "cluster_id", query_params.get("cluster_id"), query_params
+        )
+        general_probability: Optional[Union[str, float]] = process_query_param(
+            "general_probability", query_params.get("general_probability"), query_params
         )
 
-        clusters: List[str] = ["None"] + natsorted(
-            # Cluster -1 is a random noise
-            splunk_edf["general_cluster"]
-            .fillna(-1)
-            .drop_duplicates()
-            .astype(str)
-            .tolist()
-        )
-
+        # First we need to get all the unique
+        cluster_select_values = ["None"] + splunk_client.get_unique_values("avr_59k", "general_cluster")
+        
         # Render sidebar and get current settings
-        sidebar_area(clusters)
+        sidebar_params = sidebar_area(cluster_id, general_probability, cluster_select_values)
 
         # Compute filter pipeline (with auto-caching based on filter setting inputs)
         # Selective mark these as URL params as well
-        graph_url = run_filters(splunk_edf) 
+        filter_params = run_filters(splunk_client, **sidebar_params) 
 
         # Render main viz area based on computed filter pipeline results and sidebar settings
-        main_area(graph_url) 
+        main_area(**filter_params) 
 
     except Exception as exn:
-        st.write('Error loading dashboard')
+        st.write('Error loading dashboard') 
         st.write(exn)
 
 
@@ -300,14 +329,59 @@ def clean_edge_list(edf: pd.DataFrame, debug=False) -> pd.DataFrame:
     return edf
 
 
+# Cache the Splunk client as a resource so it is re-used
 @st.cache_resource
 def cache_splunk_client(username: str, password: str, host: str) -> SplunkConnection:
-    splunk_client: SplunkConnection = SplunkConnection(username, password, host)
+    splunk_client = SplunkConnection(username, password, host)
+    assert splunk_client.connect()
     return splunk_client
 
 
+def is_float_str(s: str) -> bool:
+    """is_float_str Is it a float string?"""
+
+    if s.replace(".", "", 1).isdigit() and (s.count(".") < 2):
+        return True
+    else:
+        return False
+
+# Process the canonical ID from query params - shouldn't a builtin utility do this?
+
+def process_query_param(
+    q_key: str, q_param: Optional[Union[str, int, float, List]], query_params: Dict[str, Any]
+):
+    """process_query_param Get the canonical ID as an integer, if it exists."""
+    clean_param: Optional[Union[str, int, float, List]] = None
+
+    # Query parameters are lists, take the first item
+    if isinstance(q_param, list):
+        clean_param = q_param[0]
+
+    # Did we get a clean version? Use it.
+    if isinstance(clean_param, int):
+        return clean_param
+    if isinstance(clean_param, float):
+        return clean_param
+
+    # If the value was string "None", make it None, and remove from query parameters
+    if isinstance(clean_param, str) and (clean_param == "None" or clean_param == ""):
+        clean_param = None
+        # We don't want ?cluster_id=None in a url, just delete ?cluster_id=
+        if q_key in query_params:
+            del query_params[q_key]
+        return clean_param
+
+    # Query parameters are strings, convert them to their numeric values
+    if isinstance(clean_param, str):
+        if clean_param.isdigit():
+            clean_param = int(clean_param)
+        elif is_float_str(clean_param):
+            clean_param = float(clean_param)
+
+    return clean_param
+
+
 # Process the canonical ID from query params
-@typechecked
 def preprocess_cluster_id(cluster_id: Union[None, str, int, List], query_params: Dict[str, Any]):
     """Get the canonical ID as an integer, if it exists."""
     # Query parameters are lists, take the first item
@@ -321,3 +395,4 @@ def preprocess_cluster_id(cluster_id: Union[None, str, int, List], query_params:
     if isinstance(cluster_id, str):
         cluster_id = int(cluster_id)
     return cluster_id
+

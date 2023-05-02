@@ -1,6 +1,9 @@
+"""This file splunk.py implements a SplunkConnection that exposes a service and offers normal querying, pd.DataFrames and one-shot queries.
+It uses environment variables from .env and is rigorously typed."""
+import copy
 import logging
-import sys
-from typing import Any, Dict, List
+from numbers import Number
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 import splunklib.client as client
@@ -9,12 +12,31 @@ from typeguard import typechecked
 
 # Logging is too much! Quiet it down.
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-logging.StreamHandler(sys.stderr)
+logger.setLevel(logging.DEBUG)
+
+# If we are returning a DataFrame, we may not want these columns as they aren't useful and clutter the display
+SPLUNK_SYSTEM_COLS = [
+    "_n",
+    "_bkt",
+    "_raw",
+    "_si",
+    "_sourcetype",
+    "_serial",
+    "_cd",
+    "_time",
+    "_indextime",
+    "_subsecond",
+]
 
 
 class SplunkConnectException(Exception):
-    """Splunk failed to connect."""
+    """Splunk failed to connect"""
+
+    pass
+
+
+class BadFilterPairException(Exception):
+    """Got a bad filter pair in a non-equality query"""
 
     pass
 
@@ -33,17 +55,16 @@ class SplunkConnection:
         self.password = password
         self.host = host
         self.verbose = verbose
-        self.connect()
 
     def connect(self) -> bool:
         try:
             self.service = client.connect(
                 host=self.host, username=self.username, password=self.password
             )
-            logger.debug("Splunk connection established") if self.verbose else None
+            logger.debug("Splunk connection established\n") if self.verbose else None
             return True
         except Exception as e:
-            logger.error("An exception has occurred while connection to Splunk :(")
+            logger.error("An exception has occurred while connection to Splunk :(\n")
             logger.error(e)
             raise SplunkConnectException(e)
 
@@ -52,7 +73,7 @@ class SplunkConnection:
         This is used to provide context for the symbolic AI
         """
         indexes = {}
-        logger.debug("Retrieving index information") if self.verbose else None
+        logger.debug("Retrieving index information\n") if self.verbose else None
         for index_name in self.service.indexes:
             index = self.service.indexes[index_name.name]
             fields = index.fields
@@ -63,8 +84,8 @@ class SplunkConnection:
         """Returns a list of fields for a given index
         This is used to provide context for the symbolic AI
         """
-        logger.debug(f"Returning fields from {index}") if self.verbose else None
-        query = f"search index={index} | fieldsummary | table field"
+        logger.debug(f"Returning fields from {index}\n") if self.verbose else None
+        query = f"search index={index} | fieldsummary | table field\n"
         return self.query(query)
 
     def query(
@@ -96,17 +117,17 @@ class SplunkConnection:
 
                 status = (
                     "\r%(doneProgress)03.1f%%   %(scanCount)d scanned   "
-                    "%(eventCount)d matched   %(resultCount)d results"
+                    "%(eventCount)d matched   %(resultCount)d results\n"
                 ) % stats
 
                 logger.info(status)
 
                 if stats["isDone"] == "1":
-                    logger.info("\nDone!\n")
+                    logger.info("Query done!\n")
                     break
 
             result_count: int = stats["resultCount"]
-            logger.info(f"Total results by metadata: {result_count:,}")
+            logger.info(f"Total results by metadata: {result_count:,}\n")
             offset: int = 0
             results_list: List = []
 
@@ -120,6 +141,7 @@ class SplunkConnection:
                 results_list.append(record)
             return results_list
         except Exception as e:
+            logger.error("Exception querying data :(\n")
             logger.error(e)
             return results_list
 
@@ -128,14 +150,17 @@ class SplunkConnection:
         if not data:
             return pd.DataFrame()
             # is_cancelled = yield pd.DataFrame()
-        logger.info(f"Found {len(data)} results.") if self.verbose else None
-        df = pd.DataFrame(data)
+        logger.info(f"Found {len(data)} results.\n") if self.verbose else None
+        df: pd.DataFrame = pd.DataFrame.from_dict(data)
         df.columns = [field for field in data[0].keys()]
         return df
 
     @typechecked
     def one_shot_splunk(
-        self, query: str = 'search index="avr_59k" ', count: int = 1000
+        self,
+        query: str = 'search index="avr_59k" ',
+        drop_cols: Optional[List[str]] = SPLUNK_SYSTEM_COLS,
+        count: int = 1000,
     ) -> pd.DataFrame:
         """A one-shot Splunk query that returns a pd.DataFrame"""
 
@@ -149,33 +174,154 @@ class SplunkConnection:
         )
         splunk_results_reader = splunk_results.JSONResultsReader(reader)
 
-        df_results = []
+        df_results: List[Dict[str, Any]] = []
         for item in splunk_results_reader:
-            df_results.append(item)
+            # Skip any Messages we recieve, like telling us we are receiving partial results
+            if isinstance(item, splunk_results.Message):
+                logger.debug(f"splunk.results.Message received: {item}\n")
+                continue
 
-        df = pd.DataFrame(df_results)
+            # We don't want to alter an item while we are iterating it
+            cleaned_item = copy.copy(item)
+
+            # For now we do not need the values of the dropped fields
+            if drop_cols and isinstance(drop_cols, list):
+                [cleaned_item.pop(field) for field in drop_cols if field in cleaned_item]
+
+            # Put the cleaned up item in the list that will become a pd.DataFrame
+            df_results.append(cleaned_item)
+
+        df: pd.DataFrame = pd.DataFrame.from_dict(df_results)
         return df
 
     @typechecked
     @staticmethod
-    def equality_query(query_dict: Dict[str, str], fields: List[str]) -> str:
+    def parse_filter_pair(
+        query: str, col: str, filter_pair: Tuple[str, Union[str, int, float]]
+    ) -> str:
+        # First comes op, then comes value
+        op = filter_pair[0]
+        value = filter_pair[1]
+        logger.debug(f"col={col}  op={op}  value={value}\n")
+
+        filter_query = ""
+
+        # Have to validate tuples for non-equality queries
+        if op and isinstance(op, str) and (op not in ("None", "")):
+            # If the value isn't a None alias, then build the query string
+            if value and (str(value) not in "None", ""):
+                # ex.      "col  >=  value"
+                filter_query += f"{col}{op}{value} "
+            else:
+                logger.error(f"Invalid value for filter pair: {value}\n")
+                raise BadFilterPairException(f"Invalid value for filter pair: {value}")
+
+        # If the operator isn't a string - abandon hope
+        else:
+            logger.error(f"Invalid operater in filter pair: {op}\n")
+            raise BadFilterPairException(f"Invalid operater in filter pair: {op}")
+
+        return filter_query
+
+    @typechecked
+    @staticmethod
+    def build_query(
+        index: str,
+        query_dict: Optional[
+            Dict[
+                str,
+                Union[
+                    str,
+                    int,
+                    float,
+                    Tuple[str, Union[str, Number]],
+                    List[Tuple[str, Union[str, Number]]],
+                ],
+            ]
+        ] = None,
+        fields: Optional[List[str]] = None,
+        sort: Optional[List[str]] = ["_bkt", "_cnt"],
+    ) -> str:
         """build_query Compose a simple Splunk strink query given a query dict and field list.
 
         Parameters
         ----------
-        query_dict : Dict[str, str]
-            a field and the condition for the equivalence
-        fields : List[str]
-            The fields to retrieve
+        index: str
+            The index to search
+        query_dict : Optional[Dict[str, Union[str, int, float, Tuple[str]]]]
+            A field and the value to match. Value can also be a 2-list of the format: (operator, value)
+        fields : Optional[List[str]]
+            The fields to retrieve, by default None. It can help to list these or they might not be retrieved.
+        sort: Optional[List[str]]
+            The fields to sort by, by default [_bkt, _cnt] to get a deterministic sort to make queries reproducible.
 
         Returns
         -------
         str
-            Splunk query
+            String Splunk query
         """
-        query: str = "search "
-        for col, val in query_dict.items:
-            query += f"{col}={val} "
-        query += " * "
+        query: str = f'search index="{index}" '
+        for col, val in query_dict.items():
+            logger.debug(f"WHAT? col={col} val={val}\n")
+            logger.debug(f"type(val)=={type(val)}")
+            if val and (val not in ("None", "")):
+                # Non-equality query
+                if isinstance(val, Tuple) or isinstance(val, List):
+                    # If it is a nested list, there is more than one condition
+                    if len(val) > 0 and isinstance(val[0], Tuple):
+                        logger.debug(f"YES! FOUND A NESTED QUERY: {val}\n")
+                        for filter_pair in val:
+                            logger.debug(f"Processing filter_pair: {filter_pair}\n")
+                            assert len(filter_pair) == 2
+                            try:
+                                query += SplunkConnection.parse_filter_pair(
+                                    query=query, col=col, filter_pair=filter_pair
+                                )
+                            except BadFilterPairException:
+                                continue
 
-        query += f' fields | {" ".join(fields)}'
+                    # This is a single conditional query
+                    else:
+                        logger.debug(f"NO! NOT A NESTED QUERY: {val}\n")
+                        assert len(val) == 2
+                        try:
+                            query += SplunkConnection.parse_filter_pair(
+                                query=query, col=col, filter_pair=val
+                            )
+                        except BadFilterPairException:
+                            continue
+
+                # Default equals
+                else:
+                    logger.debug(f"JUST A NORMAL EQUALS: {val}\n")
+                    query += f"{col}={val} "
+
+        # Add any fields listed - without fields queries can get flaky
+        query += f'| fields {" ".join(fields)} ' if fields else ""
+
+        # Add a deterministic sort by _bkt and _cnt by default, othrwise user can specify
+        query += f'| sort {" ".join(sort)} ' if sort else ""
+
+        return query
+
+    def get_unique_values(self, index: str, field: str) -> List[Optional[Union[str, Number]]]:
+        """get_unique_values Get the unique values of any field in any index using Splunk's stats command
+
+        Parameters
+        ----------
+        index : str
+            Splunk index to query
+        field : str
+            Field from which to seek unique values
+
+        Returns
+        -------
+        List[str]
+            List of unique values for a field in an index
+        """
+        query = f'search index="{index}" | fields {field} | dedup {field} | sort +num({field})'
+
+        unique_df = self.one_shot_splunk(query, drop_cols=None)
+        unique_vals = unique_df[field].drop_duplicates().tolist()
+
+        return unique_vals
