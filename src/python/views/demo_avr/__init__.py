@@ -42,7 +42,7 @@ urlParams = URLParam(app_id)
 
 INDEX: str = "avr_59k"
 #SAMPLE_SIZE = 1000
-QUERY_SIZE = 1000
+QUERY_SIZE = 59000
 
 def info():
     return {
@@ -65,7 +65,7 @@ def run():
 # Have fun!
 def custom_css():
     all_css()
-    
+
     with open(CSS_PATH, "r") as f:
         st.markdown(
             f"""<style>{f.read()}</style>""",
@@ -193,10 +193,10 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
     graphistry_client_protocol_hostname: Optional[str] = os.getenv(
         "GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME"
     )
-    logger.debug(
-        f"graphistry_username={graphistry_username}, graphistry_password={graphistry_password}, graphistry_protocol={graphistry_protocol},"
-        + f" graphistry_server={graphistry_server}, graphistry_client_protocol_hostname={graphistry_client_protocol_hostname}\n"
-    )
+    # logger.debug(
+    #     f"graphistry_username={graphistry_username}, graphistry_password={graphistry_password}, graphistry_protocol={graphistry_protocol},"
+    #     + f" graphistry_server={graphistry_server}, graphistry_client_protocol_hostname={graphistry_client_protocol_hostname}\n"
+    # )
 
     LOOKBACK_PERIOD = "-30d"  # For the link to the Visual Playbook
 

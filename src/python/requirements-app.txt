@@ -1,7 +1,2 @@
 ### your custom requirements here
-numpy
-pytest
-python-dotenv
 splunk-sdk
-streamlit
-typeguard

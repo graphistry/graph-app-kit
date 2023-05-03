@@ -13,7 +13,6 @@ import pandas as pd
 from graphistry.features import topic_model
 from graphistry.Plottable import Plottable
 from IPython.core.display import HTML
-from typeguard import check_type, typechecked
 
 # Reproducible samples
 SEED = 31337
@@ -146,7 +145,6 @@ class AVRMissingData(Exception):
 class AVRDataResource:
     """Filters DataFrames and hands them to AVRMarlow to visualize."""
 
-    @typechecked
     def __init__(
         self,
         edf: pd.DataFrame,
@@ -175,7 +173,6 @@ class AVRDataResource:
         # ...and set deduped edge features as nodes
         self.featurize_edges()
 
-    @typechecked
     def filter(
         self, bool_series: TypeVar("pd.Series(bool)"), inplace: bool = False
     ) -> Union[None, pd.DataFrame]:
@@ -204,7 +201,6 @@ class AVRDataResource:
         else:
             return self.edf[bool_series]
 
-    @typechecked
     def trim_to_safe_cols(self, inplace: bool = True) -> Optional[pd.DataFrame]:
         """trim_to_safe_cols Trim to just the AVR_SAFE_COLUMNS column names"""
 
@@ -229,7 +225,6 @@ class AVRDataResource:
             new_df: pd.DataFrame = self.edf.copy()
             return new_df[list(AVR_SAFE_COLUMNS.keys())]
 
-    @typechecked
     def clean_edge_list(self, inplace: bool = True) -> Optional[pd.DataFrame]:
         """clean_edge_list Clean up the edges by casting them. Makes a copy of the DataFrame to implement inplace=False."""
 
@@ -275,7 +270,6 @@ class AVRDataResource:
             # Since we assigned new_edf a copy of self.edf, we intend to return it :)
             return new_edf
 
-    @typechecked
     def featurize_edges(self) -> None:
         """featurize_edges generate a string feature column and deduplicate it to get nodes
 
@@ -309,7 +303,6 @@ class AVRDataResource:
         if self.debug:
             logger.debug(f"df.shape={self.edf.shape} ndf.shape={self.ndf.shape}")
 
-    @typechecked
     def add_pivot_url_column(
         self,
         investigation_id: str,
@@ -349,7 +342,6 @@ class AVRDataResource:
         )
             
     @staticmethod
-    @typechecked
     def is_url(url: str) -> bool:
         """is_url True if a valid URL is passed, otherwise False
 
@@ -369,7 +361,6 @@ class AVRDataResource:
         except ValueError:
             return False
 
-    @typechecked
     @staticmethod
     def iso_to_unix(iso_date: str) -> float:
         """iso_to_unix Convert an ISO8601 datetime to a Unix timestamp
@@ -387,7 +378,6 @@ class AVRDataResource:
         dt = dp.parse(iso_date)
         return dt.timestamp()
 
-    @typechecked
     @staticmethod
     def unix_to_iso(unix_ts: float) -> str:
         """unix_to_iso_to_unix Convert a unix timestamp to an ISO8601 datetime in UTC timezone and back
@@ -408,7 +398,6 @@ class AVRDataResource:
 class AVRMarlowe:
     """Draws Graphistries. A working man on a mission to reduce alert volume... an investigation of a cluster of authentication events."""
 
-    @typechecked
     def __init__(
         self,
         data_resource: AVRDataResource,
@@ -427,7 +416,6 @@ class AVRMarlowe:
         self.g: Optional[Plottable] = None
         self.debug = debug
 
-    @typechecked
     def register(
         self,
         protocol: str,
@@ -456,7 +444,6 @@ class AVRMarlowe:
             client_protocol_hostname=client_protocol_hostname,
         )
 
-    @typechecked
     def umap(
         self,
         X: Optional[Union[List[str], pd.DataFrame]] = FEATURE_COLUMNS,
@@ -481,7 +468,7 @@ class AVRMarlowe:
             A graphistry Plottable object, returned by Plottable.umap()
         """
 
-        if X and check_type(X, List[str]):
+        if X: # and check_type(X, List[str]): # remove type check
             try:
                 if self.debug:
                     logging.debug(
@@ -500,9 +487,6 @@ class AVRMarlowe:
 
         # The edges are the nodes
         g: Plottable = graphistry.nodes(self.data_resource.edf)
-
-        # I won't work after the previous line - g._nodes isn't there yet
-        #
 
         # Compose an HTML label of the attack category and the first 2 source/target IPs.
         g._nodes["Label"] = g._nodes.astype(str).apply(
@@ -546,7 +530,6 @@ class AVRMarlowe:
 
         return self.g
 
-    @typechecked
     def hypergraph(self, cluster_id: int = 0, render=False) -> Union[str, HTML]:
         """Visualize a hypergraph of the AVR edge list, with a specific cluster highlighted."""
         gen_cluster_filter = self.edf["general_cluster"] > -1

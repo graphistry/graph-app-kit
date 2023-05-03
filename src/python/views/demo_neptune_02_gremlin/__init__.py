@@ -187,7 +187,6 @@ def path_to_df(p):
 
     return pd.DataFrame(nodes.values()), pd.DataFrame(edges.values())
 
-
 # Given filter settings, generate/cache/return dataframes & viz
 #@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 @st.cache_data

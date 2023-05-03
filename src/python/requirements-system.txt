@@ -1,6 +1,4 @@
-streamlit==1.21.0
-protobuf==3.20.3
-graphistry==0.28.7
+graphistry==0.29.0
 
 ################
 #
@@ -9,7 +7,8 @@ graphistry==0.28.7
 ################
 
 ### Neptune
-gremlinpython==3.6.2
+
+gremlinpython==3.4.10
 sshtunnel==0.1.5
 
 ### TigerGraph

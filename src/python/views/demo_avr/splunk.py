@@ -8,7 +8,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import pandas as pd
 import splunklib.client as client
 import splunklib.results as splunk_results
-from typeguard import typechecked
 
 # Logging is too much! Quiet it down.
 logger = logging.getLogger(__name__)
@@ -155,7 +154,6 @@ class SplunkConnection:
         df.columns = [field for field in data[0].keys()]
         return df
 
-    @typechecked
     def one_shot_splunk(
         self,
         query: str = 'search index="avr_59k" ',
@@ -194,7 +192,6 @@ class SplunkConnection:
         df: pd.DataFrame = pd.DataFrame.from_dict(df_results)
         return df
 
-    @typechecked
     @staticmethod
     def parse_filter_pair(
         query: str, col: str, filter_pair: Tuple[str, Union[str, int, float]]
@@ -223,7 +220,6 @@ class SplunkConnection:
 
         return filter_query
 
-    @typechecked
     @staticmethod
     def build_query(
         index: str,
