@@ -26,8 +26,10 @@ from views.demo_avr.marlowe import (
 
 from views.demo_avr.splunk import SplunkConnection
 
+# App configuration
 CSS_PATH = "/apps/views/demo_avr/app.css"
-
+PIVOT_URL_INVESTIGATION_ID="123"
+APP_NOW_TIME="2019-03-18T00:00:00Z"
 
 ############################################
 #
@@ -42,7 +44,7 @@ urlParams = URLParam(app_id)
 
 INDEX: str = "avr_59k"
 #SAMPLE_SIZE = 1000
-QUERY_SIZE = 59000
+QUERY_SIZE = 1000
 
 def info():
     return {
@@ -177,8 +179,8 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
         debug=True,
     )
 
-    investigation_id: str = os.getenv("PIVOT_URL_INVESTIGATION_ID")
-    app_now_time: str = os.getenv("APP_NOW_TIME")
+    investigation_id: str = PIVOT_URL_INVESTIGATION_ID
+    app_now_time: str = APP_NOW_TIME
     logger.debug(f"investigation_id={investigation_id} app_now_time={app_now_time}\n")
 
     #
