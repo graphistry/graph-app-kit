@@ -42,6 +42,8 @@ x-production-options:
     - ../envs/neptune.env
     - ../envs/streamlit.env
     - ../envs/tigergraph.env
+    - ../envs/splunk.env
+    - ../envs/splunk.env
     - .env
   #Warning: Loads into continer env, not used by compose envvar interpolation
   environment:
@@ -57,7 +59,6 @@ x-build-kwargs:
     - BUILDKIT_INLINE_CACHE=1
     - GRAPHISTRY_FORGE_BASE_VERSION=${GRAPHISTRY_FORGE_BASE_VERSION:-v2.40.8-11.5}
 
-
 ############################################################
 ##
 ## SERVICES
@@ -66,11 +67,11 @@ x-build-kwargs:
 
 services:
   streamlit:
-    << : *production_opts
+    <<: *production_opts
     image: graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}-${CUDA_SHORT_VERSION:-11.5}
     command: --server.baseUrlPath="$BASE_PATH" /apps/entrypoint.py
     build:
-      << : *build_kwargs
+      <<: *build_kwargs
       context: ..
       dockerfile: ./docker/Dockerfile
       cache_from:
@@ -84,7 +85,13 @@ services:
       - ../streamlit/config.toml:/root/gak/config.toml
       - ../streamlit/credentials.toml:/root/gak/credentials.toml
     healthcheck:
-      test: ["CMD", "curl", "-Lf", "http://localhost:8501/${BASE_PATH}healthz"]
+      test:
+        [
+          "CMD",
+          "curl",
+          "-Lf",
+          "http://localhost:8501/${BASE_PATH}healthz"
+        ]
       interval: 30s
       timeout: 30s
       retries: 10
