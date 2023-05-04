@@ -1,4 +1,4 @@
 ### your custom requirements here
-graphistry[ai] == 0.29.0
+graphistry[ai] == 0.29.1
 splunk-sdk
 ipython
