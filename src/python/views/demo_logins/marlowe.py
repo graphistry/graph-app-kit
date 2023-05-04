@@ -118,8 +118,8 @@ class UMAPXColumnMissing(ValueError):
         super().__init__(*args, **kwargs)
 
 
-class AVRMissingData(Exception):
-    """AVRMissingData Exception occurs when our data cleaning filters out all of the data :("""
+class AuthMissingData(Exception):
+    """AuthMissingData Exception occurs when our data cleaning filters out all of the data :("""
 
     def __init__(self, *args, **kwargs):
         default_message = """Trimming to our safe columns (or a previous operation) filtered all the data.
@@ -138,8 +138,8 @@ class AVRMissingData(Exception):
         super().__init__(*args, **kwargs)
 
 
-class AVRDataResource:
-    """Filters DataFrames and hands them to AVRMarlow to visualize."""
+class AuthDataResource:
+    """Filters DataFrames and hands them to AuthMarlow to visualize."""
 
     def __init__(
         self,
@@ -160,9 +160,7 @@ class AVRDataResource:
         """
 
         self.edf: pd.DataFrame = edf
-        self.feature_columns: List[str] = feature_columns or list(
-            AUTH_SAFE_FIELDS.keys()
-        )
+        self.feature_columns: List[str] = feature_columns or list(AUTH_SAFE_FIELDS.keys())
         self.debug = debug
 
         # Checked later and computed if called by downstream dependencies
@@ -176,9 +174,7 @@ class AVRDataResource:
         # Create a DataFrame describing the DBScan clusters of anomalous events
         self.describe_clusters()
 
-    def filter(
-        self, bool_series: TypeVar("pd.Series(bool)"), inplace: bool = False
-    ) -> Union[None, pd.DataFrame]:
+    def filter(self, bool_series: TypeVar("pd.Series(bool)"), inplace: bool = False) -> Union[None, pd.DataFrame]:
         """filter Filter our DataFrame using a boolean Series, optionally in place.
 
         Parameters
@@ -214,7 +210,7 @@ class AVRDataResource:
                 "Trimming to our safe columns (or a previous operation) filtered all the data. Zero records are left."
             )
             logger.exception(e)
-            raise AVRMissingData()
+            raise AuthMissingData()
 
         assert len(self.edf.columns) >= len(AUTH_SAFE_FIELDS.keys())
         if self.debug:
@@ -242,9 +238,7 @@ class AVRDataResource:
 
         # Cast the columns to their known types
         for col, cast in AUTH_SAFE_FIELDS.items():
-            logger.debug(
-                f"Column: {col} Original Type: {new_edf[col].dtype} Cast: {cast}\n"
-            ) if self.debug else None
+            logger.debug(f"Column: {col} Original Type: {new_edf[col].dtype} Cast: {cast}\n") if self.debug else None
 
             # Cast em if ya got em!
             if cast == "datetime":
@@ -257,9 +251,7 @@ class AVRDataResource:
                 new_edf[col] = new_edf[col].astype(str)
 
         # Don't display 'nan', display None
-        new_edf["src_domain"] = new_edf["src_domain"].fillna(
-            value="None", inplace=False
-        )
+        new_edf["src_domain"] = new_edf["src_domain"].fillna(value="None", inplace=False)
         new_edf["src_domain"] = new_edf["src_domain"].astype(str)
         new_edf["src_domain"] = new_edf["src_domain"].str.replace("nan", "None")
 
@@ -316,9 +308,7 @@ class AVRDataResource:
         investigation_id: str,
         base_client_url: str,
         unix_time: float,
-        lookback_period: Literal[
-            "-1h", "-6h", "-12h", "-1d", "-7d", "-30d", "-365d", "all"
-        ],
+        lookback_period: Literal["-1h", "-6h", "-12h", "-1d", "-7d", "-30d", "-365d", "all"],
     ) -> None:
         """add_pivot_url_column Add a pivot url column using the investigation_id, general_cluster
 
@@ -354,11 +344,7 @@ class AVRDataResource:
 
         # Compute the total anomalies per cluster within the anomalous nodes
         self.anomalous_nodes = self.ndf[self.ndf["cluster"] == -1]
-        anom_cluster_counts = (
-            self.anomalous_nodes[["_dbscan", "is_anomalous", "RED"]]
-            .groupby("_dbscan")
-            .sum()
-        )
+        anom_cluster_counts = self.anomalous_nodes[["_dbscan", "is_anomalous", "RED"]].groupby("_dbscan").sum()
 
         anom_cluster_counts = (
             anom_cluster_counts[["is_anomalous", "RED"]]
@@ -391,9 +377,7 @@ class AVRDataResource:
         )
 
         # Get the count of anomalies per computer - ndf is a deduplicated edge list of src/dst computers
-        top_n_computers = anomalous_cpu_clusters.groupby("anomaly_cluster")[
-            "computer"
-        ].apply(lambda x: list(x)[:n])
+        top_n_computers = anomalous_cpu_clusters.groupby("anomaly_cluster")["computer"].apply(lambda x: list(x)[:n])
         return top_n_computers
 
     def describe_clusters(self) -> pd.DataFrame:
@@ -469,13 +453,13 @@ class AVRDataResource:
         return datetime.utcfromtimestamp(unix_ts).isoformat()
 
 
-class AVRMarlowe:
+class AuthMarlowe:
     """Draws Graphistries. A working man on a mission to reduce alert volume... an investigation
     of a cluster of authentication events."""
 
     def __init__(
         self,
-        data_resource: AVRDataResource,
+        data_resource: AuthDataResource,
         debug: bool = False,
     ) -> None:
         """__init__ Instantiate a visual investigator.
@@ -519,7 +503,7 @@ class AVRMarlowe:
         X: Optional[Union[List[str], pd.DataFrame]] = FEATURE_COLUMNS,
         y: Optional[Union[str, List[str]]] = None,
     ) -> Plottable:
-        """umap Run UMAP on the AVR edge list, visualize in 2D, unsupervised (just X) or supervised (y).
+        """umap Run UMAP on the Auth edge list, visualize in 2D, unsupervised (just X) or supervised (y).
 
         Parameters
         ----------
@@ -541,16 +525,11 @@ class AVRMarlowe:
         if X and isinstance(X, list):
             try:
                 if self.debug:
-                    column_count = len(
-                        [x for x in X if x in self.data_resource.edf.columns]
-                    )
+                    column_count = len([x for x in X if x in self.data_resource.edf.columns])
                     logger.debug(
-                        f"assert len([x for x in X if x in self.data.edf.columns]) = {column_count}"
-                        + f" == len(X) = {len(X)}"
+                        f"assert len([x for x in X if x in self.data.edf.columns]) = {column_count}" + f" == len(X) = {len(X)}"
                     )
-                assert len(
-                    [x for x in X if x in self.data_resource.edf.columns]
-                ) == len(X)
+                assert len([x for x in X if x in self.data_resource.edf.columns]) == len(X)
             except AssertionError:
                 raise UMAPXColumnMissing
 
@@ -576,7 +555,7 @@ class AVRMarlowe:
             axis=1,
         )
 
-        # This Label was computed in AVRDataResource above
+        # This Label was computed in AuthDataResource above
         if self.debug:
             logger.debug(self.data_resource.edf["Label"].head())
 
@@ -612,7 +591,7 @@ class AVRMarlowe:
         return self.g
 
     def hypergraph(self, cluster_id: int = 0, render=False) -> Union[str, HTML]:
-        """Visualize a hypergraph of the AVR edge list, with a specific cluster highlighted."""
+        """Visualize a hypergraph of the Auth edge list, with a specific cluster highlighted."""
         gen_cluster_filter = self.edf["general_cluster"] > -1
         spec_cluster_filter = self.edf["specific_cluster"] > -1
         hyper_edf = self.edf[gen_cluster_filter & spec_cluster_filter]
@@ -623,9 +602,7 @@ class AVRMarlowe:
             direct=True,
             opts={
                 "EDGES": {
-                    "Source_IP4": [
-                        "Target_IP4"
-                    ],  # , "ID", "general_cluster", "specific_cluster"],
+                    "Source_IP4": ["Target_IP4"],  # , "ID", "general_cluster", "specific_cluster"],
                     # "general_cluster": ["Target_IP4"],
                 },
                 "CATEGORIES": {"IP4": ["Source_IP4", "Target_IP4"]},
@@ -643,8 +620,6 @@ class AVRMarlowe:
             },
             default_mapping="#CCC",
         )
-        self.g = self.g.settings(
-            url_params={"play": 1000, "strongGravity": True, "pointOpacity": 0.6}
-        )
+        self.g = self.g.settings(url_params={"play": 1000, "strongGravity": True, "pointOpacity": 0.6})
 
         return self.g.plot(render=render)

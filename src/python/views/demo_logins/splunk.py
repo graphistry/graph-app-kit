@@ -55,9 +55,7 @@ class SplunkConnection:
 
     def connect(self) -> bool:
         try:
-            self.service = client.connect(
-                host=self.host, username=self.username, password=self.password
-            )
+            self.service = client.connect(host=self.host, username=self.username, password=self.password)
             logger.debug("Splunk connection established\n") if self.verbose else None
             return True
         except Exception as e:
@@ -113,8 +111,7 @@ class SplunkConnection:
                 }
 
                 status = (
-                    "\r%(doneProgress)03.1f%%   %(scanCount)d scanned   "
-                    "%(eventCount)d matched   %(resultCount)d results\n"
+                    "\r%(doneProgress)03.1f%%   %(scanCount)d scanned   " "%(eventCount)d matched   %(resultCount)d results\n"
                 ) % stats
 
                 logger.info(status)
@@ -129,9 +126,7 @@ class SplunkConnection:
             results_list: List = []
 
             # Doing one loop now, then another
-            r = splunk_results.JSONResultsReader(
-                job.results(output_mode="json", count=result_count, offset=offset)
-            )
+            r = splunk_results.JSONResultsReader(job.results(output_mode="json", count=result_count, offset=offset))
 
             for record in r:
                 offset += 0
@@ -180,11 +175,7 @@ class SplunkConnection:
 
             # For now we do not need the values of the dropped fields
             if drop_cols and isinstance(drop_cols, list):
-                [
-                    cleaned_item.pop(field)
-                    for field in drop_cols
-                    if field in cleaned_item
-                ]
+                [cleaned_item.pop(field) for field in drop_cols if field in cleaned_item]
 
             # Put the cleaned up item in the list that will become a pd.DataFrame
             df_results.append(cleaned_item)
@@ -193,9 +184,7 @@ class SplunkConnection:
         return df
 
     @staticmethod
-    def parse_filter_pair(
-        query: str, col: str, filter_pair: Tuple[str, Union[str, int, float]]
-    ) -> str:
+    def parse_filter_pair(query: str, col: str, filter_pair: Tuple[str, Union[str, int, float]]) -> str:
         # First comes op, then comes value
         op = filter_pair[0]
         value = filter_pair[1]
@@ -266,9 +255,7 @@ class SplunkConnection:
                         for filter_pair in val:
                             assert len(filter_pair) == 2
                             try:
-                                query += SplunkConnection.parse_filter_pair(
-                                    query=query, col=col, filter_pair=filter_pair
-                                )
+                                query += SplunkConnection.parse_filter_pair(query=query, col=col, filter_pair=filter_pair)
                             except BadFilterPairException:
                                 continue
 
@@ -276,9 +263,7 @@ class SplunkConnection:
                     else:
                         assert len(val) == 2
                         try:
-                            query += SplunkConnection.parse_filter_pair(
-                                query=query, col=col, filter_pair=val
-                            )
+                            query += SplunkConnection.parse_filter_pair(query=query, col=col, filter_pair=val)
                         except BadFilterPairException:
                             continue
 
@@ -297,9 +282,7 @@ class SplunkConnection:
 
         return query
 
-    def get_unique_values(
-        self, index: str, field: str
-    ) -> List[Optional[Union[str, Number]]]:
+    def get_unique_values(self, index: str, field: str) -> List[Optional[Union[str, Number]]]:
         """get_unique_values Get the unique values of any field in any index using Splunk's stats command
 
         Parameters

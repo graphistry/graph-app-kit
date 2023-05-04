@@ -9,9 +9,9 @@ from graphistry import Plottable
 from util import getChild
 from views.demo_logins.marlowe import (
     AUTH_SAFE_FIELDS,
-    AVRDataResource,
-    AVRMarlowe,
-    AVRMissingData,
+    AuthDataResource,
+    AuthMarlowe,
+    AuthMissingData,
 )
 from views.demo_logins.splunk import SplunkConnection
 
@@ -123,9 +123,7 @@ def sidebar_area():
         end_date = st.sidebar.date_input(label="End Date", value=month_ago)
         end_time = st.sidebar.time_input(label="End Time", value=current_hour)
 
-        logger.debug(
-            f"start_date={start_date} start_time={start_time} | end_date={end_date} end_time={end_time}\n"
-        )
+        logger.debug(f"start_date={start_date} start_time={start_time} | end_date={end_date} end_time={end_time}\n")
 
         start_datetime = dp.parse(f"{start_date} {start_time}")
         end_datetime = dp.parse(f"{end_date} {end_time}")
@@ -180,20 +178,16 @@ def run_filters(start_datetime, end_datetime, cluster_id):
 
         # Clean the Splunk results and send them to Graphistry to GPU render and return a url
         try:
-            data_resource = AVRDataResource(
-                edf=results, feature_columns=list(AUTH_SAFE_FIELDS.keys())
-            )
+            data_resource = AuthDataResource(edf=results, feature_columns=list(AUTH_SAFE_FIELDS.keys()))
             # Generate the graph
-            marlowe: AVRMarlowe = AVRMarlowe(data_resource=data_resource)
+            marlowe: AuthMarlowe = AuthMarlowe(data_resource=data_resource)
             marlowe.register(
                 api=3,
                 protocol=os.getenv("GRAPHISTRY_PROTOCOL", "https"),
                 server=os.getenv("GRAPHISTRY_SERVER", "hub.graphistry.com"),
                 username=os.getenv("GRAPHISTRY_USERNAME"),
                 password=os.getenv("GRAPHISTRY_PASSWORD"),
-                client_protocol_hostname=os.getenv(
-                    "GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME"
-                ),
+                client_protocol_hostname=os.getenv("GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME"),
             )
             g: Plottable = marlowe.umap()
             graph_url: str = g.plot(render=False)
@@ -202,7 +196,7 @@ def run_filters(start_datetime, end_datetime, cluster_id):
                 "graph_url": graph_url,
                 "cluster_df": data_resource.cluster_df,
             }
-        except AVRMissingData:
+        except AuthMissingData:
             st.error("Your query returned no records.", icon="🚨")
 
 
