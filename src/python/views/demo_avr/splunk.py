@@ -165,8 +165,8 @@ class SplunkConnection:
         reader = self.service.jobs.oneshot(
             query,
             count=count,
-            earliest_time="2019-03-10T00:00:00Z",
-            latest_time="2019-03-18T00:00:00Z",
+            # earliest_time="2019-03-10T00:00:00Z",
+            # latest_time="2019-03-18T00:00:00Z",
             output_mode="json",
             adhoc_search_level="verbose",
         )
