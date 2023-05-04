@@ -7,13 +7,13 @@ from components import GraphistrySt, URLParam
 from css import all_css
 from graphistry import Plottable
 from util import getChild
-from views.demo_logins.marlowe import (
+from views.demo_login.marlowe import (
     AUTH_SAFE_FIELDS,
     AuthDataResource,
     AuthMarlowe,
     AuthMissingData,
 )
-from views.demo_logins.splunk import SplunkConnection
+from views.demo_login.splunk import SplunkConnection
 
 import streamlit as st
 
