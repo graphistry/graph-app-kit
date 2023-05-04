@@ -36,8 +36,9 @@ INDEX = "auth_txt_50k"
 def info():
     return {
         "id": app_id,
-        "name": "Auth Analysis",
-        "tags": ["prod", "demo", "cyber", "cybersecurity", "security"],
+        "name": "Cyber: Auth Analysis",
+        "tags": ["cyber", "cybersecurity", "security"],
+        "enabled": True,
     }
 
 
