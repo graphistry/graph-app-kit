@@ -258,6 +258,9 @@ class AVRDataResource:
         new_edf["Target_IP4"] = new_edf["Target_IP4"].astype(str)
         new_edf["Target_IP4"] = new_edf["Target_IP4"].str.replace("nan", "None")
 
+        # Null Category fields cause the color by to fail, so we will fill them with "Unknown"
+        new_edf["Category"] = new_edf["Category"].fillna("Unknown", inplace=False)
+
         if self.debug:
             logger.debug(f'new_edf["DetectTime"].min(): {new_edf["DetectTime"].min()}\n')
             logger.debug(f'new_edf["DetectTime"].max(): {new_edf["DetectTime"].max()}\n')
