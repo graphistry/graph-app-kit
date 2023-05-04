@@ -1,6 +1,5 @@
 """This file marlowe.py implements utilities for using UMAP in a streamlit application.
 It uses environment variables from .env and is rigorously typed."""
-import logging
 import random
 from datetime import datetime
 from typing import Dict, List, Literal, Optional, Type, TypeVar, Union
@@ -13,6 +12,7 @@ import pandas as pd
 from graphistry.features import topic_model
 from graphistry.Plottable import Plottable
 from IPython.core.display import HTML
+from util import getChild
 
 # Reproducible samples
 SEED = 31337
@@ -22,9 +22,7 @@ np.random.seed = SEED
 # Where to store and load the UMAP model for the topic model
 UMAP_MODEL_PATH = ".models/umap.topic"
 
-# Setup better logging to STDERR and a file if we miss what happend.
-logger = logging.getLogger()
-logger.setLevel(logging.WARNING)
+logger = getChild("marlowe")
 
 # Default categorical field to use to draw color on the nodes
 DEFAULT_COLOR_BY: str = "Category"
@@ -472,7 +470,7 @@ class AVRMarlowe:
         if X:  # and check_type(X, List[str]): # remove type check
             try:
                 if self.debug:
-                    logging.debug(
+                    logger.debug(
                         f"assert len([x for x in X if x in self.data.edf.columns]) = {len([x for x in X if x in self.data_resource.edf.columns])}"
                         + f" == len(X) = {len(X)}"
                     )

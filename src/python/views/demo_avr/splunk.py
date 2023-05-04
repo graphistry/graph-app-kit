@@ -1,17 +1,17 @@
 """This file splunk.py implements a SplunkConnection that exposes a service and offers normal querying, pd.DataFrames and one-shot queries.
 It uses environment variables from .env and is rigorously typed."""
 import copy
-import logging
 from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 import splunklib.client as client
 import splunklib.results as splunk_results
+from util import getChild
 
 # Logging is too much! Quiet it down.
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger = getChild("splunk")
+
 
 # If we are returning a DataFrame, we may not want these columns as they aren't useful and clutter the display
 SPLUNK_SYSTEM_COLS = [
@@ -57,9 +57,7 @@ class SplunkConnection:
 
     def connect(self) -> bool:
         try:
-            self.service = client.connect(
-                host=self.host, username=self.username, password=self.password
-            )
+            self.service = client.connect(host=self.host, username=self.username, password=self.password)
             logger.debug("Splunk connection established\n") if self.verbose else None
             return True
         except Exception as e:
@@ -115,8 +113,7 @@ class SplunkConnection:
                 }
 
                 status = (
-                    "\r%(doneProgress)03.1f%%   %(scanCount)d scanned   "
-                    "%(eventCount)d matched   %(resultCount)d results\n"
+                    "\r%(doneProgress)03.1f%%   %(scanCount)d scanned   " "%(eventCount)d matched   %(resultCount)d results\n"
                 ) % stats
 
                 logger.info(status)
@@ -131,9 +128,7 @@ class SplunkConnection:
             results_list: List = []
 
             # Doing one loop now, then another
-            r = splunk_results.JSONResultsReader(
-                job.results(output_mode="json", count=result_count, offset=offset)
-            )
+            r = splunk_results.JSONResultsReader(job.results(output_mode="json", count=result_count, offset=offset))
 
             for record in r:
                 offset += 0
@@ -193,9 +188,7 @@ class SplunkConnection:
         return df
 
     @staticmethod
-    def parse_filter_pair(
-        query: str, col: str, filter_pair: Tuple[str, Union[str, int, float]]
-    ) -> str:
+    def parse_filter_pair(query: str, col: str, filter_pair: Tuple[str, Union[str, int, float]]) -> str:
         # First comes op, then comes value
         op = filter_pair[0]
         value = filter_pair[1]
@@ -270,9 +263,7 @@ class SplunkConnection:
                             logger.debug(f"Processing filter_pair: {filter_pair}\n")
                             assert len(filter_pair) == 2
                             try:
-                                query += SplunkConnection.parse_filter_pair(
-                                    query=query, col=col, filter_pair=filter_pair
-                                )
+                                query += SplunkConnection.parse_filter_pair(query=query, col=col, filter_pair=filter_pair)
                             except BadFilterPairException:
                                 continue
 
@@ -281,9 +272,7 @@ class SplunkConnection:
                         logger.debug(f"NO! NOT A NESTED QUERY: {val}\n")
                         assert len(val) == 2
                         try:
-                            query += SplunkConnection.parse_filter_pair(
-                                query=query, col=col, filter_pair=val
-                            )
+                            query += SplunkConnection.parse_filter_pair(query=query, col=col, filter_pair=val)
                         except BadFilterPairException:
                             continue
 
