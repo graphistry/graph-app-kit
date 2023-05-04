@@ -1,8 +1,3 @@
-import graphistry, pandas as pd, streamlit as st
-from components import GraphistrySt, URLParam
-from css import all_css
-from util import getChild
-
 import logging
 import os
 import random
@@ -11,11 +6,12 @@ from typing import Any, Dict, List, Optional, Union
 
 import dateutil.parser as dp
 import numpy as np
-
+import pandas as pd
+from components import GraphistrySt, URLParam
+from css import all_css
 from graphistry.Plottable import Plottable
-from streamlit.components import v1 as components
 from streamlit.logger import get_logger
-
+from util import getChild
 from views.demo_avr.marlowe import (
     AVR_SAFE_COLUMNS,
     FEATURE_COLUMNS,
@@ -23,13 +19,14 @@ from views.demo_avr.marlowe import (
     AVRMarlowe,
     AVRMissingData,
 )
-
 from views.demo_avr.splunk import SplunkConnection
+
+import streamlit as st
 
 # App configuration
 CSS_PATH = "/apps/views/demo_avr/app.css"
-PIVOT_URL_INVESTIGATION_ID="123"
-APP_NOW_TIME="2019-03-18T00:00:00Z"
+PIVOT_URL_INVESTIGATION_ID = "123"
+APP_NOW_TIME = "2019-03-18T00:00:00Z"
 
 ############################################
 #
@@ -38,20 +35,23 @@ APP_NOW_TIME="2019-03-18T00:00:00Z"
 ############################################
 #  Controls how entrypoint.py picks it up
 
-app_id = 'demo_avr'
+app_id = "demo_avr"
 logger = getChild(app_id)
 urlParams = URLParam(app_id)
 
 INDEX: str = "avr_59k"
-#SAMPLE_SIZE = 1000
+# SAMPLE_SIZE = 1000
 QUERY_SIZE = 1000
+
 
 def info():
     return {
-        'id': app_id,
-        'name': 'Incident Group Explorer',
-        'tags': ['demo', 'demo_intro']
+        "id": app_id,
+        "name": "Cyber: Incident Explorer",
+        "tags": ["demo", "demo_intro"],
+        "enabled": True,
     }
+
 
 def run():
     run_all()
@@ -73,7 +73,6 @@ def custom_css():
             f"""<style>{f.read()}</style>""",
             unsafe_allow_html=True,
         )
-
 
 
 # Given URL params, render left sidebar form and return combined filter settings
@@ -108,9 +107,7 @@ def sidebar_area(cluster_id, general_probability, cluster_select_values):
     end_date = st.sidebar.date_input("End Date", value=datetime(2019, 3, 18))
     end_time = st.sidebar.time_input("End Time", time(0, 00))
 
-    logger.debug(
-        f"start_date={start_date} start_time={start_time} end_date={end_date} end_time={end_time}\n"
-    )
+    logger.debug(f"start_date={start_date} start_time={start_time} end_date={end_date} end_time={end_time}\n")
 
     start_datetime = dp.parse(f"{start_date} {start_time}")
     end_datetime = dp.parse(f"{end_date} {end_time}")
@@ -156,20 +153,23 @@ def sidebar_area(cluster_id, general_probability, cluster_select_values):
     logger.debug(f"Final query_params: {query_params}\n")
     st.experimental_set_query_params(**query_params)
 
-    return {'cluster_id': cluster_id, 'general_probability': general_probability, 'start_datetime': start_datetime, 'end_datetime': end_datetime}
+    return {
+        "cluster_id": cluster_id,
+        "general_probability": general_probability,
+        "start_datetime": start_datetime,
+        "end_datetime": end_datetime,
+    }
+
 
 # Given filter settings, generate/cache/return dataframes & viz
-def run_filters(splunk_client, cluster_id, general_probability, start_datetime, end_datetime): 
-
+def run_filters(splunk_client, cluster_id, general_probability, start_datetime, end_datetime):
     query_dict: Dict[str, Union[str, float, List[str]]] = {
         "general_cluster": str(cluster_id),
         "general_probability": (">=", general_probability),
         "DetectTime": [(">=", start_datetime.isoformat()), ("<=", end_datetime.isoformat())],
     }
 
-    filter_query = SplunkConnection.build_query(
-        INDEX, query_dict=query_dict, fields=list(AVR_SAFE_COLUMNS.keys())
-    )
+    filter_query = SplunkConnection.build_query(INDEX, query_dict=query_dict, fields=list(AVR_SAFE_COLUMNS.keys()))
     logger.debug(f"filter_query: {filter_query}\n")
     splunk_edf: pd.DataFrame = splunk_client.one_shot_splunk(filter_query, count=QUERY_SIZE)
 
@@ -192,9 +192,7 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
     graphistry_password: str = os.getenv("GRAPHISTRY_PASSWORD")
     graphistry_protocol: str = os.getenv("GRAPHISTRY_PROTOCOL")
     graphistry_server: str = os.getenv("GRAPHISTRY_SERVER")
-    graphistry_client_protocol_hostname: Optional[str] = os.getenv(
-        "GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME"
-    )
+    graphistry_client_protocol_hostname: Optional[str] = os.getenv("GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME")
     # logger.debug(
     #     f"graphistry_username={graphistry_username}, graphistry_password={graphistry_password}, graphistry_protocol={graphistry_protocol},"
     #     + f" graphistry_server={graphistry_server}, graphistry_client_protocol_hostname={graphistry_client_protocol_hostname}\n"
@@ -208,7 +206,7 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
         data_resource.featurize_edges()
         data_resource.add_pivot_url_column(
             investigation_id=investigation_id,
-            graphistry_protocol=graphistry_protocol, 
+            graphistry_protocol=graphistry_protocol,
             graphistry_server=graphistry_server,
             unix_time=AVRDataResource.iso_to_unix(app_now_time),
             lookback_period=LOOKBACK_PERIOD,
@@ -238,13 +236,14 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
     else:
         st.error("Your query returned no records.", icon="🚨")
 
-    return {'splunk_edf': splunk_edf, 'graph_url': graph_url}
+    return {"splunk_edf": splunk_edf, "graph_url": graph_url}
 
-def main_area(splunk_edf, graph_url): 
-    logger.debug('rendering main area, with url: %s', graph_url)
+
+def main_area(splunk_edf, graph_url):
+    logger.debug("rendering main area, with url: %s", graph_url)
     with st.spinner("Generating graph..."):
         GraphistrySt().render_url(graph_url)
-    
+
 
 ############################################
 #
@@ -254,11 +253,9 @@ def main_area(splunk_edf, graph_url):
 
 
 def run_all():
-
     custom_css()
 
     try:
-
         # Logging is too much! Quiet it down.
         logger = get_logger(__name__)
         logger.setLevel(logging.WARNING)
@@ -268,21 +265,13 @@ def run_all():
         random.seed = SEED
         np.random.seed = SEED
 
-        SAMPLE_SIZE = 1000
-        QUERY_SIZE = 1000
-
         splunk_username: str = os.getenv("SPLUNK_USERNAME")
         splunk_password: str = os.getenv("SPLUNK_PASSWORD")
         splunk_host: str = os.getenv("SPLUNK_HOST")
-        logger.debug(
-            f"splunk_username={splunk_username}, splunk_password={splunk_password}, splunk_host={splunk_host}\n"
-        )
-
+        logger.debug(f"splunk_username={splunk_username}, splunk_password={splunk_password}, splunk_host={splunk_host}\n")
 
         # Instantiate, connect and cache the Splunk client as a reusable resource
-        splunk_client: Union[SplunkConnection, Any] = cache_splunk_client(
-            splunk_username, splunk_password, splunk_host
-        )
+        splunk_client: Union[SplunkConnection, Any] = cache_splunk_client(splunk_username, splunk_password, splunk_host)
 
         # Query parameters from a shared URL
         query_params: Dict[str, Any] = st.experimental_get_query_params()
@@ -291,30 +280,27 @@ def run_all():
         logger.debug(f"Initial query_params: {query_params}\n")
 
         # Process the canonical cluster / incident ID and its probability - remove the list and get the value, deal with nulls
-        cluster_id: Optional[Union[str, int]] = process_query_param(
-            "cluster_id", query_params.get("cluster_id"), query_params
-        )
+        cluster_id: Optional[Union[str, int]] = process_query_param("cluster_id", query_params.get("cluster_id"), query_params)
         general_probability: Optional[Union[str, float]] = process_query_param(
             "general_probability", query_params.get("general_probability"), query_params
         )
 
         # First we need to get all the unique
         cluster_select_values = ["None"] + splunk_client.get_unique_values("avr_59k", "general_cluster")
-        
+
         # Render sidebar and get current settings
         sidebar_params = sidebar_area(cluster_id, general_probability, cluster_select_values)
 
         # Compute filter pipeline (with auto-caching based on filter setting inputs)
         # Selective mark these as URL params as well
-        filter_params = run_filters(splunk_client, **sidebar_params) 
+        filter_params = run_filters(splunk_client, **sidebar_params)
 
         # Render main viz area based on computed filter pipeline results and sidebar settings
-        main_area(**filter_params) 
+        main_area(**filter_params)
 
     except Exception as exn:
-        st.write('Error loading dashboard') 
+        st.write("Error loading dashboard")
         st.write(exn)
-
 
 
 #########################################################
@@ -347,11 +333,11 @@ def is_float_str(s: str) -> bool:
     else:
         return False
 
+
 # Process the canonical ID from query params - shouldn't a builtin utility do this?
 
-def process_query_param(
-    q_key: str, q_param: Optional[Union[str, int, float, List]], query_params: Dict[str, Any]
-):
+
+def process_query_param(q_key: str, q_param: Optional[Union[str, int, float, List]], query_params: Dict[str, Any]):
     """process_query_param Get the canonical ID as an integer, if it exists."""
     clean_param: Optional[Union[str, int, float, List]] = None
 
@@ -397,4 +383,3 @@ def preprocess_cluster_id(cluster_id: Union[None, str, int, List], query_params:
     if isinstance(cluster_id, str):
         cluster_id = int(cluster_id)
     return cluster_id
-
