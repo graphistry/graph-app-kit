@@ -115,8 +115,9 @@ def sidebar_area():
     # urlParams.set_field('N', n)
 
     with st.sidebar:
-        today = datetime.now().date()
-        current_hour = datetime.now().hour
+        now = datetime.now()
+        today = now.date()
+        current_hour = now.time()
         month_ago = today - timedelta(days=30)
 
         start_date = st.sidebar.date_input(label="Start Date", value=today)

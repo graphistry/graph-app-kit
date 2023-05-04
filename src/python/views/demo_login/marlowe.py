@@ -14,7 +14,7 @@ from graphistry.Plottable import Plottable
 from IPython.core.display import HTML
 from util import getChild
 
-logger = getChild()
+logger = getChild("marlowe")
 
 # Reproducible samples
 SEED = 31337
