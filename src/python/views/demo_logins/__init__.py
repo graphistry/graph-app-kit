@@ -3,7 +3,6 @@ from datetime import datetime, time, timedelta
 from typing import Dict, List, Union
 
 import dateutil.parser as dp
-import pandas as pd
 from components import GraphistrySt, URLParam
 from css import all_css
 from graphistry import Plottable
@@ -26,7 +25,7 @@ import streamlit as st
 #  Controls how entrypoint.py picks it up
 
 
-app_id = "auth_analysis"
+app_id = "demo_logins"
 logger = getChild(app_id)
 urlParams = URLParam(app_id)
 
@@ -152,15 +151,6 @@ def cache_splunk_client(username: str, password: str, host: str) -> SplunkConnec
     return splunk_client
 
 
-# AVRDataResource is doing this now...
-def make_cluster_df(ndf: pd.DataFrame, cluster_id: int) -> pd.DataFrame:
-    cluster_df = ndf[ndf["dbscan"] == cluster_id]
-    cluster_df = cluster_df.drop(columns=["dbscan"])
-    cluster_df = cluster_df.drop_duplicates()
-    # NOT USED
-    return cluster_df
-
-
 # Given filter settings, generate/cache/return dataframes & viz
 def run_filters(start_datetime, end_datetime, cluster_id):
     splunk_client = cache_splunk_client(
@@ -214,7 +204,6 @@ def run_filters(start_datetime, end_datetime, cluster_id):
             }
         except AVRMissingData:
             st.error("Your query returned no records.", icon="🚨")
-            graph_url = None
 
 
 def main_area(

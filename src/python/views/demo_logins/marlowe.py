@@ -173,6 +173,8 @@ class AVRDataResource:
         self.clean_edge_list(inplace=True)
         # ...and set deduped edge features as nodes
         self.featurize_edges()
+        # Create a DataFrame describing the DBScan clusters of anomalous events
+        self.describe_clusters()
 
     def filter(
         self, bool_series: TypeVar("pd.Series(bool)"), inplace: bool = False
@@ -402,6 +404,16 @@ class AVRDataResource:
 
         # Compute the most anomalous nodes per cluster
         top_n_computers = self.top_nodes()
+        top_n_computers
+
+        # Join anom_cluster_counts and top_n_computers
+        self.cluster_df = anom_cluster_counts.merge(
+            top_n_computers,
+            on="anomaly_cluster",
+            how="left",
+        )
+
+        return self.cluster_df
 
     @staticmethod
     def is_url(url: str) -> bool:
