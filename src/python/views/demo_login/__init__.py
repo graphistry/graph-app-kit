@@ -25,7 +25,7 @@ import streamlit as st
 #  Controls how entrypoint.py picks it up
 
 
-app_id = "demo_logins"
+app_id = "demo_login"
 logger = getChild(app_id)
 urlParams = URLParam(app_id)
 
