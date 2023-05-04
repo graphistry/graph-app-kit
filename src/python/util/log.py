@@ -1,10 +1,12 @@
-import logging, os
+import logging
+import os
 
 logger = logging.getLogger()
 logger.setLevel(
-    logging.getLevelName(os.environ['LOG_LEVEL'])
-    if 'LOG_LEVEL' in os.environ else
-    logging.ERROR)
+    logging.getLevelName(os.environ["LOG_LEVEL"])
+    if "LOG_LEVEL" in os.environ
+    else logging.ERROR
+)
 
 
 def getChild(*args, **kwargs):
