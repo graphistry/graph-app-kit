@@ -127,7 +127,9 @@ class AVRMissingData(Exception):
     """AVRMissingData Exception occurs when our data cleaning filters out all of the data :("""
 
     def __init__(self, *args, **kwargs):
-        default_message = "Trimming to our safe columns (or a previous operation) filtered all the data. Zero records are left."
+        default_message = (
+            "Trimming to our safe columns (or a previous operation) filtered all the data. Zero records are left."
+        )
 
         # if no arguments are passed set the first positional argument
         # to be the default message. To do that, we have to replace the
@@ -173,9 +175,7 @@ class AVRDataResource:
         # ...and set deduped edge features as nodes
         self.featurize_edges()
 
-    def filter(
-        self, bool_series: TypeVar("pd.Series(bool)"), inplace: bool = False
-    ) -> Union[None, pd.DataFrame]:
+    def filter(self, bool_series: TypeVar("pd.Series(bool)"), inplace: bool = False) -> Union[None, pd.DataFrame]:
         """filter Filter our DataFrame using a boolean Series, optionally in place.
 
         Parameters
@@ -237,9 +237,7 @@ class AVRDataResource:
 
         # Cast the columns to their known types
         for col, cast in AVR_SAFE_COLUMNS.items():
-            logger.debug(
-                f"Column: {col} Original Type: {new_edf[col].dtype} Cast: {cast}\n"
-            ) if self.debug else None
+            logger.debug(f"Column: {col} Original Type: {new_edf[col].dtype} Cast: {cast}\n") if self.debug else None
 
             # Cast em if ya got em!
             if cast == "datetime":
@@ -306,7 +304,7 @@ class AVRDataResource:
     def add_pivot_url_column(
         self,
         investigation_id: str,
-        graphistry_protocol: str, 
+        graphistry_protocol: str,
         graphistry_server: str,
         unix_time: float,
         lookback_period: Literal["-1h", "-6h", "-12h", "-1d", "-7d", "-30d", "-365d", "all"],
@@ -329,7 +327,7 @@ class AVRDataResource:
         A url pd.Series[str] or None, by default None. Depends on whether inplace is True or False.
             The Void™
         """
-        
+
         self.edf["pivot_url"] = self.edf["general_cluster"].apply(
             lambda x: PIVOT_URL_TEMPLATE.format(
                 investigation_id=investigation_id,
@@ -340,7 +338,7 @@ class AVRDataResource:
                 lookback_period=lookback_period,
             )
         )
-            
+
     @staticmethod
     def is_url(url: str) -> bool:
         """is_url True if a valid URL is passed, otherwise False
@@ -468,7 +466,7 @@ class AVRMarlowe:
             A graphistry Plottable object, returned by Plottable.umap()
         """
 
-        if X: # and check_type(X, List[str]): # remove type check
+        if X:  # and check_type(X, List[str]): # remove type check
             try:
                 if self.debug:
                     logging.debug(
@@ -550,7 +548,7 @@ class AVRMarlowe:
         )["graph"]
 
         self.g = g.encode_point_color(
-            "category",
+            "Category",
             as_categorical=True,
             categorical_mapping={
                 "ID": "red",
@@ -560,8 +558,6 @@ class AVRMarlowe:
             },
             default_mapping="#CCC",
         )
-        self.g = self.g.settings(
-            url_params={"play": 1000, "strongGravity": True, "pointOpacity": 0.6}
-        )
+        self.g = self.g.settings(url_params={"play": 1000, "strongGravity": True, "pointOpacity": 0.6})
 
         return self.g.plot(render=render)
