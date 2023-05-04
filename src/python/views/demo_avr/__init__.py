@@ -47,7 +47,7 @@ QUERY_SIZE = 1000
 def info():
     return {
         "id": app_id,
-        "name": "Cyber: Incident Explorer",
+        "name": "Cyber: Alert Explorer",
         "tags": ["demo", "demo_intro"],
         "enabled": True,
     }
