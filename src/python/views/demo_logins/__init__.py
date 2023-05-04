@@ -115,14 +115,14 @@ def sidebar_area():
     # urlParams.set_field('N', n)
 
     with st.sidebar:
-        now_dt = datetime.now()
-        today = now_dt.date()
-        current_time = now_dt.time()
+        today = datetime.now().date()
+        current_hour = datetime.now().hour
+        month_ago = today - timedelta(days=30)
 
-        start_date = st.sidebar.date_input("Start Date", value=today)
-        start_time = st.sidebar.time_input("Start Time", value=current_time)
-        end_date = st.sidebar.date_input("End Date", value=today - timedelta(days=30))
-        end_time = st.sidebar.time_input("End Time", time(0, 00))
+        start_date = st.sidebar.date_input(label="Start Date", value=today)
+        start_time = st.sidebar.time_input(label="Start Time", value=time(0, 00))
+        end_date = st.sidebar.date_input(label="End Date", value=month_ago)
+        end_time = st.sidebar.time_input(label="End Time", value=current_hour)
 
         logger.debug(
             f"start_date={start_date} start_time={start_time} | end_date={end_date} end_time={end_time}\n"
@@ -134,7 +134,7 @@ def sidebar_area():
         st.sidebar.divider()
 
         urlParams.get_field("cluster_id", 1)
-        cluster_id: int = st.sidebar.number_input("Cluster ID", value=1, step=1)
+        cluster_id: int = st.sidebar.number_input(label="Cluster ID", value=1, step=1)
         urlParams.set_field("cluster_id", cluster_id)
 
         return {
@@ -162,11 +162,6 @@ def make_cluster_df(ndf: pd.DataFrame, cluster_id: int) -> pd.DataFrame:
 
 
 # Given filter settings, generate/cache/return dataframes & viz
-@st.cache_resource(
-    suppress_st_warning=True,
-    allow_output_mutation=True,
-    hash_funcs={pd.DataFrame: lambda _: None},
-)
 def run_filters(start_datetime, end_datetime, cluster_id):
     splunk_client = cache_splunk_client(
         os.environ["SPLUNK_USERNAME"],
@@ -212,22 +207,22 @@ def run_filters(start_datetime, end_datetime, cluster_id):
             )
             g: Plottable = marlowe.umap()
             graph_url: str = g.plot(render=False)
+
+            return {
+                "graph_url": graph_url,
+                "cluster_df": data_resource.cluster_df,
+            }
         except AVRMissingData:
             st.error("Your query returned no records.", icon="🚨")
             graph_url = None
-
-        return {
-            "graph_url": graph_url,
-            "cluster_df": data_resource.cluster_df,
-        }
 
 
 def main_area(
     start_datetime,
     end_datetime,
     cluster_id,
-    graph_url,
-    cluster_df,
+    graph_url=None,
+    cluster_df=None,
 ):
     logger.debug("rendering main area, with url: %s", graph_url)
     GraphistrySt().render_url(graph_url)
@@ -252,7 +247,11 @@ def run_all():
         filter_pipeline_result = run_filters(**sidebar_filters)
 
         # Render main viz area based on computed filter pipeline results and sidebar settings
-        main_area(**sidebar_filters, **filter_pipeline_result)
+        main_area(
+            **sidebar_filters,
+            # Fill in empties or main_area will choke
+            **filter_pipeline_result or {"graph_url": None, "cluster_df": None},
+        )
 
     except Exception as exn:
         st.write("Error loading dashboard")

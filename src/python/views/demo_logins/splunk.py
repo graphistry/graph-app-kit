@@ -1,17 +1,15 @@
 """This file splunk.py implements a SplunkConnection that exposes a service and offers normal querying,
 pd.DataFrames and one-shot queries. It uses environment variables from .env and is rigorously typed."""
 import copy
-import logging
 from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 import splunklib.client as client
 import splunklib.results as splunk_results
+from util import getChild
 
-# Logging is too much! Quiet it down.
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger = getChild()
 
 # If we are returning a DataFrame, we may not want these columns as they aren't useful and clutter the display
 SPLUNK_SYSTEM_COLS = [
@@ -165,8 +163,6 @@ class SplunkConnection:
         reader = self.service.jobs.oneshot(
             query,
             count=count,
-            # earliest_time="2019-03-10T00:00:00Z",
-            # latest_time="2019-03-18T00:00:00Z",
             output_mode="json",
             adhoc_search_level="verbose",
         )
