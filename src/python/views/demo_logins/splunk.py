@@ -240,6 +240,7 @@ class SplunkConnection:
         ] = None,
         fields: Optional[List[str]] = None,
         sort: Optional[List[str]] = ["_bkt", "_cnt"],
+        debug: bool = False,
     ) -> str:
         """build_query Compose a simple Splunk strink query given a query dict and field list.
 
@@ -294,6 +295,9 @@ class SplunkConnection:
 
         # Add a deterministic sort by _bkt and _cnt by default, othrwise user can specify
         query += f'| sort {" ".join(sort)} ' if sort else ""
+
+        if debug:
+            logger.debug(f"Splunk query: {query}\n")
 
         return query
 

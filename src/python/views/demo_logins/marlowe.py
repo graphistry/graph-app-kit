@@ -167,6 +167,9 @@ class AVRDataResource:
         )
         self.debug = debug
 
+        # Checked later and computed if called by downstream dependencies
+        self.anomalous_nodes = None
+
         # Apply all the cleaning to the edges upon instantiation
         self.trim_to_safe_cols(inplace=True)
         self.clean_edge_list(inplace=True)
@@ -345,6 +348,62 @@ class AVRDataResource:
                 lookback_period=lookback_period,
             )
         )
+
+    def anomaly_counts(self) -> pd.DataFrame:
+        """Count the anomalies per cluster and return a DataFrame of the results sorted descending on anomaly count."""
+
+        # Compute the total anomalies per cluster within the anomalous nodes
+        self.anomalous_nodes = self.ndf[self.ndf["cluster"] == -1]
+        anom_cluster_counts = (
+            self.anomalous_nodes[["_dbscan", "is_anomalous", "RED"]]
+            .groupby("_dbscan")
+            .sum()
+        )
+
+        anom_cluster_counts = (
+            anom_cluster_counts[["is_anomalous", "RED"]]
+            .reset_index()
+            .rename(
+                columns={
+                    "_dbscan": "anomaly_cluster",
+                    "is_anomalous": "anomaly_count",
+                    "RED": "RED",
+                }
+            )
+        )
+
+        if self.debug:
+            logger.debug(f"Total anom_cluster_counts = {len(anom_cluster_counts)}\n")
+
+        return anom_cluster_counts.sort_values(by="anomaly_count", ascending=False)
+
+    def top_nodes(self, n: int = 5) -> pd.Series:
+        """Create a list of the top n most anomalous computers by src_computer column."""
+
+        if not self.anomalous_nodes:
+            self.anomaly_counts()
+
+        anomalous_cpu_clusters = (
+            self.anomalous_nodes.groupby(["src_computer", "_dbscan"])
+            .count()
+            .reset_index()
+            .rename(columns={"src_computer": "computer", "_dbscan": "anomaly_cluster"})
+        )
+
+        # Get the count of anomalies per computer - ndf is a deduplicated edge list of src/dst computers
+        top_n_computers = anomalous_cpu_clusters.groupby("anomaly_cluster")[
+            "computer"
+        ].apply(lambda x: list(x)[:n])
+        return top_n_computers
+
+    def describe_clusters(self) -> pd.DataFrame:
+        """Describe the clusters in the data we ingested and return a DataFrame of the results."""
+
+        # Compute the pieces of the DataFrame and then stitch them together
+        anom_cluster_counts = self.anomaly_counts()
+
+        # Compute the most anomalous nodes per cluster
+        top_n_computers = self.top_nodes()
 
     @staticmethod
     def is_url(url: str) -> bool:

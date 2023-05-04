@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 from typing import Dict, List, Union
 
 import dateutil.parser as dp
@@ -8,7 +8,12 @@ from components import GraphistrySt, URLParam
 from css import all_css
 from graphistry import Plottable
 from util import getChild
-from views.demo_logins.marlowe import AUTH_SAFE_FIELDS, AVRDataResource, AVRMarlowe, AVRMissingData
+from views.demo_logins.marlowe import (
+    AUTH_SAFE_FIELDS,
+    AVRDataResource,
+    AVRMarlowe,
+    AVRMissingData,
+)
 from views.demo_logins.splunk import SplunkConnection
 
 import streamlit as st
@@ -110,13 +115,17 @@ def sidebar_area():
     # urlParams.set_field('N', n)
 
     with st.sidebar:
-        start_date = st.sidebar.date_input("Start Date", value=datetime(2019, 3, 11))
-        start_time = st.sidebar.time_input("Start Time", time(0, 00))
-        end_date = st.sidebar.date_input("End Date", value=datetime(2019, 3, 18))
+        now_dt = datetime.now()
+        today = now_dt.date()
+        current_time = now_dt.time()
+
+        start_date = st.sidebar.date_input("Start Date", value=today)
+        start_time = st.sidebar.time_input("Start Time", value=current_time)
+        end_date = st.sidebar.date_input("End Date", value=today - timedelta(days=30))
         end_time = st.sidebar.time_input("End Time", time(0, 00))
 
         logger.debug(
-            f"start_date={start_date} start_time={start_time} end_date={end_date} end_time={end_time}\n"
+            f"start_date={start_date} start_time={start_time} | end_date={end_date} end_time={end_time}\n"
         )
 
         start_datetime = dp.parse(f"{start_date} {start_time}")
@@ -124,7 +133,9 @@ def sidebar_area():
 
         st.sidebar.divider()
 
-        cluster_id: int = st.sidebar.number_input("Cluster ID", value=0, step=1)
+        urlParams.get_field("cluster_id", 1)
+        cluster_id: int = st.sidebar.number_input("Cluster ID", value=1, step=1)
+        urlParams.set_field("cluster_id", cluster_id)
 
         return {
             "start_datetime": start_datetime,
@@ -141,12 +152,17 @@ def cache_splunk_client(username: str, password: str, host: str) -> SplunkConnec
     return splunk_client
 
 
+# AVRDataResource is doing this now...
 def make_cluster_df(ndf: pd.DataFrame, cluster_id: int) -> pd.DataFrame:
-    cluster_df = ndf[ndf["_dbscan"] == cluster_id]
+    cluster_df = ndf[ndf["dbscan"] == cluster_id]
+    cluster_df = cluster_df.drop(columns=["dbscan"])
+    cluster_df = cluster_df.drop_duplicates()
+    # NOT USED
+    return cluster_df
 
 
 # Given filter settings, generate/cache/return dataframes & viz
-@st.cache(
+@st.cache_resource(
     suppress_st_warning=True,
     allow_output_mutation=True,
     hash_funcs={pd.DataFrame: lambda _: None},
@@ -159,7 +175,7 @@ def run_filters(start_datetime, end_datetime, cluster_id):
     )
 
     query_dict: Dict[str, Union[str, float, List[str]]] = {
-        "_dbscan": cluster_id,
+        "dbscan": cluster_id,
         "datetime": [
             (">=", start_datetime.isoformat()),
             ("<=", end_datetime.isoformat()),
@@ -173,38 +189,45 @@ def run_filters(start_datetime, end_datetime, cluster_id):
                 query_dict=query_dict,
                 fields=list(AUTH_SAFE_FIELDS.keys()),
                 sort=[],
+                debug=True,
             )
         )
 
+        # Clean the Splunk results and send them to Graphistry to GPU render and return a url
         try:
-            dr = AVRDataResource(edf=results, feature_columns=list(AUTH_SAFE_FIELDS.keys()))
-            marlowe = AVRMarlowe(data_resource=dr)
+            data_resource = AVRDataResource(
+                edf=results, feature_columns=list(AUTH_SAFE_FIELDS.keys())
+            )
+            # Generate the graph
+            marlowe: AVRMarlowe = AVRMarlowe(data_resource=data_resource)
+            marlowe.register(
+                api=3,
+                protocol=os.getenv("GRAPHISTRY_PROTOCOL", "https"),
+                server=os.getenv("GRAPHISTRY_SERVER", "hub.graphistry.com"),
+                username=os.getenv("GRAPHISTRY_USERNAME"),
+                password=os.getenv("GRAPHISTRY_PASSWORD"),
+                client_protocol_hostname=os.getenv(
+                    "GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME"
+                ),
+            )
+            g: Plottable = marlowe.umap()
+            graph_url: str = g.plot(render=False)
         except AVRMissingData:
-
-
-        # Generate the graph
-        marlowe: AVRMarlowe = AVRMarlowe(data_resource=dr)
-        marlowe.register(
-            api=3,
-            protocol=os.getenv("GRAPHISTRY_PROTOCOL", "https"),
-            server=os.getenv("GRAPHISTRY_SERVER", "hub.graphistry.com"),
-            username=os.getenv("GRAPHISTRY_USERNAME"),
-            password=os.getenv("GRAPHISTRY_PASSWORD"),
-            client_protocol_hostname=os.getenv("GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME"),
-        )
-        g: Plottable = marlowe.umap()
-        graph_url: str = g.plot(render=False)
-
-        cluster_df: pd.DataFrame = make_cluster_df(g._nodes, cluster_id)
+            st.error("Your query returned no records.", icon="🚨")
+            graph_url = None
 
         return {
             "graph_url": graph_url,
-            "cluster_df": cluster_df,
+            "cluster_df": data_resource.cluster_df,
         }
 
 
 def main_area(
-    num_nodes, num_edges, bank, bank_ids, nodes_df, edges_df, graph_url, ego_banks_df
+    start_datetime,
+    end_datetime,
+    cluster_id,
+    graph_url,
+    cluster_df,
 ):
     logger.debug("rendering main area, with url: %s", graph_url)
     GraphistrySt().render_url(graph_url)
