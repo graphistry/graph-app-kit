@@ -1,2 +1,4 @@
 ### your custom requirements here
+graphistry[ai] == 0.29.0
 splunk-sdk
+ipython
