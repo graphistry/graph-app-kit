@@ -111,14 +111,6 @@ hr {
 # Given URL params, render left sidebar form and return combined filter settings
 # https://docs.streamlit.io/en/stable/api.html#display-interactive-widgets
 def sidebar_area():
-    # regular param (not in url)
-    # e = st.sidebar.number_input('Number of edges', min_value=10, max_value=100000, value=100, step=20)
-
-    # deep-linkable param (in url)
-    # n_init = urlParams.get_field('N', 100)
-    # n = st.sidebar.number_input('Number of nodes', min_value=10, max_value=100000, value=n_init, step=20)
-    # urlParams.set_field('N', n)
-
     with st.sidebar:
         now = datetime.now()
         today = now.date()
@@ -137,8 +129,8 @@ def sidebar_area():
 
         st.sidebar.divider()
 
-        urlParams.get_field("cluster_id", 1)
-        cluster_id: int = st.sidebar.number_input(label="Cluster ID", value=1, step=1)
+        urlParams.get_field("cluster_id", 0)
+        cluster_id: int = st.sidebar.number_input(label="Cluster ID", value=0, step=1)
         urlParams.set_field("cluster_id", cluster_id)
 
         return {
@@ -166,13 +158,14 @@ def run_filters(start_datetime, end_datetime, cluster_id):
         )
 
         query_dict: Dict[str, Union[str, float, List[str]]] = {
-            "dbscan": cluster_id,
             "datetime": [
                 (">=", start_datetime.isoformat()),
                 ("<=", end_datetime.isoformat()),
             ],
         }
-        logger.debug(f"query_dict: {query_dict}")
+        if cluster_id > 0:
+            query_dict["dbscan"] = cluster_id
+        logger.debug(f"query_dict: {query_dict}\n")
 
         splunk_query = SplunkConnection.build_query(
             index=INDEX,
@@ -181,7 +174,7 @@ def run_filters(start_datetime, end_datetime, cluster_id):
             sort=[],
             debug=True,
         )
-        logger.debug(f"Splunk query: {splunk_query}")
+        logger.debug(f"Splunk query: {splunk_query}\n")
         results = splunk_client.one_shot_splunk(splunk_query)
 
         # Clean the Splunk results and send them to Graphistry to GPU render and return a url
@@ -189,14 +182,6 @@ def run_filters(start_datetime, end_datetime, cluster_id):
             data_resource = AuthDataResource(edf=results, feature_columns=list(AUTH_SAFE_FIELDS.keys()))
             # Generate the graph
             marlowe: AuthMarlowe = AuthMarlowe(data_resource=data_resource)
-            marlowe.register(
-                api=3,
-                protocol=os.getenv("GRAPHISTRY_PROTOCOL", "https"),
-                server=os.getenv("GRAPHISTRY_SERVER", "hub.graphistry.com"),
-                username=os.getenv("GRAPHISTRY_USERNAME"),
-                password=os.getenv("GRAPHISTRY_PASSWORD"),
-                client_protocol_hostname=os.getenv("GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME"),
-            )
             g: Plottable = marlowe.umap()
             graph_url: str = g.plot(render=False)
 
@@ -215,7 +200,7 @@ def main_area(
     graph_url=None,
     cluster_df=None,
 ):
-    logger.debug("rendering main area, with url: %s", graph_url)
+    logger.debug("rendering main area, with url: %s\n", graph_url)
     GraphistrySt().render_url(graph_url)
 
 

@@ -218,16 +218,16 @@ class AuthDataResource:
                 "Trimming to our safe columns (or a previous operation) filtered all the data. Zero records are left."
             )
 
-        logger.debug(f"self.edf.columns: {self.edf.columns}")
+        logger.debug(f"self.edf.columns: {self.edf.columns}\n")
         logger.debug(
-            f"len(self.edf.columns): {len(self.edf.columns)} | len(AUTH_SAFE_FIELDS.keys()): {len(AUTH_SAFE_FIELDS.keys())}"
+            f"len(self.edf.columns): {len(self.edf.columns)} | len(AUTH_SAFE_FIELDS.keys()): {len(AUTH_SAFE_FIELDS.keys())}\n"
         )
 
         assert len(self.edf.columns) >= len(AUTH_SAFE_FIELDS.keys())
         if self.debug:
             logger.debug(
                 f"Successfult assertion: len(self.edf.columns) = {len(self.edf.columns)} >="
-                + f"len(AUTH_SAFE_FIELDS.keys()) = {len(AUTH_SAFE_FIELDS.keys())}"
+                + f"len(AUTH_SAFE_FIELDS.keys()) = {len(AUTH_SAFE_FIELDS.keys())}\n"
             )
 
         if inplace is True:
@@ -292,7 +292,7 @@ class AuthDataResource:
         # Dedupe for safety
         self.feature_columns = self.feature_columns
         if self.debug:
-            logger.debug("self.feature_columns: {self.feature_columns}}")
+            logger.debug("self.feature_columns: {self.feature_columns}}\n")
 
         str_edf = self.edf[self.feature_columns]
         for col in str_edf.columns:
@@ -312,7 +312,7 @@ class AuthDataResource:
         self.ndf = self.edf.drop_duplicates(subset=["features"])
 
         if self.debug:
-            logger.debug(f"df.shape={self.edf.shape} ndf.shape={self.ndf.shape}")
+            logger.debug(f"df.shape={self.edf.shape} ndf.shape={self.ndf.shape}\n")
 
     def add_pivot_url_column(
         self,
@@ -538,7 +538,8 @@ class AuthMarlowe:
                 if self.debug:
                     column_count = len([x for x in X if x in self.data_resource.edf.columns])
                     logger.debug(
-                        f"assert len([x for x in X if x in self.data.edf.columns]) = {column_count}" + f" == len(X) = {len(X)}"
+                        f"assert len([x for x in X if x in self.data.edf.columns]) = {column_count}"
+                        + f" == len(X) = {len(X)}\n"
                     )
                 assert len([x for x in X if x in self.data_resource.edf.columns]) == len(X)
             except AssertionError:
@@ -568,7 +569,7 @@ class AuthMarlowe:
 
         # This Label was computed in AuthDataResource above
         if self.debug:
-            logger.debug(self.data_resource.edf["Label"].head())
+            logger.debug(f'{self.data_resource.edf["Label"].head()}\n')
 
         g2: Plottable = g.bind(point_title="Label")
 
