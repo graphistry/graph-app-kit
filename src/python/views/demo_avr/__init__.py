@@ -9,6 +9,7 @@ import dateutil.parser as dp
 import numpy as np
 import pandas as pd
 from components import GraphistrySt, URLParam
+from components.Splunk import SplunkConnection
 from css import all_css
 from graphistry.Plottable import Plottable
 from streamlit.logger import get_logger
@@ -19,7 +20,6 @@ from views.demo_avr.marlowe import (
     AVRMarlowe,
     AVRMissingData,
 )
-from views.demo_avr.splunk import SplunkConnection
 
 import streamlit as st
 
