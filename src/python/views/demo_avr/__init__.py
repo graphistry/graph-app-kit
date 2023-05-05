@@ -45,8 +45,8 @@ app_id = "demo_avr"
 urlParams = URLParam(app_id)
 
 INDEX: str = "avr_59k"
-# SAMPLE_SIZE = 1000
-QUERY_SIZE = 1000
+SAMPLE_SIZE = 1000
+QUERY_SIZE = 20000
 
 
 def info():
@@ -100,7 +100,8 @@ def sidebar_area(cluster_id, general_probability, cluster_select_values):
     try:
         pre_selected_index = cluster_select_values.index(str(cluster_id))
         logger.debug(
-            f"We DID get a pre-selected-cluster ID. It's index is '{pre_selected_index}', its value is {cluster_select_values[pre_selected_index]}\n"
+            f"We DID get a pre-selected-cluster ID. It's index is '{pre_selected_index}', its value is "
+            + f"{cluster_select_values[pre_selected_index]}\n"
         )
     except ValueError as e:
         logger.error("URL cluster_id does not appear in sample :(")
@@ -174,9 +175,16 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
         "DetectTime": [(">=", start_datetime.isoformat()), ("<=", end_datetime.isoformat())],
     }
 
-    filter_query = SplunkConnection.build_query(INDEX, query_dict=query_dict, fields=list(AVR_SAFE_COLUMNS.keys()))
+    filter_query = SplunkConnection.build_query(
+        INDEX,
+        query_dict=query_dict,
+        fields=list(AVR_SAFE_COLUMNS.keys()),
+    )
     logger.debug(f"filter_query: {filter_query}\n")
+
+    # Get more data in the query than we sample down to ensure diversity
     splunk_edf: pd.DataFrame = splunk_client.one_shot_splunk(filter_query, count=QUERY_SIZE)
+    splunk_edf = splunk_edf.sample(min(SAMPLE_SIZE, len(splunk_edf)))
 
     data_resource: AVRDataResource = AVRDataResource(
         edf=splunk_edf,
@@ -226,14 +234,6 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
         with st.spinner("Generating graph..."):
             # Generate the graph
             marlowe: AVRMarlowe = AVRMarlowe(data_resource=data_resource)
-            # marlowe.register(
-            #     api=3,
-            #     protocol=graphistry_protocol,
-            #     server=graphistry_server,
-            #     username=graphistry_username,
-            #     password=graphistry_password,
-            #     client_protocol_hostname=graphistry_client_protocol_hostname,
-            # )
             g: Plottable = marlowe.umap()
             graph_url: str = g.plot(render=False)
 
