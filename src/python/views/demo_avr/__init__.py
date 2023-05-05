@@ -1,6 +1,7 @@
 import logging
 import os
 import random
+import sys
 from datetime import datetime, time
 from typing import Any, Dict, List, Optional, Union
 
@@ -11,7 +12,6 @@ from components import GraphistrySt, URLParam
 from css import all_css
 from graphistry.Plottable import Plottable
 from streamlit.logger import get_logger
-from util import getChild
 from views.demo_avr.marlowe import (
     AVR_SAFE_COLUMNS,
     FEATURE_COLUMNS,
@@ -22,6 +22,12 @@ from views.demo_avr.marlowe import (
 from views.demo_avr.splunk import SplunkConnection
 
 import streamlit as st
+
+# Make sure logs get through to STDERR
+logger = logging.getLogger(__name__)
+logger.setLevel(os.getenv("LOG_LEVEL", "DEBUG"))
+stream_handler = logging.StreamHandler(stream=sys.stderr)
+logger.addHandler(stream_handler)
 
 # App configuration
 CSS_PATH = "/apps/views/demo_avr/app.css"
@@ -36,7 +42,6 @@ APP_NOW_TIME = "2019-03-18T00:00:00Z"
 #  Controls how entrypoint.py picks it up
 
 app_id = "demo_avr"
-logger = getChild(app_id)
 urlParams = URLParam(app_id)
 
 INDEX: str = "avr_59k"
