@@ -1,21 +1,30 @@
+import logging
 import os
+import sys
 from datetime import datetime, time, timedelta
 from typing import Dict, List, Union
 
 import dateutil.parser as dp
 from components import GraphistrySt, URLParam
+from components.Splunk import SplunkConnection
 from css import all_css
 from graphistry import Plottable
-from util import getChild
 from views.demo_login.marlowe import (
     AUTH_SAFE_FIELDS,
     AuthDataResource,
     AuthMarlowe,
     AuthMissingData,
 )
-from views.demo_login.splunk import SplunkConnection
 
 import streamlit as st
+
+# from views.demo_login.splunk import SplunkConnection
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(os.getenv("LOG_LEVEL", "DEBUG"))
+stream_handler = logging.StreamHandler(stream=sys.stderr)
+logger.addHandler(stream_handler)
 
 ############################################
 #
@@ -26,7 +35,6 @@ import streamlit as st
 
 
 app_id = "demo_login"
-logger = getChild(app_id)
 urlParams = URLParam(app_id)
 
 # Splunk configuration
@@ -36,7 +44,7 @@ INDEX = "auth_txt_50k"
 def info():
     return {
         "id": app_id,
-        "name": "Cyber: Auth Analysis",
+        "name": "Cyber: Login Analyzer",
         "tags": ["cyber", "cybersecurity", "security"],
         "enabled": True,
     }
@@ -120,9 +128,9 @@ def sidebar_area():
         current_hour = now.time()
         month_ago = today - timedelta(days=30)
 
-        start_date = st.sidebar.date_input(label="Start Date", value=today)
+        start_date = st.sidebar.date_input(label="Start Date", value=month_ago)
         start_time = st.sidebar.time_input(label="Start Time", value=time(0, 00))
-        end_date = st.sidebar.date_input(label="End Date", value=month_ago)
+        end_date = st.sidebar.date_input(label="End Date", value=now)
         end_time = st.sidebar.time_input(label="End Time", value=current_hour)
 
         logger.debug(f"start_date={start_date} start_time={start_time} | end_date={end_date} end_time={end_time}\n")
@@ -153,30 +161,31 @@ def cache_splunk_client(username: str, password: str, host: str) -> SplunkConnec
 
 # Given filter settings, generate/cache/return dataframes & viz
 def run_filters(start_datetime, end_datetime, cluster_id):
-    splunk_client = cache_splunk_client(
-        os.environ["SPLUNK_USERNAME"],
-        os.environ["SPLUNK_PASSWORD"],
-        os.environ["SPLUNK_HOST"],
-    )
-
-    query_dict: Dict[str, Union[str, float, List[str]]] = {
-        "dbscan": cluster_id,
-        "datetime": [
-            (">=", start_datetime.isoformat()),
-            ("<=", end_datetime.isoformat()),
-        ],
-    }
-
     with st.spinner("Generating graph..."):
-        results = splunk_client.one_shot_splunk(
-            SplunkConnection.build_query(
-                index=INDEX,
-                query_dict=query_dict,
-                fields=list(AUTH_SAFE_FIELDS.keys()),
-                sort=[],
-                debug=True,
-            )
+        splunk_client = cache_splunk_client(
+            os.environ["SPLUNK_USERNAME"],
+            os.environ["SPLUNK_PASSWORD"],
+            os.environ["SPLUNK_HOST"],
         )
+
+        query_dict: Dict[str, Union[str, float, List[str]]] = {
+            "dbscan": cluster_id,
+            "datetime": [
+                (">=", start_datetime.isoformat()),
+                ("<=", end_datetime.isoformat()),
+            ],
+        }
+        logger.debug(f"query_dict: {query_dict}")
+
+        splunk_query = SplunkConnection.build_query(
+            index=INDEX,
+            query_dict=query_dict,
+            fields=list(AUTH_SAFE_FIELDS.keys()),
+            sort=[],
+            debug=True,
+        )
+        logger.debug(f"Splunk query: {splunk_query}")
+        results = splunk_client.one_shot_splunk(splunk_query)
 
         # Clean the Splunk results and send them to Graphistry to GPU render and return a url
         try:

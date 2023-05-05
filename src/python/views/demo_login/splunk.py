@@ -1,15 +1,21 @@
 """This file splunk.py implements a SplunkConnection that exposes a service and offers normal querying,
 pd.DataFrames and one-shot queries. It uses environment variables from .env and is rigorously typed."""
 import copy
+import logging
+import os
+import sys
 from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 import splunklib.client as client
 import splunklib.results as splunk_results
-from util import getChild
 
-logger = getChild("splunk")
+# Make sure logs get through to STDERR
+logger = logging.getLogger(__name__)
+logger.setLevel(os.getenv("LOG_LEVEL", "DEBUG"))
+stream_handler = logging.StreamHandler(stream=sys.stderr)
+logger.addHandler(stream_handler)
 
 # If we are returning a DataFrame, we may not want these columns as they aren't useful and clutter the display
 SPLUNK_SYSTEM_COLS = [

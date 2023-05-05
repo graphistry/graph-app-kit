@@ -1,6 +1,9 @@
 """This file marlowe.py implements utilities for using UMAP in a streamlit application.
 It uses environment variables from .env and is rigorously typed."""
+import logging
+import os
 import random
+import sys
 from datetime import datetime
 from typing import Dict, List, Literal, Optional, Type, TypeVar, Union
 from urllib.parse import urlparse
@@ -12,9 +15,12 @@ import pandas as pd
 from graphistry.features import topic_model
 from graphistry.Plottable import Plottable
 from IPython.core.display import HTML
-from util import getChild
 
-logger = getChild("marlowe")
+# Make sure logs get through to STDERR
+logger = logging.getLogger(__name__)
+logger.setLevel(os.getenv("LOG_LEVEL", "DEBUG"))
+stream_handler = logging.StreamHandler(stream=sys.stderr)
+logger.addHandler(stream_handler)
 
 # Reproducible samples
 SEED = 31337
@@ -52,6 +58,7 @@ AUTH_SAFE_FIELDS: Dict[str, Union[str, Type[str], Type[float]]] = {
     "success_or_failure": str,
     "datetime": "datetime",
     "time": int,
+    "dbscan": int,
 }
 
 # FEATURE_COLUMNS = ["x", "y", "general_cluster", "specific_cluster", "general_probability", "specific_probability"]
@@ -206,11 +213,15 @@ class AuthDataResource:
         try:
             assert len(self.edf) > 0
         except AssertionError as e:
-            logger.error(
+            logger.exception(e)
+            raise AuthMissingData(
                 "Trimming to our safe columns (or a previous operation) filtered all the data. Zero records are left."
             )
-            logger.exception(e)
-            raise AuthMissingData()
+
+        logger.debug(f"self.edf.columns: {self.edf.columns}")
+        logger.debug(
+            f"len(self.edf.columns): {len(self.edf.columns)} | len(AUTH_SAFE_FIELDS.keys()): {len(AUTH_SAFE_FIELDS.keys())}"
+        )
 
         assert len(self.edf.columns) >= len(AUTH_SAFE_FIELDS.keys())
         if self.debug:
