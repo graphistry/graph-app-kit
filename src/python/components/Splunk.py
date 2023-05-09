@@ -230,7 +230,7 @@ class SplunkConnection:
             ]
         ] = None,
         fields: Optional[List[str]] = None,
-        sort: Optional[List[str]] = ["_bkt", "_cnt"],
+        sort: Optional[List[str]] = None,
         debug: bool = False,
     ) -> str:
         """build_query Compose a simple Splunk strink query given a query dict and field list.
@@ -280,8 +280,11 @@ class SplunkConnection:
         # Add any fields listed - without fields queries can get flaky
         query += f'| fields {" ".join(fields)} ' if fields else ""
 
-        # Add a deterministic sort by _bkt and _cnt by default, othrwise user can specify
-        query += f'| sort {" ".join(sort)} ' if sort else ""
+        # Default random sort
+        if sort and isinstance(sort, list) and len(list) > 0:
+            query += f'| sort {" ".join(sort)} ' if sort else ""
+        else:
+            query += "| eval _random=random() | sort 0 _random"
 
         if debug:
             logger.debug(f"Splunk query: {query}\n")
