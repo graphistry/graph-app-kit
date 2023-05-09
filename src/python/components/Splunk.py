@@ -1,7 +1,9 @@
-"""This file splunk.py implements a SplunkConnection that exposes a service and offers normal querying, pd.DataFrames and one-shot queries.
-It uses environment variables from .env and is rigorously typed."""
+"""This file splunk.py implements a SplunkConnection that exposes a service and offers normal querying,
+pd.DataFrames and one-shot queries. It uses environment variables from .env and is rigorously typed."""
 import copy
 import logging
+import os
+import sys
 from numbers import Number
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -9,9 +11,11 @@ import pandas as pd
 import splunklib.client as client
 import splunklib.results as splunk_results
 
-# Logging is too much! Quiet it down.
+# Make sure logs get through to STDERR
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(os.getenv("LOG_LEVEL", "DEBUG"))
+stream_handler = logging.StreamHandler(stream=sys.stderr)
+logger.addHandler(stream_handler)
 
 # If we are returning a DataFrame, we may not want these columns as they aren't useful and clutter the display
 SPLUNK_SYSTEM_COLS = [
@@ -41,7 +45,7 @@ class BadFilterPairException(Exception):
 
 
 class SplunkConnection:
-    """Synchronous and Asynchronous Splunk client"""
+    """Synchronous Splunk client"""
 
     def __init__(
         self,
@@ -57,9 +61,7 @@ class SplunkConnection:
 
     def connect(self) -> bool:
         try:
-            self.service = client.connect(
-                host=self.host, username=self.username, password=self.password
-            )
+            self.service = client.connect(host=self.host, username=self.username, password=self.password)
             logger.debug("Splunk connection established\n") if self.verbose else None
             return True
         except Exception as e:
@@ -115,8 +117,7 @@ class SplunkConnection:
                 }
 
                 status = (
-                    "\r%(doneProgress)03.1f%%   %(scanCount)d scanned   "
-                    "%(eventCount)d matched   %(resultCount)d results\n"
+                    "\r%(doneProgress)03.1f%%   %(scanCount)d scanned   " "%(eventCount)d matched   %(resultCount)d results\n"
                 ) % stats
 
                 logger.info(status)
@@ -131,9 +132,7 @@ class SplunkConnection:
             results_list: List = []
 
             # Doing one loop now, then another
-            r = splunk_results.JSONResultsReader(
-                job.results(output_mode="json", count=result_count, offset=offset)
-            )
+            r = splunk_results.JSONResultsReader(job.results(output_mode="json", count=result_count, offset=offset))
 
             for record in r:
                 offset += 0
@@ -156,7 +155,7 @@ class SplunkConnection:
 
     def one_shot_splunk(
         self,
-        query: str = 'search index="avr_59k" ',
+        query: str,
         drop_cols: Optional[List[str]] = SPLUNK_SYSTEM_COLS,
         count: int = 1000,
     ) -> pd.DataFrame:
@@ -165,8 +164,6 @@ class SplunkConnection:
         reader = self.service.jobs.oneshot(
             query,
             count=count,
-            # earliest_time="2019-03-10T00:00:00Z",
-            # latest_time="2019-03-18T00:00:00Z",
             output_mode="json",
             adhoc_search_level="verbose",
         )
@@ -176,7 +173,7 @@ class SplunkConnection:
         for item in splunk_results_reader:
             # Skip any Messages we recieve, like telling us we are receiving partial results
             if isinstance(item, splunk_results.Message):
-                logger.debug(f"splunk.results.Message received: {item}\n")
+                logger.info(f"splunk.results.Message received: {item}\n")
                 continue
 
             # We don't want to alter an item while we are iterating it
@@ -193,13 +190,10 @@ class SplunkConnection:
         return df
 
     @staticmethod
-    def parse_filter_pair(
-        query: str, col: str, filter_pair: Tuple[str, Union[str, int, float]]
-    ) -> str:
+    def parse_filter_pair(query: str, col: str, filter_pair: Tuple[str, Union[str, int, float]]) -> str:
         # First comes op, then comes value
         op = filter_pair[0]
         value = filter_pair[1]
-        logger.debug(f"col={col}  op={op}  value={value}\n")
 
         filter_query = ""
 
@@ -236,7 +230,8 @@ class SplunkConnection:
             ]
         ] = None,
         fields: Optional[List[str]] = None,
-        sort: Optional[List[str]] = ["_bkt", "_cnt"],
+        sort: Optional[List[str]] = None,
+        debug: bool = False,
     ) -> str:
         """build_query Compose a simple Splunk strink query given a query dict and field list.
 
@@ -258,45 +253,41 @@ class SplunkConnection:
         """
         query: str = f'search index="{index}" '
         for col, val in query_dict.items():
-            logger.debug(f"WHAT? col={col} val={val}\n")
-            logger.debug(f"type(val)=={type(val)}")
             if val and (val not in ("None", "")):
                 # Non-equality query
                 if isinstance(val, Tuple) or isinstance(val, List):
                     # If it is a nested list, there is more than one condition
                     if len(val) > 0 and isinstance(val[0], Tuple):
-                        logger.debug(f"YES! FOUND A NESTED QUERY: {val}\n")
                         for filter_pair in val:
-                            logger.debug(f"Processing filter_pair: {filter_pair}\n")
                             assert len(filter_pair) == 2
                             try:
-                                query += SplunkConnection.parse_filter_pair(
-                                    query=query, col=col, filter_pair=filter_pair
-                                )
+                                query += SplunkConnection.parse_filter_pair(query=query, col=col, filter_pair=filter_pair)
                             except BadFilterPairException:
                                 continue
 
                     # This is a single conditional query
                     else:
-                        logger.debug(f"NO! NOT A NESTED QUERY: {val}\n")
                         assert len(val) == 2
                         try:
-                            query += SplunkConnection.parse_filter_pair(
-                                query=query, col=col, filter_pair=val
-                            )
+                            query += SplunkConnection.parse_filter_pair(query=query, col=col, filter_pair=val)
                         except BadFilterPairException:
                             continue
 
                 # Default equals
                 else:
-                    logger.debug(f"JUST A NORMAL EQUALS: {val}\n")
                     query += f"{col}={val} "
 
         # Add any fields listed - without fields queries can get flaky
         query += f'| fields {" ".join(fields)} ' if fields else ""
 
-        # Add a deterministic sort by _bkt and _cnt by default, othrwise user can specify
-        query += f'| sort {" ".join(sort)} ' if sort else ""
+        # Default random sort
+        if sort and isinstance(sort, list) and len(list) > 0:
+            query += f'| sort {" ".join(sort)} ' if sort else ""
+        else:
+            query += "| eval _random=random() | sort 0 _random"
+
+        if debug:
+            logger.debug(f"Splunk query: {query}\n")
 
         return query
 

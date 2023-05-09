@@ -31,46 +31,44 @@ np.random.seed = SEED
 UMAP_MODEL_PATH = ".models/umap.topic"
 
 # Default categorical field to use to draw color on the nodes
-DEFAULT_COLOR_BY: str = "Category"
+DEFAULT_COLOR_BY: str = "_dbscan"
 
 # How to build the pivot URLs :) We will use PIVOT_URL_TEMPLATE.format(investigation_id=investigation_id, ...)
-PIVOT_URL_TEMPLATE: str = '<a href="{graphistry_protocol}://{graphistry_server}/pivot/template?investigation={investigation_id}&pivot[0][events][0][general_cluster]={general_cluster}&time={unix_time}&before={lookback_period}&name=Incident-360-{investigation_id}">Investigate Cluster</a>'
+PIVOT_URL_TEMPLATE: str = ""
+# = (
+#     '<a href="{base_client_url}/pivot/template?investigation={investigation_id}'
+#     + f"&pivot[0][events][0][cluster_id]={cluster_id}&time={unix_time}"
+#     + f'&before={lookback_period}&name=Incident-360-{investigation_id}">Investigate Cluster</a>'
+# )
 
 # How to cast the columns we are interested in to more useful types
-AVR_SAFE_COLUMNS: Dict[str, Union[str, Type[str], Type[float]]] = {
-    "DetectTime": "datetime",
-    "Category": str,
-    "ID": str,
-    "Node_SW": str,
-    "Node_Type": str,
-    "Node_Name": str,
-    "Source_Port": str,
-    "Source_IP4": str,
-    "Source_Proto": str,
-    "Target_Port": str,
-    "Target_IP4": str,
-    "Target_Proto": str,
-    "Source_IP4_Subnet_16": str,
-    "Source_IP4_Subnet_24": str,
-    "Target_IP4_Subnet_16": str,
-    "Target_IP4_Subnet_24": str,
-    "x": float,
-    "y": float,
-    "general_cluster": int,
-    "general_probability": float,
-    "specific_cluster": int,
-    "specific_probability": float,
+AUTH_SAFE_FIELDS: Dict[str, Union[str, Type[str], Type[float]]] = {
+    "RED": float,
+    "auth_type": str,
+    "authentication_orientation": str,
+    "cluster": int,
+    "dst_computer": str,
+    "dst_domain": str,
+    "is_anomalous": bool,
+    "logontype": str,
+    "node": int,
+    "probability": float,
+    "src_computer": str,
+    "src_domain": str,
+    "success_or_failure": str,
+    "datetime": "datetime",
+    "time": int,
+    "dbscan": int,
 }
 
 # FEATURE_COLUMNS = ["x", "y", "general_cluster", "specific_cluster", "general_probability", "specific_probability"]
 FEATURE_COLUMNS: Optional[Union[List[str], pd.DataFrame]] = [
-    "Source_IP4",
-    "Target_IP4",
-    "Source_Port",
-    "Category",
+    "src_computer",
+    "dst_computer",
 ]
 
-# A big palette from 3 different palettes from: https://www.heavy.ai/blog/12-color-palettes-for-telling-better-stories-with-your-data
+# A big palette from 3 different palettes from:
+# https://www.heavy.ai/blog/12-color-palettes-for-telling-better-stories-with-your-data
 CATEGORICAL_PALETTE: List[str] = (
     [
         "#ea5545",
@@ -127,13 +125,12 @@ class UMAPXColumnMissing(ValueError):
         super().__init__(*args, **kwargs)
 
 
-class AVRMissingData(Exception):
-    """AVRMissingData Exception occurs when our data cleaning filters out all of the data :("""
+class AuthMissingData(Exception):
+    """AuthMissingData Exception occurs when our data cleaning filters out all of the data :("""
 
     def __init__(self, *args, **kwargs):
-        default_message = (
-            "Trimming to our safe columns (or a previous operation) filtered all the data. Zero records are left."
-        )
+        default_message = """Trimming to our safe columns (or a previous operation) filtered all the data.
+        Zero records (rows) are left."""
 
         # if no arguments are passed set the first positional argument
         # to be the default message. To do that, we have to replace the
@@ -148,8 +145,8 @@ class AVRMissingData(Exception):
         super().__init__(*args, **kwargs)
 
 
-class AVRDataResource:
-    """Filters DataFrames and hands them to AVRMarlow to visualize."""
+class AuthDataResource:
+    """Filters DataFrames and hands them to AuthMarlow to visualize."""
 
     def __init__(
         self,
@@ -170,14 +167,23 @@ class AVRDataResource:
         """
 
         self.edf: pd.DataFrame = edf
-        self.feature_columns: List[str] = feature_columns or list(AVR_SAFE_COLUMNS.keys())
+
+        logging.debug(f"Origial edf.shape: {edf.shape}")
+        logging.debug(f"Origial edf.columns: {edf.columns}")
+
+        self.feature_columns: List[str] = feature_columns or list(AUTH_SAFE_FIELDS.keys())
         self.debug = debug
+
+        # Checked later and computed if called by downstream dependencies
+        self.anomalous_nodes = None
 
         # Apply all the cleaning to the edges upon instantiation
         self.trim_to_safe_cols(inplace=True)
         self.clean_edge_list(inplace=True)
         # ...and set deduped edge features as nodes
         self.featurize_edges()
+        # Create a DataFrame describing the DBScan clusters of anomalous events
+        self.describe_clusters()
 
     def filter(self, bool_series: TypeVar("pd.Series(bool)"), inplace: bool = False) -> Union[None, pd.DataFrame]:
         """filter Filter our DataFrame using a boolean Series, optionally in place.
@@ -206,31 +212,37 @@ class AVRDataResource:
             return self.edf[bool_series]
 
     def trim_to_safe_cols(self, inplace: bool = True) -> Optional[pd.DataFrame]:
-        """trim_to_safe_cols Trim to just the AVR_SAFE_COLUMNS column names"""
+        """trim_to_safe_cols Trim to just the AUTH_SAFE_FIELDS column names"""
 
         try:
             assert len(self.edf) > 0
         except AssertionError as e:
-            logger.error(
+            logger.exception(e)
+            raise AuthMissingData(
                 "Trimming to our safe columns (or a previous operation) filtered all the data. Zero records are left."
             )
-            logger.exception(e)
-            raise AVRMissingData()
 
-        assert len(self.edf.columns) >= len(AVR_SAFE_COLUMNS.keys())
+        logger.debug(f"self.edf.columns: {self.edf.columns}\n")
+        logger.debug(
+            f"len(self.edf.columns): {len(self.edf.columns)} | len(AUTH_SAFE_FIELDS.keys()): {len(AUTH_SAFE_FIELDS.keys())}\n"
+        )
+
+        assert len(self.edf.columns) >= len(AUTH_SAFE_FIELDS.keys())
         if self.debug:
             logger.debug(
-                f"Successfult assertion: len(self.edf.columns) = {len(self.edf.columns)} >= len(AVR_SAFE_COLUMNS.keys()) = {len(AVR_SAFE_COLUMNS.keys())}"
+                f"Successfult assertion: len(self.edf.columns) = {len(self.edf.columns)} >="
+                + f"len(AUTH_SAFE_FIELDS.keys()) = {len(AUTH_SAFE_FIELDS.keys())}\n"
             )
 
         if inplace is True:
-            self.edf: pd.DataFrame = self.edf[list(AVR_SAFE_COLUMNS.keys())]
+            self.edf: pd.DataFrame = self.edf[list(AUTH_SAFE_FIELDS.keys())]
         else:
             new_df: pd.DataFrame = self.edf.copy()
-            return new_df[list(AVR_SAFE_COLUMNS.keys())]
+            return new_df[list(AUTH_SAFE_FIELDS.keys())]
 
     def clean_edge_list(self, inplace: bool = True) -> Optional[pd.DataFrame]:
-        """clean_edge_list Clean up the edges by casting them. Makes a copy of the DataFrame to implement inplace=False."""
+        """clean_edge_list Clean up the edges by casting them. Makes a copy of the DataFrame to implement
+        inplace=False."""
 
         new_edf: pd.DataFrame = self.edf
         # If we are not acting in place, make a copy to return. See return statement below.
@@ -240,34 +252,31 @@ class AVRDataResource:
             new_edf: pd.DataFrame = self.edf.copy()
 
         # Cast the columns to their known types
-        for col, cast in AVR_SAFE_COLUMNS.items():
-            logger.debug(f"Column: {col} Original Type: {new_edf[col].dtype} Cast: {cast}\n") if self.debug else None
+        for col, cast in AUTH_SAFE_FIELDS.items():
+            # logger.debug(f"Column: {col} Original Type: {new_edf[col].dtype} Cast: {cast}\n") if self.debug else None
 
             # Cast em if ya got em!
             if cast == "datetime":
                 new_edf[col] = pd.to_datetime(new_edf[col], utc=True)
             elif cast == int:
-                new_edf[col] = new_edf[col].fillna(-1).astype(cast)
+                new_edf[col] = new_edf[col].fillna(0).astype(cast)
             elif cast == float:
                 new_edf[col] = new_edf[col].fillna(0.0).astype(cast)
             else:
                 new_edf[col] = new_edf[col].astype(str)
 
         # Don't display 'nan', display None
-        new_edf["Source_IP4"] = new_edf["Source_IP4"].fillna(value="None", inplace=False)
-        new_edf["Source_IP4"] = new_edf["Source_IP4"].astype(str)
-        new_edf["Source_IP4"] = new_edf["Source_IP4"].str.replace("nan", "None")
+        new_edf["src_domain"] = new_edf["src_domain"].fillna(value="None", inplace=False)
+        new_edf["src_domain"] = new_edf["src_domain"].astype(str)
+        new_edf["src_domain"] = new_edf["src_domain"].str.replace("nan", "None")
 
-        new_edf["Target_IP4"] = new_edf["Target_IP4"].fillna("None", inplace=False)
-        new_edf["Target_IP4"] = new_edf["Target_IP4"].astype(str)
-        new_edf["Target_IP4"] = new_edf["Target_IP4"].str.replace("nan", "None")
+        new_edf["dst_domain"] = new_edf["dst_domain"].fillna("None", inplace=False)
+        new_edf["dst_domain"] = new_edf["dst_domain"].astype(str)
+        new_edf["dst_domain"] = new_edf["dst_domain"].str.replace("nan", "None")
 
-        # Null Category fields cause the color by to fail, so we will fill them with "Unknown"
-        new_edf["Category"] = new_edf["Category"].fillna("Unknown", inplace=False)
-
-        if self.debug:
-            logger.debug(f'new_edf["DetectTime"].min(): {new_edf["DetectTime"].min()}\n')
-            logger.debug(f'new_edf["DetectTime"].max(): {new_edf["DetectTime"].max()}\n')
+        # if self.debug:
+        #     logger.debug(f'new_edf["datetime"].min(): {new_edf["datetime"].min()}\n')
+        #     logger.debug(f'new_edf["datetime"].max(): {new_edf["datetime"].max()}\n')
 
         if inplace is True:
             self.edf: pd.DataFrame = new_edf
@@ -287,32 +296,32 @@ class AVRDataResource:
         # Dedupe for safety
         self.feature_columns = self.feature_columns
         if self.debug:
-            logger.debug("self.feature_columns: {self.feature_columns}}")
+            logger.debug("self.feature_columns: {self.feature_columns}}\n")
 
         str_edf = self.edf[self.feature_columns]
         for col in str_edf.columns:
             str_edf[col] = str_edf[col].astype(str)
 
-        # Concatenate the features as a string to run a topic model, and get rid of things that might come across as topics
+        # Concatenate the features as a string to run a topic model, and get rid of things that might come
+        # across as topics
         self.edf["features"] = (
             str_edf[self.feature_columns]
             .apply(" ".join, axis=1)  # Concatenate the values of all columns
             .str.replace("nan", "None")  # Replace nan with None
             .str.replace("None", "")  # Remove None, which covers nan and None
-            .str.replace("[ ]{2,}", " ")  # Remove extra spaces
+            .str.replace(r"\s+", " ", regex=True)  # Remove extra spaces
         )
 
         # Drop duplicates to get the nodes
         self.ndf = self.edf.drop_duplicates(subset=["features"])
 
         if self.debug:
-            logger.debug(f"df.shape={self.edf.shape} ndf.shape={self.ndf.shape}")
+            logger.debug(f"df.shape={self.edf.shape} ndf.shape={self.ndf.shape}\n")
 
     def add_pivot_url_column(
         self,
         investigation_id: str,
-        graphistry_protocol: str,
-        graphistry_server: str,
+        base_client_url: str,
         unix_time: float,
         lookback_period: Literal["-1h", "-6h", "-12h", "-1d", "-7d", "-30d", "-365d", "all"],
     ) -> None:
@@ -322,8 +331,8 @@ class AVRDataResource:
         ----------
         investigation_id : str
             The identifier of the visual playbook template to which the URL refers
-        graphistry_server : str
-            The base url corresponding to the GRAPHISTRY_SERVER environment variable
+        base_client_url : str
+            The base url corresponding to the GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME environment variable
         unix_time : float
             The Unix timestamp to look back from in the visual playbook
         lookback_period : Literal["-1h", "-6h", "-12h", "-1d", "-7d", "-30d", "-365d", "all"]
@@ -339,12 +348,71 @@ class AVRDataResource:
             lambda x: PIVOT_URL_TEMPLATE.format(
                 investigation_id=investigation_id,
                 general_cluster=x,
-                graphistry_protocol=graphistry_protocol,
-                graphistry_server=graphistry_server,
+                base_client_url=base_client_url,
                 unix_time=unix_time,
                 lookback_period=lookback_period,
             )
         )
+
+    def anomaly_counts(self) -> pd.DataFrame:
+        """Count the anomalies per cluster and return a DataFrame of the results sorted descending on anomaly count."""
+
+        # Compute the total anomalies per cluster within the anomalous nodes
+        self.anomalous_nodes = self.ndf[self.ndf["cluster"] == -1]
+        anom_cluster_counts = self.anomalous_nodes[["_dbscan", "is_anomalous", "RED"]].groupby("_dbscan").sum()
+
+        anom_cluster_counts = (
+            anom_cluster_counts[["is_anomalous", "RED"]]
+            .reset_index()
+            .rename(
+                columns={
+                    "_dbscan": "anomaly_cluster",
+                    "is_anomalous": "anomaly_count",
+                    "RED": "RED",
+                }
+            )
+        )
+
+        if self.debug:
+            logger.debug(f"Total anom_cluster_counts = {len(anom_cluster_counts)}\n")
+
+        return anom_cluster_counts.sort_values(by="anomaly_count", ascending=False)
+
+    def top_nodes(self, n: int = 5) -> pd.Series:
+        """Create a list of the top n most anomalous computers by src_computer column."""
+
+        if not self.anomalous_nodes:
+            self.anomaly_counts()
+
+        anomalous_cpu_clusters = (
+            self.anomalous_nodes.groupby(["src_computer", "_dbscan"])
+            .count()
+            .reset_index()
+            .rename(columns={"src_computer": "computer", "_dbscan": "anomaly_cluster"})
+        )
+
+        # Get the count of anomalies per computer - ndf is a deduplicated edge list of src/dst computers
+        top_n_computers = anomalous_cpu_clusters.groupby("anomaly_cluster")["computer"].apply(lambda x: list(x)[:n])
+        return top_n_computers
+
+    def describe_clusters(self) -> pd.DataFrame:
+        """Describe the clusters in the data we ingested and return a DataFrame of the results."""
+
+        # Compute the pieces of the DataFrame and then stitch them together
+        anom_cluster_counts = self.anomaly_counts()
+
+        # Compute the most anomalous nodes per cluster
+        top_n_computers = self.top_nodes()
+        top_n_computers
+
+        # Join anom_cluster_counts and top_n_computers
+        self.cluster_df = anom_cluster_counts.merge(
+            top_n_computers,
+            on="anomaly_cluster",
+            how="left",
+        )
+
+        return self.cluster_df
 
     @staticmethod
     def is_url(url: str) -> bool:
@@ -400,12 +468,13 @@ class AVRDataResource:
         return datetime.utcfromtimestamp(unix_ts).isoformat()
 
 
-class AVRMarlowe:
-    """Draws Graphistries. A working man on a mission to reduce alert volume... an investigation of a cluster of authentication events."""
+class AuthMarlowe:
+    """Draws Graphistries. A working man on a mission to reduce alert volume... an investigation
+    of a cluster of authentication events."""
 
     def __init__(
         self,
-        data_resource: AVRDataResource,
+        data_resource: AuthDataResource,
         debug: bool = False,
     ) -> None:
         """__init__ Instantiate a visual investigator.
@@ -435,11 +504,6 @@ class AVRMarlowe:
         self.client_protocol_hostname = client_protocol_hostname
         self.api = api
 
-        logger.debug(
-            f"api: {api}, protocol: {protocol} client_protocol_hostname: {client_protocol_hostname} username: {username},"
-            + f" password: {password}, server: {server}, debug: {self.debug} :)\n"
-        ) if self.debug else None
-
         graphistry.register(
             api=api,
             protocol=protocol,
@@ -454,7 +518,7 @@ class AVRMarlowe:
         X: Optional[Union[List[str], pd.DataFrame]] = FEATURE_COLUMNS,
         y: Optional[Union[str, List[str]]] = None,
     ) -> Plottable:
-        """umap Run UMAP on the AVR edge list, visualize in 2D, unsupervised (just X) or supervised (y).
+        """umap Run UMAP on the Auth edge list, visualize in 2D, unsupervised (just X) or supervised (y).
 
         Parameters
         ----------
@@ -473,12 +537,13 @@ class AVRMarlowe:
             A graphistry Plottable object, returned by Plottable.umap()
         """
 
-        if X:  # and check_type(X, List[str]): # remove type check
+        if X and isinstance(X, list):
             try:
                 if self.debug:
+                    column_count = len([x for x in X if x in self.data_resource.edf.columns])
                     logger.debug(
-                        f"assert len([x for x in X if x in self.data.edf.columns]) = {len([x for x in X if x in self.data_resource.edf.columns])}"
-                        + f" == len(X) = {len(X)}"
+                        f"assert len([x for x in X if x in self.data.edf.columns]) = {column_count}"
+                        + f" == len(X) = {len(X)}\n"
                     )
                 assert len([x for x in X if x in self.data_resource.edf.columns]) == len(X)
             except AssertionError:
@@ -491,25 +556,31 @@ class AVRMarlowe:
             logger.debug(f"node data types: {self.data_resource.edf.dtypes}\n")
 
         # The edges are the nodes
-        g: Plottable = graphistry.nodes(self.data_resource.edf)
+        g: Plottable = (
+            graphistry.nodes(self.data_resource.ndf)
+            .edges(self.data_resource.edf)
+            .bind(point_title="features", point_size="all_anomalous")
+        )
+
+        # I won't work after the previous line - g._nodes isn't there yet
+        #
 
         # Compose an HTML label of the attack category and the first 2 source/target IPs.
         g._nodes["Label"] = g._nodes.astype(str).apply(
-            lambda x: f"Category: {x.Category}"
-            + f"<br />Source: {' '.join(x.Source_IP4.split(' ')[:2]).strip()}"
-            + f"<br />Target: {' '.join(x.Target_IP4.split(' ')[:2]).strip()}",
+            lambda x: f"<br />Source: {x.src_computer}<br />Dest: {x.dst_computer}",
             axis=1,
         )
 
-        # This Label was computed in AVRDataResource above
+        # This Label was computed in AuthDataResource above
         if self.debug:
-            logger.debug(self.data_resource.edf["Label"].head())
+            logger.debug(f'{self.data_resource.edf["Label"].head()}\n')
 
         g2: Plottable = g.bind(point_title="Label")
 
         g3: Plottable = g2.umap(
             X=FEATURE_COLUMNS,
             y=y,
+            dbscan=True,
             **topic_model,
         )
 
@@ -517,16 +588,16 @@ class AVRMarlowe:
             DEFAULT_COLOR_BY,
             as_categorical=True,
             palette=CATEGORICAL_PALETTE,
-            default_mapping="#CCC",
+            default_mapping="gray",
         )
 
-        self.g: Plottable = g4.settings(
+        self.g = g4.settings(
             url_params={
                 "play": 1000,
-                "strongGravity": True,
-                "pointSize": 0.7,
-                "pointOpacity": 0.4,
-                "edgeOpacity": 0.3,
+                "strongGravity": False,
+                "pointSize": 0.4,
+                "pointOpacity": 0.2,
+                "edgeOpacity": 0.15,
                 "edgeCurvature": 0.4,
                 "gravity": 0.25,
                 "showPointsOfInterestLabel": False,
@@ -536,7 +607,7 @@ class AVRMarlowe:
         return self.g
 
     def hypergraph(self, cluster_id: int = 0, render=False) -> Union[str, HTML]:
-        """Visualize a hypergraph of the AVR edge list, with a specific cluster highlighted."""
+        """Visualize a hypergraph of the Auth edge list, with a specific cluster highlighted."""
         gen_cluster_filter = self.edf["general_cluster"] > -1
         spec_cluster_filter = self.edf["specific_cluster"] > -1
         hyper_edf = self.edf[gen_cluster_filter & spec_cluster_filter]
@@ -555,7 +626,7 @@ class AVRMarlowe:
         )["graph"]
 
         self.g = g.encode_point_color(
-            "Category",
+            "category",
             as_categorical=True,
             categorical_mapping={
                 "ID": "red",
