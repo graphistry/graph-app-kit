@@ -218,12 +218,14 @@ class AuthDataResource:
                 "Trimming to our safe columns (or a previous operation) filtered all the data. Zero records are left."
             )
 
-        logger.debug(f"self.edf.columns: {self.edf.columns}\n")
-        logger.debug(
-            f"len(self.edf.columns): {len(self.edf.columns)} | len(AUTH_SAFE_FIELDS.keys()): {len(AUTH_SAFE_FIELDS.keys())}\n"
-        )
+        if self.debug:
+            logger.debug(f"self.edf.columns: {self.edf.columns}\n")
+            logger.debug(
+                f"len(self.edf.columns): {len(self.edf.columns)} | len(AUTH_SAFE_FIELDS.keys()): {len(AUTH_SAFE_FIELDS.keys())}\n"
+            )
 
         assert len(self.edf.columns) >= len(AUTH_SAFE_FIELDS.keys())
+
         if self.debug:
             logger.debug(
                 f"Successfult assertion: len(self.edf.columns) = {len(self.edf.columns)} >="
@@ -256,8 +258,6 @@ class AuthDataResource:
 
         # Cast the columns to their known types
         for col, cast in AUTH_SAFE_FIELDS.items():
-            # logger.debug(f"Column: {col} Original Type: {new_edf[col].dtype} Cast: {cast}\n") if self.debug else None
-
             # Cast em if ya got em!
             if cast == "datetime":
                 new_edf[col] = pd.to_datetime(new_edf[col], utc=True)
@@ -461,22 +461,12 @@ class AuthMarlowe:
         # Compute the total anomalies per cluster within the anomalous nodes
         self.anomalous_nodes = self.g._nodes[self.g._nodes["cluster"] == -1]
 
-        logger.debug(f"self.anomalous_nodes.index = {self.anomalous_nodes.index}\n")
-        logger.debug(f"self.anomalous_nodes.columns = {self.anomalous_nodes.columns}\n")
         anom_cluster_counts = (
             self.anomalous_nodes[["dbscan", "is_anomalous", "RED"]]
             .groupby("dbscan")
             .agg({"is_anomalous": "sum", "RED": "sum"})
         )
-        logger.debug(f"1 anom_cluster_counts.index = {anom_cluster_counts.index}\n")
-        logger.debug(f"1 anom_cluster_counts.columns = {anom_cluster_counts.columns}\n")
-        logger.debug(anom_cluster_counts.head(1))
-
         anom_cluster_counts.reset_index(inplace=True)
-        logger.debug(f"2 anom_cluster_counts.index = {anom_cluster_counts.index}\n")
-        logger.debug(f"2 anom_cluster_counts.columns = {anom_cluster_counts.columns}\n")
-        logger.debug(anom_cluster_counts.head(1))
-
         anom_cluster_counts.rename(
             columns={
                 "dbscan": "anomaly_cluster",
@@ -486,9 +476,9 @@ class AuthMarlowe:
             inplace=True,
         )
 
-        logger.debug(f"3 anom_cluster_counts.index = {anom_cluster_counts.index}\n")
-        logger.debug(f"3 anom_cluster_counts.columns = {anom_cluster_counts.columns}\n")
-        logger.debug(anom_cluster_counts.head(1))
+        if self.debug:
+            logger.debug(f"anom_cluster_counts.index = {anom_cluster_counts.index}\n")
+            logger.debug(f"anom_cluster_counts.columns = {anom_cluster_counts.columns}\n")
 
         if self.debug:
             logger.debug(f"Total anom_cluster_counts = {len(anom_cluster_counts)}\n")
@@ -596,7 +586,6 @@ class AuthMarlowe:
             dbscan=True,
             **topic_model,
         )
-        logger.debug(g3._nodes.dtypes)
 
         # Rename the _dbscan column to be ok with Splunk
         g3._nodes.rename(columns={"_dbscan": "dbscan"}, inplace=True)
@@ -611,12 +600,12 @@ class AuthMarlowe:
         self.g = g4.settings(
             url_params={
                 "play": 1000,
-                "strongGravity": False,
+                "strongGravity": True,
                 "pointSize": 0.4,
                 "pointOpacity": 0.2,
                 "edgeOpacity": 0.15,
                 "edgeCurvature": 0.4,
-                "gravity": 0.25,
+                "gravity": 0.5,
                 "showPointsOfInterestLabel": False,
             }
         )

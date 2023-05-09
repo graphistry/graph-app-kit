@@ -165,9 +165,8 @@ def run_filters(start_datetime, end_datetime, dbscan):
                 ("<=", end_datetime.isoformat()),
             ],
         }
-        if dbscan > 0:
-            query_dict["dbscan"] = dbscan
-        logger.debug(f"query_dict: {query_dict}\n")
+        # if dbscan > 0:
+        #     query_dict["dbscan"] = dbscan
 
         splunk_query = SplunkConnection.build_query(
             index=INDEX,
@@ -206,7 +205,7 @@ def main_area(
     graph_url=None,
     cluster_df=None,
 ):
-    logger.debug("rendering main area, with url: %s\n", graph_url)
+    logger.debug("Rendering main area, with url: %s\n", graph_url)
     GraphistrySt().render_url(graph_url)
 
 

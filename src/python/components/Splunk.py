@@ -66,7 +66,7 @@ class SplunkConnection:
             return True
         except Exception as e:
             logger.error("An exception has occurred while connection to Splunk :(\n")
-            logger.error(e)
+            logger.exception(e)
             raise SplunkConnectException(e)
 
     def get_indexes(self):
