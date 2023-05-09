@@ -129,16 +129,16 @@ def sidebar_area():
         start_datetime = dp.parse(f"{start_date} {start_time}")
         end_datetime = dp.parse(f"{end_date} {end_time}")
 
-        st.sidebar.divider()
+        # st.sidebar.divider()
 
-        urlParams.get_field("dbscan", 0)
-        dbscan: int = st.sidebar.number_input(label="Cluster ID", value=0, step=1)
-        urlParams.set_field("dbscan", dbscan)
+        # urlParams.get_field("dbscan", 0)
+        # dbscan: int = st.sidebar.number_input(label="Cluster ID", value=0, step=1)
+        # urlParams.set_field("dbscan", dbscan)
 
         return {
             "start_datetime": start_datetime,
             "end_datetime": end_datetime,
-            "dbscan": dbscan,
+            # "dbscan": dbscan,
         }
 
 
@@ -151,7 +151,7 @@ def cache_splunk_client(username: str, password: str, host: str) -> SplunkConnec
 
 
 # Given filter settings, generate/cache/return dataframes & viz
-def run_filters(start_datetime, end_datetime, dbscan):
+def run_filters(start_datetime, end_datetime):  # , dbscan):
     with st.spinner("Generating graph..."):
         splunk_client = cache_splunk_client(
             os.environ["SPLUNK_USERNAME"],
@@ -201,7 +201,7 @@ def run_filters(start_datetime, end_datetime, dbscan):
 def main_area(
     start_datetime,
     end_datetime,
-    dbscan,
+    # dbscan,
     graph_url=None,
     cluster_df=None,
 ):
