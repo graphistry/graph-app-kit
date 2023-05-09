@@ -277,6 +277,9 @@ class AuthDataResource:
         new_edf["dst_domain"] = new_edf["dst_domain"].astype(str)
         new_edf["dst_domain"] = new_edf["dst_domain"].str.replace("nan", "None")
 
+        # We sum it, so we need this
+        new_edf["is_anomalous"] = new_edf["is_anomalous"].astype(bool).astype(int)
+
         if inplace is True:
             self.edf: pd.DataFrame = new_edf
         else:
@@ -429,9 +432,6 @@ class AuthMarlowe:
         self.g: Optional[Plottable] = None
         self.debug = debug
 
-        # Checked later and computed if called by downstream dependencies
-        self.anomalous_nodes = None
-
     def register(
         self,
         protocol: str,
@@ -460,9 +460,23 @@ class AuthMarlowe:
 
         # Compute the total anomalies per cluster within the anomalous nodes
         self.anomalous_nodes = self.g._nodes[self.g._nodes["cluster"] == -1]
-        anom_cluster_counts = self.anomalous_nodes[["dbscan", "is_anomalous", "RED"]].groupby("dbscan").sum()
+
+        logger.debug(f"self.anomalous_nodes.index = {self.anomalous_nodes.index}\n")
+        logger.debug(f"self.anomalous_nodes.columns = {self.anomalous_nodes.columns}\n")
+        anom_cluster_counts = (
+            self.anomalous_nodes[["dbscan", "is_anomalous", "RED"]]
+            .groupby("dbscan")
+            .agg({"is_anomalous": "sum", "RED": "sum"})
+        )
+        logger.debug(f"1 anom_cluster_counts.index = {anom_cluster_counts.index}\n")
+        logger.debug(f"1 anom_cluster_counts.columns = {anom_cluster_counts.columns}\n")
+        logger.debug(anom_cluster_counts.head(1))
 
         anom_cluster_counts.reset_index(inplace=True)
+        logger.debug(f"2 anom_cluster_counts.index = {anom_cluster_counts.index}\n")
+        logger.debug(f"2 anom_cluster_counts.columns = {anom_cluster_counts.columns}\n")
+        logger.debug(anom_cluster_counts.head(1))
+
         anom_cluster_counts.rename(
             columns={
                 "dbscan": "anomaly_cluster",
@@ -472,10 +486,13 @@ class AuthMarlowe:
             inplace=True,
         )
 
+        logger.debug(f"3 anom_cluster_counts.index = {anom_cluster_counts.index}\n")
+        logger.debug(f"3 anom_cluster_counts.columns = {anom_cluster_counts.columns}\n")
+        logger.debug(anom_cluster_counts.head(1))
+
         if self.debug:
             logger.debug(f"Total anom_cluster_counts = {len(anom_cluster_counts)}\n")
 
-        logger.debug(f"anom_cluster_counts.columns = {anom_cluster_counts.columns}\n")
         return anom_cluster_counts
 
     def top_nodes(self, n: int = 5) -> pd.Series:
@@ -555,7 +572,7 @@ class AuthMarlowe:
         g: Plottable = (
             graphistry.nodes(self.data_resource.ndf)
             .edges(self.data_resource.edf)
-            .bind(point_title="features", point_size="all_anomalous")
+            .bind(point_title="features")  # , point_size="all_anomalous")
         )
 
         # I won't work after the previous line - g._nodes isn't there yet

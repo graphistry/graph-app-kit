@@ -10,6 +10,7 @@ from components import GraphistrySt, URLParam
 from components.Splunk import SplunkConnection
 from css import all_css
 from graphistry import Plottable
+from requests.exceptions import HTTPError
 from views.demo_login.marlowe import (
     AUTH_SAFE_FIELDS,
     AuthDataResource,
@@ -130,14 +131,14 @@ def sidebar_area():
 
         st.sidebar.divider()
 
-        urlParams.get_field("cluster_id", 0)
-        cluster_id: int = st.sidebar.number_input(label="Cluster ID", value=0, step=1)
-        urlParams.set_field("cluster_id", cluster_id)
+        urlParams.get_field("dbscan", 0)
+        dbscan: int = st.sidebar.number_input(label="Cluster ID", value=0, step=1)
+        urlParams.set_field("dbscan", dbscan)
 
         return {
             "start_datetime": start_datetime,
             "end_datetime": end_datetime,
-            "cluster_id": cluster_id,
+            "dbscan": dbscan,
         }
 
 
@@ -150,7 +151,7 @@ def cache_splunk_client(username: str, password: str, host: str) -> SplunkConnec
 
 
 # Given filter settings, generate/cache/return dataframes & viz
-def run_filters(start_datetime, end_datetime, cluster_id):
+def run_filters(start_datetime, end_datetime, dbscan):
     with st.spinner("Generating graph..."):
         splunk_client = cache_splunk_client(
             os.environ["SPLUNK_USERNAME"],
@@ -164,8 +165,8 @@ def run_filters(start_datetime, end_datetime, cluster_id):
                 ("<=", end_datetime.isoformat()),
             ],
         }
-        if cluster_id > 0:
-            query_dict["dbscan"] = cluster_id
+        if dbscan > 0:
+            query_dict["dbscan"] = dbscan
         logger.debug(f"query_dict: {query_dict}\n")
 
         splunk_query = SplunkConnection.build_query(
@@ -185,7 +186,10 @@ def run_filters(start_datetime, end_datetime, cluster_id):
             marlowe: AuthMarlowe = AuthMarlowe(data_resource=data_resource)
             g: Plottable = marlowe.umap()  # next line describe_clusters uses dbscan clusters from umap
             cluster_df: pd.DataFrame = marlowe.describe_clusters()
-            graph_url: str = g.plot(render=False)
+            try:
+                graph_url: str = g.plot(render=False)
+            except HTTPError as e:
+                logging.exception(e)
 
             return {
                 "graph_url": graph_url,
@@ -198,7 +202,7 @@ def run_filters(start_datetime, end_datetime, cluster_id):
 def main_area(
     start_datetime,
     end_datetime,
-    cluster_id,
+    dbscan,
     graph_url=None,
     cluster_df=None,
 ):
