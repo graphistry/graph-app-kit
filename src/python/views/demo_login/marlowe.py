@@ -167,6 +167,10 @@ class AuthDataResource:
         """
 
         self.edf: pd.DataFrame = edf
+
+        logging.debug(f"Origial edf.shape: {edf.shape}")
+        logging.debug(f"Origial edf.columns: {edf.columns}")
+
         self.feature_columns: List[str] = feature_columns or list(AUTH_SAFE_FIELDS.keys())
         self.debug = debug
 

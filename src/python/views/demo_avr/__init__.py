@@ -46,7 +46,9 @@ urlParams = URLParam(app_id)
 
 INDEX: str = "avr_59k"
 SAMPLE_SIZE = 1000
-QUERY_SIZE = 20000
+CATEGORY_SAMPLE_SIZE = {"min": 5, "max": 100}
+QUERY_SIZE = 10000
+SAMPLE_RATIO = SAMPLE_SIZE / QUERY_SIZE
 
 
 def info():
@@ -184,7 +186,14 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
 
     # Get more data in the query than we sample down to ensure diversity
     splunk_edf: pd.DataFrame = splunk_client.one_shot_splunk(filter_query, count=QUERY_SIZE)
-    splunk_edf = splunk_edf.sample(min(SAMPLE_SIZE, len(splunk_edf)))
+
+    # # Perform a stratified sample that maintains the same ratios of categories
+    # category_ratios = splunk_edf["Category"].value_counts(normalize=True)
+    # inverse_category_ratios = 1 / category_ratios
+    # normalized_inv_cat_ratios = inverse_category_ratios / inverse_category_ratios.sum()
+    # logger
+
+    # splunk_edf = splunk_edf.sample(weights=normalized_inv_cat_ratios, frac=0.1)
 
     data_resource: AVRDataResource = AVRDataResource(
         edf=splunk_edf,
