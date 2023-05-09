@@ -249,7 +249,7 @@ class AuthDataResource:
 
         # Cast the columns to their known types
         for col, cast in AUTH_SAFE_FIELDS.items():
-            logger.debug(f"Column: {col} Original Type: {new_edf[col].dtype} Cast: {cast}\n") if self.debug else None
+            # logger.debug(f"Column: {col} Original Type: {new_edf[col].dtype} Cast: {cast}\n") if self.debug else None
 
             # Cast em if ya got em!
             if cast == "datetime":
@@ -270,9 +270,9 @@ class AuthDataResource:
         new_edf["dst_domain"] = new_edf["dst_domain"].astype(str)
         new_edf["dst_domain"] = new_edf["dst_domain"].str.replace("nan", "None")
 
-        if self.debug:
-            logger.debug(f'new_edf["datetime"].min(): {new_edf["datetime"].min()}\n')
-            logger.debug(f'new_edf["datetime"].max(): {new_edf["datetime"].max()}\n')
+        # if self.debug:
+        #     logger.debug(f'new_edf["datetime"].min(): {new_edf["datetime"].min()}\n')
+        #     logger.debug(f'new_edf["datetime"].max(): {new_edf["datetime"].max()}\n')
 
         if inplace is True:
             self.edf: pd.DataFrame = new_edf

@@ -177,6 +177,14 @@ def run_filters(start_datetime, end_datetime, cluster_id):
         logger.debug(f"Splunk query: {splunk_query}\n")
         results = splunk_client.one_shot_splunk(splunk_query)
 
+        for i, r in enumerate(results):
+            if isinstance(r, str):
+                logger.debug(f"{i}th string result: {r}\n")
+            elif isinstance(r, dict):
+                logger.debug(f"{i}th dict result: {r}\n")
+            else:
+                logger.debug(f"{i}th {type(r)}\n")
+
         # Clean the Splunk results and send them to Graphistry to GPU render and return a url
         try:
             data_resource = AuthDataResource(edf=results, feature_columns=list(AUTH_SAFE_FIELDS.keys()))
