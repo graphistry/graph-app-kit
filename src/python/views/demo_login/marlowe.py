@@ -31,7 +31,7 @@ np.random.seed = SEED
 UMAP_MODEL_PATH = ".models/umap.topic"
 
 # Default categorical field to use to draw color on the nodes
-DEFAULT_COLOR_BY: str = "_dbscan"
+DEFAULT_COLOR_BY: str = "dbscan"
 
 # How to build the pivot URLs :) We will use PIVOT_URL_TEMPLATE.format(investigation_id=investigation_id, ...)
 PIVOT_URL_TEMPLATE: str = ""
@@ -266,11 +266,11 @@ class AuthDataResource:
                 new_edf[col] = new_edf[col].astype(str)
 
         # Don't display 'nan', display None
-        new_edf["src_domain"] = new_edf["src_domain"].fillna(value="None", inplace=False)
+        new_edf["src_domain"] = new_edf["src_domain"].fillna(value="None", inplace=True)
         new_edf["src_domain"] = new_edf["src_domain"].astype(str)
         new_edf["src_domain"] = new_edf["src_domain"].str.replace("nan", "None")
 
-        new_edf["dst_domain"] = new_edf["dst_domain"].fillna("None", inplace=False)
+        new_edf["dst_domain"] = new_edf["dst_domain"].fillna("None", inplace=True)
         new_edf["dst_domain"] = new_edf["dst_domain"].astype(str)
         new_edf["dst_domain"] = new_edf["dst_domain"].str.replace("nan", "None")
 
@@ -359,41 +359,36 @@ class AuthDataResource:
 
         # Compute the total anomalies per cluster within the anomalous nodes
         self.anomalous_nodes = self.ndf[self.ndf["cluster"] == -1]
-        anom_cluster_counts = self.anomalous_nodes[["_dbscan", "is_anomalous", "RED"]].groupby("_dbscan").sum()
+        anom_cluster_counts = self.anomalous_nodes[["dbscan", "is_anomalous", "RED"]].groupby("dbscan").sum()
 
-        anom_cluster_counts = (
-            anom_cluster_counts[["is_anomalous", "RED"]]
-            .reset_index()
-            .rename(
-                columns={
-                    "_dbscan": "anomaly_cluster",
-                    "is_anomalous": "anomaly_count",
-                    "RED": "RED",
-                }
-            )
+        anom_cluster_counts.reset_index(inplace=True)
+        anom_cluster_counts.rename(
+            columns={
+                "dbscan": "anomaly_cluster",
+                "is_anomalous": "anomaly_count",
+                "RED": "RED",
+            },
+            inplace=True,
         )
 
         if self.debug:
             logger.debug(f"Total anom_cluster_counts = {len(anom_cluster_counts)}\n")
 
-        return anom_cluster_counts.sort_values(by="anomaly_count", ascending=False)
+        logger.debug(f"anom_cluster_counts.columns = {anom_cluster_counts.columns}\n")
+        return anom_cluster_counts
 
     def top_nodes(self, n: int = 5) -> pd.Series:
         """Create a list of the top n most anomalous computers by src_computer column."""
 
-        if not self.anomalous_nodes:
-            self.anomaly_counts()
-
         anomalous_cpu_clusters = (
-            self.anomalous_nodes.groupby(["src_computer", "_dbscan"])
+            self.anomalous_nodes.groupby(["src_computer", "dbscan"])
             .count()
             .reset_index()
-            .rename(columns={"src_computer": "computer", "_dbscan": "anomaly_cluster"})
+            .rename(columns={"src_computer": "computer", "dbscan": "anomaly_cluster"})
         )
 
         # Get the count of anomalies per computer - ndf is a deduplicated edge list of src/dst computers
-        top_n_computers = anomalous_cpu_clusters.groupby("anomaly_cluster")["computer"].apply(lambda x: list(x)[:n])
-        return top_n_computers
+        return anomalous_cpu_clusters.groupby("anomaly_cluster")["computer"].apply(lambda x: list(x)[:n])
 
     def describe_clusters(self) -> pd.DataFrame:
         """Describe the clusters in the data we ingested and return a DataFrame of the results."""
@@ -403,7 +398,6 @@ class AuthDataResource:
 
         # Compute the most anomalous nodes per cluster
         top_n_computers = self.top_nodes()
-        top_n_computers
 
         # Join anom_cluster_counts and top_n_computers
         self.cluster_df = anom_cluster_counts.merge(
@@ -583,6 +577,9 @@ class AuthMarlowe:
             dbscan=True,
             **topic_model,
         )
+
+        # Rename the _dbscan column to be ok with Splunk
+        g3._nodes.rename(columns={"_dbscan": "dbscan"}, inplace=True)
 
         g4: Plottable = g3.encode_point_color(
             DEFAULT_COLOR_BY,
