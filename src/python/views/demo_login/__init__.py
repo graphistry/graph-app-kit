@@ -5,6 +5,7 @@ from datetime import datetime, time, timedelta
 from typing import Dict, List, Union
 
 import dateutil.parser as dp
+import pandas as pd
 from components import GraphistrySt, URLParam
 from components.Splunk import SplunkConnection
 from css import all_css
@@ -182,12 +183,13 @@ def run_filters(start_datetime, end_datetime, cluster_id):
             data_resource = AuthDataResource(edf=results, feature_columns=list(AUTH_SAFE_FIELDS.keys()))
             # Generate the graph
             marlowe: AuthMarlowe = AuthMarlowe(data_resource=data_resource)
-            g: Plottable = marlowe.umap()
+            g: Plottable = marlowe.umap()  # next line describe_clusters uses dbscan clusters from umap
+            cluster_df: pd.DataFrame = marlowe.describe_clusters()
             graph_url: str = g.plot(render=False)
 
             return {
                 "graph_url": graph_url,
-                "cluster_df": data_resource.cluster_df,
+                "cluster_df": cluster_df,
             }
         except AuthMissingData:
             st.error("Your query returned no records.", icon="🚨")

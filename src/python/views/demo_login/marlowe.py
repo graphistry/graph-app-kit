@@ -4,7 +4,8 @@ import logging
 import os
 import random
 import sys
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
 from typing import Dict, List, Literal, Optional, Type, TypeVar, Union
 from urllib.parse import urlparse
 
@@ -58,7 +59,6 @@ AUTH_SAFE_FIELDS: Dict[str, Union[str, Type[str], Type[float]]] = {
     "success_or_failure": str,
     "datetime": "datetime",
     "time": int,
-    "dbscan": int,
 }
 
 # FEATURE_COLUMNS = ["x", "y", "general_cluster", "specific_cluster", "general_probability", "specific_probability"]
@@ -174,16 +174,12 @@ class AuthDataResource:
         self.feature_columns: List[str] = feature_columns or list(AUTH_SAFE_FIELDS.keys())
         self.debug = debug
 
-        # Checked later and computed if called by downstream dependencies
-        self.anomalous_nodes = None
-
         # Apply all the cleaning to the edges upon instantiation
         self.trim_to_safe_cols(inplace=True)
         self.clean_edge_list(inplace=True)
+        self.add_datetime()
         # ...and set deduped edge features as nodes
         self.featurize_edges()
-        # Create a DataFrame describing the DBScan clusters of anomalous events
-        self.describe_clusters()
 
     def filter(self, bool_series: TypeVar("pd.Series(bool)"), inplace: bool = False) -> Union[None, pd.DataFrame]:
         """filter Filter our DataFrame using a boolean Series, optionally in place.
@@ -240,6 +236,13 @@ class AuthDataResource:
             new_df: pd.DataFrame = self.edf.copy()
             return new_df[list(AUTH_SAFE_FIELDS.keys())]
 
+    def add_datetime(self) -> None:
+        """add_datetime Add a datetime column to our DataFrame using the timeframe and an offset."""
+        # Make the time a 2023 datetime
+        offset_date = datetime.now() - timedelta(days=30)
+        seconds_offset = time.mktime(offset_date.timetuple())
+        self.edf["datetime"] = pd.to_datetime(self.edf["time"] + seconds_offset, unit="s")
+
     def clean_edge_list(self, inplace: bool = True) -> Optional[pd.DataFrame]:
         """clean_edge_list Clean up the edges by casting them. Makes a copy of the DataFrame to implement
         inplace=False."""
@@ -273,10 +276,6 @@ class AuthDataResource:
         new_edf["dst_domain"] = new_edf["dst_domain"].fillna("None", inplace=True)
         new_edf["dst_domain"] = new_edf["dst_domain"].astype(str)
         new_edf["dst_domain"] = new_edf["dst_domain"].str.replace("nan", "None")
-
-        # if self.debug:
-        #     logger.debug(f'new_edf["datetime"].min(): {new_edf["datetime"].min()}\n')
-        #     logger.debug(f'new_edf["datetime"].max(): {new_edf["datetime"].max()}\n')
 
         if inplace is True:
             self.edf: pd.DataFrame = new_edf
@@ -354,60 +353,6 @@ class AuthDataResource:
             )
         )
 
-    def anomaly_counts(self) -> pd.DataFrame:
-        """Count the anomalies per cluster and return a DataFrame of the results sorted descending on anomaly count."""
-
-        # Compute the total anomalies per cluster within the anomalous nodes
-        self.anomalous_nodes = self.ndf[self.ndf["cluster"] == -1]
-        anom_cluster_counts = self.anomalous_nodes[["dbscan", "is_anomalous", "RED"]].groupby("dbscan").sum()
-
-        anom_cluster_counts.reset_index(inplace=True)
-        anom_cluster_counts.rename(
-            columns={
-                "dbscan": "anomaly_cluster",
-                "is_anomalous": "anomaly_count",
-                "RED": "RED",
-            },
-            inplace=True,
-        )
-
-        if self.debug:
-            logger.debug(f"Total anom_cluster_counts = {len(anom_cluster_counts)}\n")
-
-        logger.debug(f"anom_cluster_counts.columns = {anom_cluster_counts.columns}\n")
-        return anom_cluster_counts
-
-    def top_nodes(self, n: int = 5) -> pd.Series:
-        """Create a list of the top n most anomalous computers by src_computer column."""
-
-        anomalous_cpu_clusters = (
-            self.anomalous_nodes.groupby(["src_computer", "dbscan"])
-            .count()
-            .reset_index()
-            .rename(columns={"src_computer": "computer", "dbscan": "anomaly_cluster"})
-        )
-
-        # Get the count of anomalies per computer - ndf is a deduplicated edge list of src/dst computers
-        return anomalous_cpu_clusters.groupby("anomaly_cluster")["computer"].apply(lambda x: list(x)[:n])
-
-    def describe_clusters(self) -> pd.DataFrame:
-        """Describe the clusters in the data we ingested and return a DataFrame of the results."""
-
-        # Compute the pieces of the DataFrame and then stitch them together
-        anom_cluster_counts = self.anomaly_counts()
-
-        # Compute the most anomalous nodes per cluster
-        top_n_computers = self.top_nodes()
-
-        # Join anom_cluster_counts and top_n_computers
-        self.cluster_df = anom_cluster_counts.merge(
-            top_n_computers,
-            on="anomaly_cluster",
-            how="left",
-        )
-
-        return self.cluster_df
-
     @staticmethod
     def is_url(url: str) -> bool:
         """is_url True if a valid URL is passed, otherwise False
@@ -484,6 +429,9 @@ class AuthMarlowe:
         self.g: Optional[Plottable] = None
         self.debug = debug
 
+        # Checked later and computed if called by downstream dependencies
+        self.anomalous_nodes = None
+
     def register(
         self,
         protocol: str,
@@ -506,6 +454,60 @@ class AuthMarlowe:
             password=password,
             client_protocol_hostname=client_protocol_hostname,
         )
+
+    def anomaly_counts(self) -> pd.DataFrame:
+        """Count the anomalies per cluster and return a DataFrame of the results sorted descending on anomaly count."""
+
+        # Compute the total anomalies per cluster within the anomalous nodes
+        self.anomalous_nodes = self.g._nodes[self.g._nodes["cluster"] == -1]
+        anom_cluster_counts = self.anomalous_nodes[["dbscan", "is_anomalous", "RED"]].groupby("dbscan").sum()
+
+        anom_cluster_counts.reset_index(inplace=True)
+        anom_cluster_counts.rename(
+            columns={
+                "dbscan": "anomaly_cluster",
+                "is_anomalous": "anomaly_count",
+                "RED": "RED",
+            },
+            inplace=True,
+        )
+
+        if self.debug:
+            logger.debug(f"Total anom_cluster_counts = {len(anom_cluster_counts)}\n")
+
+        logger.debug(f"anom_cluster_counts.columns = {anom_cluster_counts.columns}\n")
+        return anom_cluster_counts
+
+    def top_nodes(self, n: int = 5) -> pd.Series:
+        """Create a list of the top n most anomalous computers by src_computer column."""
+
+        anomalous_cpu_clusters = (
+            self.anomalous_nodes.groupby(["src_computer", "dbscan"])
+            .count()
+            .reset_index()
+            .rename(columns={"src_computer": "computer", "dbscan": "anomaly_cluster"})
+        )
+
+        # Get the count of anomalies per computer - ndf is a deduplicated edge list of src/dst computers
+        return anomalous_cpu_clusters.groupby("anomaly_cluster")["computer"].apply(lambda x: list(x)[:n])
+
+    def describe_clusters(self) -> pd.DataFrame:
+        """Describe the clusters in the data we ingested and return a DataFrame of the results."""
+
+        # Compute the pieces of the DataFrame and then stitch them together
+        anom_cluster_counts = self.anomaly_counts()
+
+        # Compute the most anomalous nodes per cluster
+        top_n_computers = self.top_nodes()
+
+        # Join anom_cluster_counts and top_n_computers
+        self.cluster_df = anom_cluster_counts.merge(
+            top_n_computers,
+            on="anomaly_cluster",
+            how="left",
+        )
+
+        return self.cluster_df
 
     def umap(
         self,
@@ -577,6 +579,7 @@ class AuthMarlowe:
             dbscan=True,
             **topic_model,
         )
+        logger.debug(g3._nodes.dtypes)
 
         # Rename the _dbscan column to be ok with Splunk
         g3._nodes.rename(columns={"_dbscan": "dbscan"}, inplace=True)
