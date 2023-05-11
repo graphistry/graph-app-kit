@@ -39,6 +39,7 @@ urlParams = URLParam(app_id)
 
 # Splunk configuration
 INDEX = "auth_txt_50k"
+DEFAULT_PIVOT_URL_INVESTIGATION_ID = "123"
 
 
 def info():
@@ -106,11 +107,7 @@ hr {
     margin-block-start: 0.1rem;
     margin-block-end: 0.1rem;
 }
-
-div[data-testid="stVerticalBlock"] {
-    gap: 0.3rem;
-}
-        </style>""",
+</style>""",
         unsafe_allow_html=True,
     )
 
@@ -119,6 +116,18 @@ div[data-testid="stVerticalBlock"] {
 # https://docs.streamlit.io/en/stable/api.html#display-interactive-widgets
 def sidebar_area():
     with st.sidebar:
+        # Write a description in the sidebar
+        st.sidebar.markdown(
+            '<p style="font-size: 14px">Nodes: Logins, colored by attack category</p>',
+            unsafe_allow_html=True,
+        )
+        st.sidebar.markdown(
+            '<p style="font-size: 14px">Edges: Link logins by similarity</p>',
+            unsafe_allow_html=True,
+        )
+
+        st.sidebar.divider()
+
         now = datetime.now()
         today = now.date()
         current_hour = now.time()
@@ -186,6 +195,23 @@ def run_filters(start_datetime, end_datetime):  # , dbscan):
         # Clean the Splunk results and send them to Graphistry to GPU render and return a url
         try:
             data_resource = AuthDataResource(edf=results, feature_columns=list(AUTH_SAFE_FIELDS.keys()))
+
+            #
+            # Bring in standard graphistry environment variables: Set env/*.env files, in .env --> docker-compose.yml --> os.getenv(key) --> AVRMarlowe.register()
+            #
+
+            logger.info("Configuring environment variables...\n")
+            investigation_id: str = os.getenv("PIVOT_URL_INVESTIGATION_ID", DEFAULT_PIVOT_URL_INVESTIGATION_ID)
+            logger.debug(f"investigation_id={investigation_id}\n")
+            graphistry_protocol: str = os.getenv("GRAPHISTRY_PROTOCOL")
+            graphistry_server: str = os.getenv("GRAPHISTRY_SERVER")
+
+            data_resource.add_pivot_url_column(
+                investigation_id=investigation_id,
+                graphistry_protocol=graphistry_protocol,
+                graphistry_server=graphistry_server,
+            )
+
             # Generate the graph
             marlowe: AuthMarlowe = AuthMarlowe(data_resource=data_resource)
             g: Plottable = marlowe.umap()  # next line describe_clusters uses dbscan clusters from umap

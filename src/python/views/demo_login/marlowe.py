@@ -35,7 +35,7 @@ UMAP_MODEL_PATH = ".models/umap.topic"
 DEFAULT_COLOR_BY: str = "dbscan"
 
 # How to build the pivot URLs :) We will use PIVOT_URL_TEMPLATE.format(investigation_id=investigation_id, ...)
-PIVOT_URL_TEMPLATE: str = '<a href="{graphistry_protocol}://{graphistry_server}/pivot/template?investigation={investigation_id}&pivot[0][events][0][src_computer]={src_computer}&time={unix_time}00&before={lookback_period}&name=Incident-360-{investigation_id}">Investigate Source Computer</a>'
+PIVOT_URL_TEMPLATE: str = '<a href="{graphistry_protocol}://{graphistry_server}/pivot/template?investigation={investigation_id}&pivot[0][events][0][src_computer]={src_computer}&name=Incident-360-{investigation_id}">Investigate Source Computer</a>'
 
 # How to cast the columns we are interested in to more useful types
 AUTH_SAFE_FIELDS: Dict[str, Union[str, Type[str], Type[float]]] = {
@@ -315,35 +315,11 @@ class AuthDataResource:
         if self.debug:
             logger.debug(f"df.shape={self.edf.shape} ndf.shape={self.ndf.shape}\n")
 
-    # def node_anomaly_counts(self) -> None:
-    #     """node_anomaly_counts Sum the number of anomalies per node by src and dst and add it to the node DataFrame."""
-
-    #     # Compute the total anomalies per computer
-    #     anom_src_cpus = self.edf[["src_computer", "is_anomalous"]].groupby("src_computer").sum()
-    #     anom_src_cpus["is_anomalous"].rename("cpu_total_anomalous", inplace=True)
-
-    #     if self.debug:
-    #         logger.debug(f"Total anomalous source computers: {len(anom_src_cpus):,}\n")
-
-    #     anom_dst_cpus = self.edf[["dst_computer", "is_anomalous"]].groupby("dst_computer").sum()
-    #     anom_dst_cpus = anom_dst_cpus["is_anomalous"].rename("cpu_total_anomalous")
-
-    #     if self.debug:
-    #         logger.debug(f"Total anomalous dest computers:   {len(anom_dst_cpus):,}\n")
-
-    #     # Append one to the bottom of the other, and rename the columns
-    #     all_cpus = anom_src_cpus.append(anom_dst_cpus, ignore_index=False).reset_index()
-    #     all_cpus.columns = ["computer", "cpu_total_anomalous"]
-
-    #     # Sum the cpu_total_anomalous values to get the total anomalies per computer
-    #     anomaly_df = all_cpus.groupby("computer").sum()
-
     def add_pivot_url_column(
         self,
         investigation_id: str,
-        base_client_url: str,
-        unix_time: float,
-        lookback_period: Literal["-1h", "-6h", "-12h", "-1d", "-7d", "-30d", "-365d", "all"],
+        graphistry_protocol: str,
+        graphistry_server: str,
     ) -> None:
         """add_pivot_url_column Add a pivot url column using the investigation_id, general_cluster
 
@@ -351,12 +327,10 @@ class AuthDataResource:
         ----------
         investigation_id : str
             The identifier of the visual playbook template to which the URL refers
-        base_client_url : str
-            The base url corresponding to the GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME environment variable
-        unix_time : float
-            The Unix timestamp to look back from in the visual playbook
-        lookback_period : Literal["-1h", "-6h", "-12h", "-1d", "-7d", "-30d", "-365d", "all"]
-            A selection of lookback periods for you to enjoy
+        graphistry_protocol : str
+            The protocol to use to connect to the GRAPHISTRY_SERVER
+        graphistry_server : str
+            The base url corresponding to the GRAPHISTRY_SERVER environment variable
 
         Returns
         -------
@@ -364,13 +338,12 @@ class AuthDataResource:
             The Void™
         """
 
-        self.edf["pivot_url"] = self.edf["src_computer"].apply(
+        self.ndf["pivot_url"] = self.ndf["src_computer"].apply(
             lambda x: PIVOT_URL_TEMPLATE.format(
                 investigation_id=investigation_id,
                 src_computer=x,
-                base_client_url=base_client_url,
-                unix_time=unix_time,
-                lookback_period=lookback_period,
+                graphistry_protocol=graphistry_protocol,
+                graphistry_server=graphistry_server,
             )
         )
 
