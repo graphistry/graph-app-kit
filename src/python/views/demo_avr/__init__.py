@@ -31,8 +31,7 @@ logger.addHandler(stream_handler)
 
 # App configuration
 CSS_PATH = "/apps/views/demo_avr/app.css"
-PIVOT_URL_INVESTIGATION_ID = "123"
-APP_NOW_TIME = "2019-03-18T00:00:00Z"
+DEFAULT_PIVOT_URL_INVESTIGATION_ID = "123"
 
 ############################################
 #
@@ -185,7 +184,8 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
     logger.debug(f"filter_query: {filter_query}\n")
 
     # Get more data in the query than we sample down to ensure diversity
-    splunk_edf: pd.DataFrame = splunk_client.one_shot_splunk(filter_query, count=QUERY_SIZE)
+    with st.spinner("Retrieving data from Splunk ..."):
+        splunk_edf: pd.DataFrame = splunk_client.one_shot_splunk(filter_query, count=QUERY_SIZE)
 
     data_resource: AVRDataResource = AVRDataResource(
         edf=splunk_edf,
@@ -193,9 +193,12 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
         debug=True,
     )
 
-    investigation_id: str = PIVOT_URL_INVESTIGATION_ID
-    app_now_time: str = APP_NOW_TIME
-    logger.debug(f"investigation_id={investigation_id} app_now_time={app_now_time}\n")
+    if os.getenv("PIVOT_URL_INVESTIGATION_ID") is not None: 
+        investigation_id: str = os.getenv("PIVOT_URL_INVESTIGATION_ID") 
+    else: 
+        investigation_id: str = DEFAULT_PIVOT_URL_INVESTIGATION_ID
+
+    logger.debug(f"investigation_id={investigation_id}\n")
 
     #
     # Bring in standard graphistry environment variables: Set in .env --> docker-compose.yml --> os.getenv(key) --> AVRMarlowe.register()
@@ -208,8 +211,6 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
     graphistry_server: str = os.getenv("GRAPHISTRY_SERVER")
     # graphistry_client_protocol_hostname: Optional[str] = os.getenv("GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME")
 
-    LOOKBACK_PERIOD = "-30d"  # For the link to the Visual Playbook
-
     try:
         data_resource.trim_to_safe_cols(inplace=True)
         data_resource.clean_edge_list(inplace=True)
@@ -218,8 +219,6 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
             investigation_id=investigation_id,
             graphistry_protocol=graphistry_protocol,
             graphistry_server=graphistry_server,
-            unix_time=AVRDataResource.iso_to_unix(app_now_time),
-            lookback_period=LOOKBACK_PERIOD,
         )
     except AVRMissingData as e:
         logger.error(f"Total records received from Splunk: {len(splunk_edf):,}\n")
@@ -288,7 +287,8 @@ def run_all():
         )
 
         # First we need to get all the unique
-        cluster_select_values = ["None"] + splunk_client.get_unique_values("avr_59k", "general_cluster")
+        with st.spinner("Retrieving cluster IDs from Splunk ..."):
+            cluster_select_values = ["None"] + splunk_client.get_unique_values("avr_59k", "general_cluster")
 
         # Render sidebar and get current settings
         sidebar_params = sidebar_area(cluster_id, general_probability, cluster_select_values)
