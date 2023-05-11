@@ -187,14 +187,6 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
     # Get more data in the query than we sample down to ensure diversity
     splunk_edf: pd.DataFrame = splunk_client.one_shot_splunk(filter_query, count=QUERY_SIZE)
 
-    # # Perform a stratified sample that maintains the same ratios of categories
-    # category_ratios = splunk_edf["Category"].value_counts(normalize=True)
-    # inverse_category_ratios = 1 / category_ratios
-    # normalized_inv_cat_ratios = inverse_category_ratios / inverse_category_ratios.sum()
-    # logger
-
-    # splunk_edf = splunk_edf.sample(weights=normalized_inv_cat_ratios, frac=0.1)
-
     data_resource: AVRDataResource = AVRDataResource(
         edf=splunk_edf,
         feature_columns=FEATURE_COLUMNS,
@@ -210,15 +202,11 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
     #
 
     logger.info("Configuring environment variables...\n")
-    graphistry_username: str = os.getenv("GRAPHISTRY_USERNAME")
-    graphistry_password: str = os.getenv("GRAPHISTRY_PASSWORD")
+    # graphistry_username: str = os.getenv("GRAPHISTRY_USERNAME")
+    # graphistry_password: str = os.getenv("GRAPHISTRY_PASSWORD")
     graphistry_protocol: str = os.getenv("GRAPHISTRY_PROTOCOL")
     graphistry_server: str = os.getenv("GRAPHISTRY_SERVER")
-    graphistry_client_protocol_hostname: Optional[str] = os.getenv("GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME")
-    # logger.debug(
-    #     f"graphistry_username={graphistry_username}, graphistry_password={graphistry_password}, graphistry_protocol={graphistry_protocol},"
-    #     + f" graphistry_server={graphistry_server}, graphistry_client_protocol_hostname={graphistry_client_protocol_hostname}\n"
-    # )
+    # graphistry_client_protocol_hostname: Optional[str] = os.getenv("GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME")
 
     LOOKBACK_PERIOD = "-30d"  # For the link to the Visual Playbook
 
@@ -318,17 +306,6 @@ def run_all():
 
 
 #########################################################
-
-
-def clean_edge_list(edf: pd.DataFrame, debug=False) -> pd.DataFrame:
-    """clean_edge_list Clean up the edges by casting them."""
-    edf = edf[AVR_SAFE_COLUMNS.keys()]
-
-    for col, cast in AVR_SAFE_COLUMNS.items():
-        logger.warning(f"Column: {col} Cast: {cast}") if debug else None
-        edf[col] = pd.to_datetime(edf[col]) if cast == "datetime" else edf[col].astype(cast)
-
-    return edf
 
 
 # Cache the Splunk client as a resource so it is re-used
