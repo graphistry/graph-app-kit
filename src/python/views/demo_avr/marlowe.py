@@ -34,7 +34,7 @@ UMAP_MODEL_PATH = ".models/umap.topic"
 DEFAULT_COLOR_BY: str = "Category"
 
 # How to build the pivot URLs :) We will use PIVOT_URL_TEMPLATE.format(investigation_id=investigation_id, ...)
-PIVOT_URL_TEMPLATE: str = '<a href="{graphistry_protocol}://{graphistry_server}/pivot/template?investigation={investigation_id}&pivot[0][events][0][general_cluster]={general_cluster}&time={unix_time}&before={lookback_period}&name=Incident-360-{investigation_id}">Investigate Cluster</a>'
+PIVOT_URL_TEMPLATE: str = '<a href="{graphistry_protocol}://{graphistry_server}/pivot/template?investigation={investigation_id}&pivot[0][events][0][general_cluster]={general_cluster}&time={unix_time}00&before={lookback_period}&name=Incident-360-{investigation_id}">Investigate Cluster</a>'
 
 # How to cast the columns we are interested in to more useful types
 AVR_SAFE_COLUMNS: Dict[str, Union[str, Type[str], Type[float]]] = {
