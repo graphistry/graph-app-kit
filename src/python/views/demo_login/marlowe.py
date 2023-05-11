@@ -530,7 +530,7 @@ class AuthMarlowe:
             top_n_computers,
             on="anomaly_cluster",
             how="left",
-        )
+        ).sort_values("anomaly_count", ascending=False)
 
         return self.cluster_df
 
