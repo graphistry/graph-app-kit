@@ -6,7 +6,8 @@ from typing import Dict, List, Union
 
 import dateutil.parser as dp
 import pandas as pd
-from components import GraphistrySt, URLParam
+import streamlit.components.v1 as components
+from components import URLParam
 from components.Splunk import SplunkConnection
 from css import all_css
 from graphistry import Plottable
@@ -86,7 +87,7 @@ h2 {
 }
 
 .e1fqkh3o4 {
-    padding-top: 3.2rem;
+    padding-top: 1.2rem;
     padding-bottom: 0rem;
     padding-left: 0rem;
     padding-right: 0rem;
@@ -105,6 +106,10 @@ hr {
     margin-block-start: 0.1rem;
     margin-block-end: 0.1rem;
 }
+
+div[data-testid="stVerticalBlock"] {
+    gap: 0.3rem;
+}
         </style>""",
         unsafe_allow_html=True,
     )
@@ -117,7 +122,7 @@ def sidebar_area():
         now = datetime.now()
         today = now.date()
         current_hour = now.time()
-        month_ago = today - timedelta(days=30)
+        month_ago = today - timedelta(days=60)
 
         start_date = st.sidebar.date_input(label="Start Date", value=month_ago)
         start_time = st.sidebar.time_input(label="Start Time", value=time(0, 00))
@@ -206,7 +211,8 @@ def main_area(
     cluster_df=None,
 ):
     logger.debug("Rendering main area, with url: %s\n", graph_url)
-    GraphistrySt().render_url(graph_url)
+    components.iframe(src=graph_url, height=650, scrolling=True)
+    st.dataframe(cluster_df, use_container_width=True, height=176)
 
 
 ############################################

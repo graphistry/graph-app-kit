@@ -317,6 +317,7 @@ class AuthDataResource:
 
     # def node_anomaly_counts(self) -> None:
     #     """node_anomaly_counts Sum the number of anomalies per node by src and dst and add it to the node DataFrame."""
+
     #     # Compute the total anomalies per computer
     #     anom_src_cpus = self.edf[["src_computer", "is_anomalous"]].groupby("src_computer").sum()
     #     anom_src_cpus["is_anomalous"].rename("cpu_total_anomalous", inplace=True)
@@ -624,7 +625,9 @@ class AuthMarlowe:
                 "edgeCurvature": 0.4,
                 "gravity": 0.5,
                 "showPointsOfInterestLabel": False,
-            }
+                "height": 200,
+            },
+            height=200,
         )
 
         return self.g
