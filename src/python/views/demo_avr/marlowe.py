@@ -241,8 +241,6 @@ class AVRDataResource:
 
         # Cast the columns to their known types
         for col, cast in AVR_SAFE_COLUMNS.items():
-            logger.debug(f"Column: {col} Original Type: {new_edf[col].dtype} Cast: {cast}\n") if self.debug else None
-
             # Cast em if ya got em!
             if cast == "datetime":
                 new_edf[col] = pd.to_datetime(new_edf[col], utc=True)
