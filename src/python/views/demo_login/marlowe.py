@@ -526,11 +526,15 @@ class AuthMarlowe:
         top_n_computers = self.cluster_top_nodes()
 
         # Join anom_cluster_counts and top_n_computers
-        self.cluster_df = anom_cluster_counts.merge(
-            top_n_computers,
-            on="anomaly_cluster",
-            how="left",
-        ).sort_values("anomaly_count", ascending=False)
+        self.cluster_df = (
+            anom_cluster_counts.merge(
+                top_n_computers,
+                on="anomaly_cluster",
+                how="left",
+            )
+            .sort_values("anomaly_count", ascending=False)
+            .set_index("anomaly_cluster")
+        )
 
         return self.cluster_df
 
