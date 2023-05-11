@@ -565,7 +565,7 @@ class AuthMarlowe:
 
         # Compose an HTML label of the attack category and the first 2 source/target IPs.
         g._nodes["Label"] = g._nodes.astype(str).apply(
-            lambda x: f"<br />Source: {x.src_computer}<br />Dest: {x.dst_computer}",
+            lambda x: f"Source: {x.src_computer}<br />Dest: {x.dst_computer}",
             axis=1,
         )
 
