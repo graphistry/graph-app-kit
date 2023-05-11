@@ -35,12 +35,7 @@ UMAP_MODEL_PATH = ".models/umap.topic"
 DEFAULT_COLOR_BY: str = "dbscan"
 
 # How to build the pivot URLs :) We will use PIVOT_URL_TEMPLATE.format(investigation_id=investigation_id, ...)
-PIVOT_URL_TEMPLATE: str = ""
-# = (
-#     '<a href="{base_client_url}/pivot/template?investigation={investigation_id}'
-#     + f"&pivot[0][events][0][cluster_id]={cluster_id}&time={unix_time}"
-#     + f'&before={lookback_period}&name=Incident-360-{investigation_id}">Investigate Cluster</a>'
-# )
+PIVOT_URL_TEMPLATE: str = '<a href="{graphistry_protocol}://{graphistry_server}/pivot/template?investigation={investigation_id}&pivot[0][events][0][src_computer]={src_computer}&time={unix_time}00&before={lookback_period}&name=Incident-360-{investigation_id}">Investigate Source Computer</a>'
 
 # How to cast the columns we are interested in to more useful types
 AUTH_SAFE_FIELDS: Dict[str, Union[str, Type[str], Type[float]]] = {
@@ -320,6 +315,28 @@ class AuthDataResource:
         if self.debug:
             logger.debug(f"df.shape={self.edf.shape} ndf.shape={self.ndf.shape}\n")
 
+    # def node_anomaly_counts(self) -> None:
+    #     """node_anomaly_counts Sum the number of anomalies per node by src and dst and add it to the node DataFrame."""
+    #     # Compute the total anomalies per computer
+    #     anom_src_cpus = self.edf[["src_computer", "is_anomalous"]].groupby("src_computer").sum()
+    #     anom_src_cpus["is_anomalous"].rename("cpu_total_anomalous", inplace=True)
+
+    #     if self.debug:
+    #         logger.debug(f"Total anomalous source computers: {len(anom_src_cpus):,}\n")
+
+    #     anom_dst_cpus = self.edf[["dst_computer", "is_anomalous"]].groupby("dst_computer").sum()
+    #     anom_dst_cpus = anom_dst_cpus["is_anomalous"].rename("cpu_total_anomalous")
+
+    #     if self.debug:
+    #         logger.debug(f"Total anomalous dest computers:   {len(anom_dst_cpus):,}\n")
+
+    #     # Append one to the bottom of the other, and rename the columns
+    #     all_cpus = anom_src_cpus.append(anom_dst_cpus, ignore_index=False).reset_index()
+    #     all_cpus.columns = ["computer", "cpu_total_anomalous"]
+
+    #     # Sum the cpu_total_anomalous values to get the total anomalies per computer
+    #     anomaly_df = all_cpus.groupby("computer").sum()
+
     def add_pivot_url_column(
         self,
         investigation_id: str,
@@ -346,10 +363,10 @@ class AuthDataResource:
             The Void™
         """
 
-        self.edf["pivot_url"] = self.edf["general_cluster"].apply(
+        self.edf["pivot_url"] = self.edf["src_computer"].apply(
             lambda x: PIVOT_URL_TEMPLATE.format(
                 investigation_id=investigation_id,
-                general_cluster=x,
+                src_computer=x,
                 base_client_url=base_client_url,
                 unix_time=unix_time,
                 lookback_period=lookback_period,
@@ -455,7 +472,7 @@ class AuthMarlowe:
             client_protocol_hostname=client_protocol_hostname,
         )
 
-    def anomaly_counts(self) -> pd.DataFrame:
+    def cluster_anomaly_counts(self) -> pd.DataFrame:
         """Count the anomalies per cluster and return a DataFrame of the results sorted descending on anomaly count."""
 
         # Compute the total anomalies per cluster within the anomalous nodes
@@ -485,7 +502,7 @@ class AuthMarlowe:
 
         return anom_cluster_counts
 
-    def top_nodes(self, n: int = 5) -> pd.Series:
+    def cluster_top_nodes(self, n: int = 5) -> pd.Series:
         """Create a list of the top n most anomalous computers by src_computer column."""
 
         anomalous_cpu_clusters = (
@@ -502,10 +519,10 @@ class AuthMarlowe:
         """Describe the clusters in the data we ingested and return a DataFrame of the results."""
 
         # Compute the pieces of the DataFrame and then stitch them together
-        anom_cluster_counts = self.anomaly_counts()
+        anom_cluster_counts = self.cluster_anomaly_counts()
 
         # Compute the most anomalous nodes per cluster
-        top_n_computers = self.top_nodes()
+        top_n_computers = self.cluster_top_nodes()
 
         # Join anom_cluster_counts and top_n_computers
         self.cluster_df = anom_cluster_counts.merge(
@@ -599,9 +616,9 @@ class AuthMarlowe:
 
         self.g = g4.settings(
             url_params={
-                "play": 1000,
+                "play": 0,
                 "strongGravity": True,
-                "pointSize": 0.4,
+                "pointSize": 0.3,
                 "pointOpacity": 0.2,
                 "edgeOpacity": 0.15,
                 "edgeCurvature": 0.4,
