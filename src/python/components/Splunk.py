@@ -277,10 +277,10 @@ class SplunkConnection:
                 else:
                     query += f"{col}={val} "
 
-        # Add any fields listed - without fields queries can get flaky
-        query += f'| fields {" ".join(fields)} ' if fields else ""
+        # Add any fields listed in the table command - without fields queries can get flaky
+        query += f'| table {" ".join(fields)} ' if fields else ""
 
-        # Default random sort
+        # Default random sort - otherwise must be deterministic
         if sort and isinstance(sort, list) and len(list) > 0:
             query += f'| sort {" ".join(sort)} ' if sort else ""
         else:
