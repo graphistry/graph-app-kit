@@ -198,8 +198,6 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
     #
 
     logger.info("Configuring environment variables...\n")
-    graphistry_protocol: str = os.getenv("GRAPHISTRY_PROTOCOL")
-    graphistry_server: str = os.getenv("GRAPHISTRY_SERVER")
 
     try:
         data_resource.trim_to_safe_cols(inplace=True)
@@ -207,8 +205,6 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
         data_resource.featurize_edges()
         data_resource.add_pivot_url_column(
             investigation_id=investigation_id,
-            graphistry_protocol=graphistry_protocol,
-            graphistry_server=graphistry_server,
         )
     except AVRMissingData as e:
         logger.error(f"Total records received from Splunk: {len(splunk_edf):,}\n")

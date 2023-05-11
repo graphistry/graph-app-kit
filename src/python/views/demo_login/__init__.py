@@ -203,13 +203,9 @@ def run_filters(start_datetime, end_datetime):  # , dbscan):
             logger.info("Configuring environment variables...\n")
             investigation_id: str = os.getenv("PIVOT_URL_INVESTIGATION_ID", DEFAULT_PIVOT_URL_INVESTIGATION_ID)
             logger.debug(f"investigation_id={investigation_id}\n")
-            graphistry_protocol: str = os.getenv("GRAPHISTRY_PROTOCOL")
-            graphistry_server: str = os.getenv("GRAPHISTRY_SERVER")
 
             data_resource.add_pivot_url_column(
                 investigation_id=investigation_id,
-                graphistry_protocol=graphistry_protocol,
-                graphistry_server=graphistry_server,
             )
 
             # Generate the graph

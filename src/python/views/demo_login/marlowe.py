@@ -35,7 +35,7 @@ UMAP_MODEL_PATH = ".models/umap.topic"
 DEFAULT_COLOR_BY: str = "dbscan"
 
 # How to build the pivot URLs :) We will use PIVOT_URL_TEMPLATE.format(investigation_id=investigation_id, ...)
-PIVOT_URL_TEMPLATE: str = '<a href="{graphistry_protocol}://{graphistry_server}/pivot/template?investigation={investigation_id}&pivot[0][events][0][src_computer]={src_computer}&name=Incident-360-{investigation_id}">Investigate Source Computer</a>'
+PIVOT_URL_TEMPLATE: str = '<a href="/pivot/template?investigation={investigation_id}&pivot[0][events][0][src_computer]={src_computer}&name=Incident-360-{investigation_id}" target="_blank">Investigate Source Computer</a>'
 
 # How to cast the columns we are interested in to more useful types
 AUTH_SAFE_FIELDS: Dict[str, Union[str, Type[str], Type[float]]] = {
@@ -318,8 +318,6 @@ class AuthDataResource:
     def add_pivot_url_column(
         self,
         investigation_id: str,
-        graphistry_protocol: str,
-        graphistry_server: str,
     ) -> None:
         """add_pivot_url_column Add a pivot url column using the investigation_id, general_cluster
 
@@ -327,10 +325,6 @@ class AuthDataResource:
         ----------
         investigation_id : str
             The identifier of the visual playbook template to which the URL refers
-        graphistry_protocol : str
-            The protocol to use to connect to the GRAPHISTRY_SERVER
-        graphistry_server : str
-            The base url corresponding to the GRAPHISTRY_SERVER environment variable
 
         Returns
         -------
@@ -342,8 +336,6 @@ class AuthDataResource:
             lambda x: PIVOT_URL_TEMPLATE.format(
                 investigation_id=investigation_id,
                 src_computer=x,
-                graphistry_protocol=graphistry_protocol,
-                graphistry_server=graphistry_server,
             )
         )
 

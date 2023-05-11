@@ -35,7 +35,7 @@ DEFAULT_COLOR_BY: str = "Category"
 
 # How to build the pivot URLs :) We will use PIVOT_URL_TEMPLATE.format(investigation_id=investigation_id, ...)
 # tcook - added 00 to avoid misinterpretation on the playbook of the epoch time
-PIVOT_URL_TEMPLATE: str = '<a href="{graphistry_protocol}://{graphistry_server}/pivot/template?investigation={investigation_id}&pivot[0][events][0][general_cluster]={general_cluster}&name=Incident-360-{investigation_id}">Investigate Cluster</a>'
+PIVOT_URL_TEMPLATE: str = '<a href="/pivot/template?investigation={investigation_id}&pivot[0][events][0][general_cluster]={general_cluster}&name=Incident-360-{investigation_id}" target="_blank">Investigate Cluster</a>'
 
 # How to cast the columns we are interested in to more useful types
 AVR_SAFE_COLUMNS: Dict[str, Union[str, Type[str], Type[float]]] = {
@@ -310,8 +310,6 @@ class AVRDataResource:
     def add_pivot_url_column(
         self,
         investigation_id: str,
-        graphistry_protocol: str,
-        graphistry_server: str,
     ) -> None:
         """add_pivot_url_column Add a pivot url column using the investigation_id, general_cluster
 
@@ -319,12 +317,6 @@ class AVRDataResource:
         ----------
         investigation_id : str
             The identifier of the visual playbook template to which the URL refers
-        general_cluster : str
-            The cluster ID of to pass to the playbook
-        graphistry_protocol : str
-            The protocol to use to connect to the GRAPHISTRY_SERVER
-        graphistry_server : str
-            The base url corresponding to the GRAPHISTRY_SERVER environment variable
 
         Returns
         -------
@@ -336,8 +328,6 @@ class AVRDataResource:
             lambda x: PIVOT_URL_TEMPLATE.format(
                 investigation_id=investigation_id,
                 general_cluster=x,
-                graphistry_protocol=graphistry_protocol,
-                graphistry_server=graphistry_server,
             )
         )
 
