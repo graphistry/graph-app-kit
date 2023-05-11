@@ -320,7 +320,7 @@ class AVRDataResource:
         investigation_id : str
             The identifier of the visual playbook template to which the URL refers
         general_cluster : str
-            The cluster ID of to pass to the playbook 
+            The cluster ID of to pass to the playbook
         graphistry_protocol : str
             The protocol to use to connect to the GRAPHISTRY_SERVER
         graphistry_server : str

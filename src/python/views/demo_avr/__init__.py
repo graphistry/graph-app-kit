@@ -44,10 +44,7 @@ app_id = "demo_avr"
 urlParams = URLParam(app_id)
 
 INDEX: str = "avr_59k"
-SAMPLE_SIZE = 1000
-CATEGORY_SAMPLE_SIZE = {"min": 5, "max": 100}
-QUERY_SIZE = 10000
-SAMPLE_RATIO = SAMPLE_SIZE / QUERY_SIZE
+QUERY_SIZE = 5000
 
 
 def info():
@@ -193,11 +190,7 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
         debug=True,
     )
 
-    if os.getenv("PIVOT_URL_INVESTIGATION_ID") is not None: 
-        investigation_id: str = os.getenv("PIVOT_URL_INVESTIGATION_ID") 
-    else: 
-        investigation_id: str = DEFAULT_PIVOT_URL_INVESTIGATION_ID
-
+    investigation_id: str = os.getenv("PIVOT_URL_INVESTIGATION_ID", DEFAULT_PIVOT_URL_INVESTIGATION_ID)
     logger.debug(f"investigation_id={investigation_id}\n")
 
     #
@@ -205,11 +198,8 @@ def run_filters(splunk_client, cluster_id, general_probability, start_datetime, 
     #
 
     logger.info("Configuring environment variables...\n")
-    # graphistry_username: str = os.getenv("GRAPHISTRY_USERNAME")
-    # graphistry_password: str = os.getenv("GRAPHISTRY_PASSWORD")
     graphistry_protocol: str = os.getenv("GRAPHISTRY_PROTOCOL")
     graphistry_server: str = os.getenv("GRAPHISTRY_SERVER")
-    # graphistry_client_protocol_hostname: Optional[str] = os.getenv("GRAPHISTRY_CLIENT_PROTOCOL_HOSTNAME")
 
     try:
         data_resource.trim_to_safe_cols(inplace=True)
