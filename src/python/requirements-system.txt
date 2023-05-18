@@ -9,7 +9,7 @@ graphistry==0.27.1
 ################
 
 ### Neptune
-gremlinpython==3.4.10
+gremlinpython==3.6.4
 sshtunnel==0.1.5
 
 ### TigerGraph
