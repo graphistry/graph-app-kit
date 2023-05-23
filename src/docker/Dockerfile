@@ -1,12 +1,12 @@
 # Default to big image, but allow thin cpu override
 ARG DOCKER_TAG=latest
-ARG GRAPHISTRY_FORGE_BASE_VERSION=v2.39.45-11.5
+ARG GRAPHISTRY_FORGE_BASE_VERSION=v2.40.8-11.5
 ARG PYTHON_VERSION=3.8
 ARG BASE_IMAGE=graphistry/graphistry-forge-base:${GRAPHISTRY_FORGE_BASE_VERSION}
 FROM python:$PYTHON_VERSION as cpu_base
 
 ARG DOCKER_TAG=latest
-ARG GRAPHISTRY_FORGE_BASE_VERSION=v2.39.45-11.5
+ARG GRAPHISTRY_FORGE_BASE_VERSION=v2.40.8-11.5
 ARG BASE_IMAGE=graphistry/graphistry-forge-base:${GRAPHISTRY_FORGE_BASE_VERSION}
 FROM $BASE_IMAGE
 
@@ -25,6 +25,9 @@ RUN --mount=type=cache,target=/root/.cache \
 COPY python/requirements-app.txt ./
 RUN --mount=type=cache,target=/root/.cache  \
     { source activate rapids || echo ok ; } && pip install -r requirements-app.txt
+
+RUN --mount=type=cache,target=/root/.cache  \
+    { source activate rapids || echo ok ; } && pip install --no-deps streamlit pympler altair==4.2.2 watchdog
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8

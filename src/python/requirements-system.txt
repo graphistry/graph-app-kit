@@ -1,6 +1,4 @@
-streamlit==1.12.0
-protobuf==3.18
-graphistry==0.27.1
+graphistry==0.29.1
 
 ################
 #
@@ -13,5 +11,9 @@ gremlinpython==3.4.10
 sshtunnel==0.1.5
 
 ### TigerGraph
-pyTigerGraph  # Unpinned as TG Cloud is rapidly moving
-plotly  # for demos
+pyTigerGraph    # Unpinned as TG Cloud is rapidly moving
+plotly          # for demos
+
+### Splunk
+splunk-sdk==1.7.3
+

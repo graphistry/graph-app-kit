@@ -72,12 +72,14 @@ def sidebar_area():
     return {'num_nodes': 1000000, 'num_edges': 1000000, 'bank': bank, 'bank_ids': bank_ids}
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True, hash_funcs={pd.DataFrame: lambda _: None})
+#@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def fetch_iso3611():
     return pd.read_csv('https://raw.githubusercontent.com/datasets/country-codes/master/data/country-codes.csv')
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True, hash_funcs={pd.DataFrame: lambda _: None})
+#@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def fetch_csv():
     from io import BytesIO
     from urllib.request import urlopen
@@ -143,7 +145,8 @@ def bank_name_to_ids(df, bank, bank_ids):
 
 
 # Given filter settings, generate/cache/return dataframes & viz
-@st.cache(suppress_st_warning=True, allow_output_mutation=True, hash_funcs={pd.DataFrame: lambda _: None})
+#@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def run_filters(num_nodes, num_edges, bank, bank_ids):
 
     transactions_map_df = fetch_csv()
