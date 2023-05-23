@@ -27,7 +27,7 @@ RUN --mount=type=cache,target=/root/.cache  \
     { source activate rapids || echo ok ; } && pip install -r requirements-app.txt
 
 RUN --mount=type=cache,target=/root/.cache  \
-    { source activate rapids || echo ok ; } && pip install --no-deps streamlit pympler altair watchdog
+    { source activate rapids || echo ok ; } && pip install --no-deps streamlit pympler altair==4.2.2 watchdog
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
