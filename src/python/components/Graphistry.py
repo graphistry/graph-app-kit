@@ -34,7 +34,6 @@ class GraphistrySt:
         if not ("store_token_creds_in_memory" in self.cfg):
             self.cfg["store_token_creds_in_memory"] = True
         graphistry.register(**self.cfg)
-        graphistry.login(username=self.cfg["username"], password=self.cfg["password"])
 
     def render_url(self, url):
         if self.test_login():
