@@ -14,7 +14,7 @@ logger.debug("Using graphistry version: %s", graphistry.__version__)
 
 class GraphistrySt:
     def __init__(self, overrides={}):
-        cfg = {
+        self.cfg = {
             "api": 3,
             **({"username": os.environ["GRAPHISTRY_USERNAME"]} if "GRAPHISTRY_USERNAME" in os.environ else {}),
             **({"password": os.environ["GRAPHISTRY_PASSWORD"]} if "GRAPHISTRY_PASSWORD" in os.environ else {}),
@@ -28,13 +28,12 @@ class GraphistrySt:
             ),
             **overrides,
         }
-        if not (("username" in cfg) and ("password" in cfg)) and not ("token" in cfg):
+        if not (("username" in self.cfg) and ("password" in self.cfg)) and not ("token" in self.cfg):
             logger.info("No graphistry creds set, skipping")
             return
-        if not ("store_token_creds_in_memory" in cfg):
-            cfg["store_token_creds_in_memory"] = True
-        graphistry.register(**cfg)
-        graphistry.login(username=cfg["username"], password=cfg["password"])
+        if not ("store_token_creds_in_memory" in self.cfg):
+            self.cfg["store_token_creds_in_memory"] = True
+        graphistry.register(**self.cfg)
 
     def render_url(self, url):
         if self.test_login():
@@ -56,7 +55,9 @@ class GraphistrySt:
 
     def test_login(self, verbose=True):
         try:
-            graphistry.register()
+            graphistry.register(**self.cfg)
+            if PyGraphistry._config["api_token"] is None:
+                raise Exception("Graphistry username and/or password not found.") 
             return True
         except:  # noqa: E722
             if verbose:
@@ -64,7 +65,11 @@ class GraphistrySt:
                     Exception(
                         """Not logged in for Graphistry plots:
                     Get free GPU account at graphistry.com/get-started and
-                    plug into src/docker/.env using template at envs/graphistry.env"""
+                    plug in Graphistry crendentials: GRAPHISTRY_USERNAME, GRAPHISTRY_PASSWORD, GRAPHISTRY_SERVER
+                    into src/docker/.env if running graph-app-kit in standalone mode. If using Graphistry 
+                    Enterprise Server which has graph-app-kit integrated, add the credentials to
+                    ${GRAPHISTRY_HOME}/.env or ${GRAPHISTRY_HOME}/data/custom.env or ${GRAPHISTRY_HOME}/.env or
+                    envs/graphistry.env"""
                     )
                 )
             return False
