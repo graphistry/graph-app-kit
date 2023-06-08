@@ -56,8 +56,8 @@ class GraphistrySt:
     def test_login(self, verbose=True):
         try:
             graphistry.register(**self.cfg)
-            if not (("username" in self.cfg) and ("password" in self.cfg)):
-                raise Exception("Graphistry username and/or password not found.")
+            if PyGraphistry._config["api_token"] is None:
+                raise Exception("Graphistry username and/or password not found.") 
             return True
         except:  # noqa: E722
             if verbose:
