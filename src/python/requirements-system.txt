@@ -1,4 +1,5 @@
-graphistry==0.29.1
+graphistry==0.29.3
+streamlit==1.25.0
 
 ################
 #
@@ -7,13 +8,17 @@ graphistry==0.29.1
 ################
 
 ### Neptune
-gremlinpython==3.4.10
-sshtunnel==0.1.5
+# bumping version to get around tornado dependency issue w/ streamlit
+# gremlinpython==3.4.10
+gremlinpython==3.7.0
+
+# tcook: not used?
+# sshtunnel==0.1.5
 
 ### TigerGraph
 pyTigerGraph    # Unpinned as TG Cloud is rapidly moving
 plotly          # for demos
 
 ### Splunk
-splunk-sdk==1.7.3
+splunk-sdk==1.7.4
 
