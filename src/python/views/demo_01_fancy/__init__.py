@@ -238,7 +238,7 @@ def run_all():
         # Render sidebar and get current settings
         sidebar_filters = sidebar_area()
 
-        logger.debug('sidebar_filters: %s', sidebar_filters)
+        # logger.debug('sidebar_filters: %s', sidebar_filters)
 
         # Compute filter pipeline (with auto-caching based on filter setting inputs)
         # Selective mark these as URL params as well

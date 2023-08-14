@@ -10,8 +10,6 @@ from gremlin_python.structure.graph import Path, Vertex, Edge
 from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-
 
 def connect_to_neptune():
     """Creates a connection to Neptune and returns the traversal source"""
