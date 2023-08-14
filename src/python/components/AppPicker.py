@@ -2,11 +2,9 @@ import importlib
 import os
 
 from util import getChild
-
 import streamlit as st
 
 logger = getChild(__name__)
-
 
 # loads all views/<app>/__init__.py and tracks active as URL param "?view_index=<info()['id']>"
 #  includes modules with methods run()
@@ -39,6 +37,17 @@ class AppPicker:
 
     # () -> {'id' -> { 'name': str, 'id': str, 'module': Module } }
     def list_modules(self):
+        
+        # debug: 
+        print("func: print(flush=True) call list_modules() 111111", flush=True)
+        print("func: print(NO flush) call list_modules() 111111")
+        logger.info("logger.INFO() msg in list_modules() 111111")
+        logger.error("logger.ERROR() msg in list_modules() 111111")
+        logger.debug("logger.DEBUG() msg in list_modules() 111111")
+        print(f"func: print() call LOG_LEVEL={os.getenv('LOG_LEVEL')}", flush=True)
+        # for handler in logger.handlers:
+        #     handler.flush()
+
         modules_by_id = {}
         for view_folder in sorted([view.split("/")[-1] for (view, _, _) in os.walk("/apps/views") if view != "/apps/views"]):
             try:
@@ -56,6 +65,17 @@ class AppPicker:
                     if self.check_included(nfo_resolved):
                         modules_by_id[mod_id] = nfo_resolved
             except:  # noqa: E722
+                print("exception caught in list_modules()", flush=True)
+
+                # debug: 
+                print("func: list_modules() 222222", flush=True)
+                logger.info("logger.INFO msg in list_modules() 222222")
+                logger.error("logger.ERROR msg in list_modules() 222222")
+                logger.debug("logger.DEBUG msg in list_modules() 222222")
+                print(f"check: LOG_LEVEL={os.getenv('LOG_LEVEL')}", flush=True)
+                for handler in logger.handlers:
+                    handler.flush()
+
                 logger.debug(
                     "Module loader ignoring file views/%s due to import failure; safe to ignore for .swp etc files",
                     view_folder,
@@ -78,7 +98,7 @@ class AppPicker:
         logger.debug("url view id: %s", maybe_default_view_id)
 
         modules_by_id = self.list_modules()
-        logger.debug("loaded mods: %s", modules_by_id)
+        # logger.debug("loaded mods: %s", modules_by_id)
 
         view = None
         if len(modules_by_id.keys()) == 0:
