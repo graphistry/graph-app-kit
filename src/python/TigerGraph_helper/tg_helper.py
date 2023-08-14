@@ -1,8 +1,6 @@
 import logging, os, pyTigerGraph as tg
 from typing import Optional
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
 
 TIGERGRAPH_CONNECTION_VERSION = '3.1.0'
 

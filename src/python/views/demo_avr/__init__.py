@@ -23,11 +23,7 @@ from views.demo_avr.marlowe import (
 
 import streamlit as st
 
-# Make sure logs get through to STDERR
 logger = logging.getLogger(__name__)
-logger.setLevel(os.getenv("LOG_LEVEL", "DEBUG"))
-stream_handler = logging.StreamHandler(stream=sys.stderr)
-logger.addHandler(stream_handler)
 
 # App configuration
 CSS_PATH = "/apps/views/demo_avr/app.css"
@@ -245,7 +241,6 @@ def run_all():
     try:
         # Logging is too much! Quiet it down.
         logger = get_logger(__name__)
-        logger.setLevel(logging.WARNING)
 
         # Reproducible samples
         SEED = 31337

@@ -11,11 +11,7 @@ import pandas as pd
 import splunklib.client as client
 import splunklib.results as splunk_results
 
-# Make sure logs get through to STDERR
 logger = logging.getLogger(__name__)
-logger.setLevel(os.getenv("LOG_LEVEL", "DEBUG"))
-stream_handler = logging.StreamHandler(stream=sys.stderr)
-logger.addHandler(stream_handler)
 
 # If we are returning a DataFrame, we may not want these columns as they aren't useful and clutter the display
 SPLUNK_SYSTEM_COLS = [

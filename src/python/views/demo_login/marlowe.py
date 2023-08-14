@@ -17,11 +17,7 @@ from graphistry.features import topic_model
 from graphistry.Plottable import Plottable
 from IPython.core.display import HTML
 
-# Make sure logs get through to STDERR
 logger = logging.getLogger(__name__)
-logger.setLevel(os.getenv("LOG_LEVEL", "DEBUG"))
-stream_handler = logging.StreamHandler(stream=sys.stderr)
-logger.addHandler(stream_handler)
 
 # Reproducible samples
 SEED = 31337

@@ -22,9 +22,6 @@ from views.demo_login.marlowe import (
 import streamlit as st
 
 logger = logging.getLogger(__name__)
-logger.setLevel(os.getenv("LOG_LEVEL", "DEBUG"))
-stream_handler = logging.StreamHandler(stream=sys.stderr)
-logger.addHandler(stream_handler)
 
 ############################################
 #
