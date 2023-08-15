@@ -11,7 +11,7 @@ import pandas as pd
 import splunklib.client as client
 import splunklib.results as splunk_results
 
-logger = logging.getLogger(__name__)
+xlogger = logging.getLogger()
 
 # If we are returning a DataFrame, we may not want these columns as they aren't useful and clutter the display
 SPLUNK_SYSTEM_COLS = [

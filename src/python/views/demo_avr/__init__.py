@@ -12,7 +12,7 @@ from components import GraphistrySt, URLParam
 from components.Splunk import SplunkConnection
 from css import all_css
 from graphistry.Plottable import Plottable
-from streamlit.logger import get_logger
+
 from views.demo_avr.marlowe import (
     AVR_SAFE_COLUMNS,
     FEATURE_COLUMNS,
@@ -23,7 +23,8 @@ from views.demo_avr.marlowe import (
 
 import streamlit as st
 
-logger = logging.getLogger(__name__)
+import util.log
+from util import getChild
 
 # App configuration
 CSS_PATH = "/apps/views/demo_avr/app.css"
@@ -37,6 +38,7 @@ DEFAULT_PIVOT_URL_INVESTIGATION_ID = "123"
 #  Controls how entrypoint.py picks it up
 
 app_id = "demo_avr"
+logger = getChild(app_id)
 urlParams = URLParam(app_id)
 
 INDEX: str = "avr_59k"
@@ -239,9 +241,6 @@ def run_all():
     custom_css()
 
     try:
-        # Logging is too much! Quiet it down.
-        logger = get_logger(__name__)
-
         # Reproducible samples
         SEED = 31337
         random.seed = SEED
@@ -252,34 +251,40 @@ def run_all():
         splunk_host: str = os.getenv("SPLUNK_HOST")
         logger.debug(f"splunk_username={splunk_username}, splunk_password={splunk_password}, splunk_host={splunk_host}\n")
 
-        # Instantiate, connect and cache the Splunk client as a reusable resource
-        splunk_client: Union[SplunkConnection, Any] = cache_splunk_client(splunk_username, splunk_password, splunk_host)
+        # if splunk host, username or password are not set, emit error and exit gracefully
 
-        # Query parameters from a shared URL
-        query_params: Dict[str, Any] = st.experimental_get_query_params()
+        if splunk_username is None or splunk_password is None or splunk_host is None:
+            logger.error("Missing required splunk host, username or password in environment variables, dashboard will not run.")
+            st.write(" Error:  Missing required splunk host, username or password in environment variables, dashboard will not run without splunk configuration.")
+        else:
+            # Instantiate, connect and cache the Splunk client as a reusable resource
+            splunk_client: Union[SplunkConnection, Any] = cache_splunk_client(splunk_username, splunk_password, splunk_host)
 
-        # Log what we got
-        logger.debug(f"Initial query_params: {query_params}\n")
+            # Query parameters from a shared URL
+            query_params: Dict[str, Any] = st.experimental_get_query_params()
 
-        # Process the canonical cluster / incident ID and its probability - remove the list and get the value, deal with nulls
-        cluster_id: Optional[Union[str, int]] = process_query_param("cluster_id", query_params.get("cluster_id"), query_params)
-        general_probability: Optional[Union[str, float]] = process_query_param(
-            "general_probability", query_params.get("general_probability"), query_params
-        )
+            # Log what we got
+            logger.debug(f"Initial query_params: {query_params}\n")
 
-        # First we need to get all the unique
-        with st.spinner("Retrieving cluster IDs from Splunk ..."):
-            cluster_select_values = ["None"] + splunk_client.get_unique_values("avr_59k", "general_cluster")
+            # Process the canonical cluster / incident ID and its probability - remove the list and get the value, deal with nulls
+            cluster_id: Optional[Union[str, int]] = process_query_param("cluster_id", query_params.get("cluster_id"), query_params)
+            general_probability: Optional[Union[str, float]] = process_query_param(
+                "general_probability", query_params.get("general_probability"), query_params
+            )
 
-        # Render sidebar and get current settings
-        sidebar_params = sidebar_area(cluster_id, general_probability, cluster_select_values)
+            # First we need to get all the unique
+            with st.spinner("Retrieving cluster IDs from Splunk ..."):
+                cluster_select_values = ["None"] + splunk_client.get_unique_values("avr_59k", "general_cluster")
 
-        # Compute filter pipeline (with auto-caching based on filter setting inputs)
-        # Selective mark these as URL params as well
-        filter_params = run_filters(splunk_client, **sidebar_params)
+            # Render sidebar and get current settings
+            sidebar_params = sidebar_area(cluster_id, general_probability, cluster_select_values)
 
-        # Render main viz area based on computed filter pipeline results and sidebar settings
-        main_area(**filter_params)
+            # Compute filter pipeline (with auto-caching based on filter setting inputs)
+            # Selective mark these as URL params as well
+            filter_params = run_filters(splunk_client, **sidebar_params)
+
+            # Render main viz area based on computed filter pipeline results and sidebar settings
+            main_area(**filter_params)
 
     except Exception as exn:
         st.write("Error loading dashboard")

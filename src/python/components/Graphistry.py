@@ -1,13 +1,11 @@
 import os
-
+import logging
 import graphistry
 import streamlit.components.v1 as components
 from graphistry import PyGraphistry
-from util import getChild
-
 import streamlit as st
 
-logger = getChild(__name__)
+logger = logging.getLogger()
 
 logger.debug("Using graphistry version: %s", graphistry.__version__)
 

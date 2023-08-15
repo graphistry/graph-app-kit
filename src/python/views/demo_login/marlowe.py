@@ -16,8 +16,10 @@ import pandas as pd
 from graphistry.features import topic_model
 from graphistry.Plottable import Plottable
 from IPython.core.display import HTML
+import util.log
+from util.log import getChild
 
-logger = logging.getLogger(__name__)
+logger = getChild("demo_login")
 
 # Reproducible samples
 SEED = 31337

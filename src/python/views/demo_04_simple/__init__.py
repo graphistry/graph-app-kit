@@ -1,7 +1,10 @@
 import graphistry, pandas as pd, streamlit as st
 from components import GraphistrySt, URLParam
 from css import all_css
-from util import getChild
+
+import logging, os
+import util.log
+from util.log import getChild
 
 ############################################
 #

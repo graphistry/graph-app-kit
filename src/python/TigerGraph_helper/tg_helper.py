@@ -1,9 +1,8 @@
 import logging, os, pyTigerGraph as tg
 from typing import Optional
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 TIGERGRAPH_CONNECTION_VERSION = '3.1.0'
-
 
 def connect_to_tigergraph() -> Optional[dict]:
     if ('TIGERGRAPH_HOST' in os.environ and 'TIGERGRAPH_USERNAME' in os.environ

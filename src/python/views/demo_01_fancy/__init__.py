@@ -3,7 +3,8 @@ from components import GraphistrySt, URLParam
 from graphistry import PyGraphistry
 from css import all_css
 from time import sleep
-from util import getChild
+# import util
+from util.log import getChild
 
 ############################################
 #
