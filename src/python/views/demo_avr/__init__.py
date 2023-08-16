@@ -23,8 +23,6 @@ from views.demo_avr.marlowe import (
 
 import streamlit as st
 
-import util.log
-from util import getChild
 
 # App configuration
 CSS_PATH = "/apps/views/demo_avr/app.css"
@@ -38,7 +36,7 @@ DEFAULT_PIVOT_URL_INVESTIGATION_ID = "123"
 #  Controls how entrypoint.py picks it up
 
 app_id = "demo_avr"
-logger = getChild(app_id)
+logger = logging.getLogger(app_id)
 urlParams = URLParam(app_id)
 
 INDEX: str = "avr_59k"

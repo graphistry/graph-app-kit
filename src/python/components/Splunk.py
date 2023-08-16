@@ -10,8 +10,9 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import pandas as pd
 import splunklib.client as client
 import splunklib.results as splunk_results
+from util import getChild
 
-xlogger = logging.getLogger()
+logger = getChild(__name__)
 
 # If we are returning a DataFrame, we may not want these columns as they aren't useful and clutter the display
 SPLUNK_SYSTEM_COLS = [

@@ -16,10 +16,7 @@ from graphistry.features import topic_model
 from graphistry.Plottable import Plottable
 from IPython.core.display import HTML
 
-import util.log
-from util import getChild
-
-logger = getChild("demo_avr")
+logger = logger = logging.getLogger("demo_avr")
 
 # Reproducible samples
 SEED = 31337

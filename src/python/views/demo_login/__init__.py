@@ -20,8 +20,6 @@ from views.demo_login.marlowe import (
 )
 
 import streamlit as st
-import util.log
-from util.log import getChild
 
 ############################################
 #
@@ -32,7 +30,7 @@ from util.log import getChild
 
 
 app_id = "demo_login"
-logger = getChild(app_id)
+logger = logging.getLogger(app_id)
 urlParams = URLParam(app_id)
 
 # Splunk configuration

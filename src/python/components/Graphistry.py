@@ -5,10 +5,11 @@ import streamlit.components.v1 as components
 from graphistry import PyGraphistry
 import streamlit as st
 
-logger = logging.getLogger()
+from util import getChild
+
+logger = getChild(__name__)
 
 logger.debug("Using graphistry version: %s", graphistry.__version__)
-
 
 class GraphistrySt:
     def __init__(self, overrides={}):

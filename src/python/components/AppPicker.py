@@ -1,10 +1,11 @@
 import importlib
 import logging, os
 import streamlit as st
+from util import getChild
 
 logging.basicConfig(format="%(levelname)s %(asctime)s %(name)s:%(message)s\n")
 
-logger = logging.getLogger()
+logger = getChild(__name__)
 
 # loads all views/<app>/__init__.py and tracks active as URL param "?view_index=<info()['id']>"
 #  includes modules with methods run()
@@ -103,7 +104,7 @@ class AppPicker:
         logger.debug("url view id: %s", maybe_default_view_id)
 
         modules_by_id = self.list_modules()
-        # logger.debug("loaded mods: %s", modules_by_id)
+        logger.debug("loaded mods: %s", modules_by_id)
 
         view = None
         if len(modules_by_id.keys()) == 0:

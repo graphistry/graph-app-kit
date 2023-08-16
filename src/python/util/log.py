@@ -3,7 +3,7 @@ import os
 
 def getChild(*args, **kwargs):
 
-    logger = logging.getLogger()
+    logger = logging.getLogger('gak')
 
     if "LOG_LEVEL" in os.environ:
         log_level=getattr(logging, os.environ["LOG_LEVEL"].upper())
