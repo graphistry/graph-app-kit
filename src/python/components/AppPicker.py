@@ -39,6 +39,7 @@ class AppPicker:
     # () -> {'id' -> { 'name': str, 'id': str, 'module': Module } }
     def list_modules(self):
         
+<<<<<<< HEAD
         # tcook - debug logger issues and prints to stdout
         # print("func: print(flush=True) in list_modules()", flush=True)
         # print("func: print(NO flush) in list_modules()")
@@ -48,6 +49,15 @@ class AppPicker:
         # print(f"func: print() call LOG_LEVEL={os.getenv('LOG_LEVEL')}", flush=True)
 
         # tcook: does not affect newlines issues in logger
+=======
+        # debug: 
+        print("func: print(flush=True) call list_modules() 111111", flush=True)
+        print("func: print(NO flush) call list_modules() 111111")
+        logger.info("logger.INFO() msg in list_modules() 111111")
+        logger.error("logger.ERROR() msg in list_modules() 111111")
+        logger.debug("logger.DEBUG() msg in list_modules() 111111")
+        print(f"func: print() call LOG_LEVEL={os.getenv('LOG_LEVEL')}", flush=True)
+>>>>>>> master
         # for handler in logger.handlers:
         #     handler.flush()
 
@@ -68,6 +78,7 @@ class AppPicker:
                     if self.check_included(nfo_resolved):
                         modules_by_id[mod_id] = nfo_resolved
             except:  # noqa: E722
+<<<<<<< HEAD
 
                 # tcook - debug logger issues and prints to stdout
                 # print("exception caught in list_modules()", flush=True)
@@ -78,6 +89,20 @@ class AppPicker:
                 # print(f"check: LOG_LEVEL={os.getenv('LOG_LEVEL')}", flush=True)
 
                 logger.error(
+=======
+                print("exception caught in list_modules()", flush=True)
+
+                # debug: 
+                print("func: list_modules() 222222", flush=True)
+                logger.info("logger.INFO msg in list_modules() 222222")
+                logger.error("logger.ERROR msg in list_modules() 222222")
+                logger.debug("logger.DEBUG msg in list_modules() 222222")
+                print(f"check: LOG_LEVEL={os.getenv('LOG_LEVEL')}", flush=True)
+                for handler in logger.handlers:
+                    handler.flush()
+
+                logger.debug(
+>>>>>>> master
                     "Module loader ignoring file views/%s due to import failure; safe to ignore for .swp etc files",
                     view_folder,
                     exc_info=True,
@@ -104,7 +129,7 @@ class AppPicker:
         logger.debug("url view id: %s", maybe_default_view_id)
 
         modules_by_id = self.list_modules()
-        logger.debug("loaded mods: %s", modules_by_id)
+        # logger.debug("loaded mods: %s", modules_by_id)
 
         view = None
         if len(modules_by_id.keys()) == 0:

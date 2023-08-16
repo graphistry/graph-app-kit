@@ -23,7 +23,6 @@ from views.demo_avr.marlowe import (
 
 import streamlit as st
 
-
 # App configuration
 CSS_PATH = "/apps/views/demo_avr/app.css"
 DEFAULT_PIVOT_URL_INVESTIGATION_ID = "123"
@@ -239,6 +238,12 @@ def run_all():
     custom_css()
 
     try:
+<<<<<<< HEAD
+=======
+        # Logging is too much! Quiet it down.
+        logger = get_logger(__name__)
+
+>>>>>>> master
         # Reproducible samples
         SEED = 31337
         random.seed = SEED

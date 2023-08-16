@@ -3,7 +3,9 @@ import urllib
 import streamlit as st
 import logging
 
-logger = logging.getLogger()
+from util import getChild
+
+logger = getChild(__name__)
 
 class URLParam:
     def __init__(self, prefix="d_"):

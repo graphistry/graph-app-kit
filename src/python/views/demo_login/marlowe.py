@@ -17,7 +17,7 @@ from graphistry.features import topic_model
 from graphistry.Plottable import Plottable
 from IPython.core.display import HTML
 
-logger = logging.getLogger("demo_login")
+logger = logging.getLogger(__name__)
 
 # Reproducible samples
 SEED = 31337
