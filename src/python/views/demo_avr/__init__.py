@@ -238,12 +238,6 @@ def run_all():
     custom_css()
 
     try:
-<<<<<<< HEAD
-=======
-        # Logging is too much! Quiet it down.
-        logger = get_logger(__name__)
-
->>>>>>> master
         # Reproducible samples
         SEED = 31337
         random.seed = SEED
