@@ -49,7 +49,7 @@ jobs:
       run: |
         cd src/python && python -m pytest test
 
-  free-space:
+  test-docker:
 
     runs-on: ubuntu-latest
 
@@ -210,23 +210,8 @@ jobs:
         sudo docker system df
         sudo ls -alh /var/lib/docker || echo 'ok docker'
         sudo ls -alh /var/lib/docker/buildkit || echo 'ok docker buildkit'
-  test-docker:
-
-    runs-on: ubuntu-latest
-
-    env:
-      COMPOSE_DOCKER_CLI_BUILD: 1
-      DOCKER_BUILDKIT: 1    
-
-    strategy:
-      matrix:
-        flavor: [ 'dc', 'dc.cpu' ]
-
-    steps:
-
-    - name: Checkout repo
-      uses: actions/checkout@v3
-
+        df -h
+        
     - name: Build docker
       env:
           COMPOSE_DOCKER_CLI_BUILD: 1
