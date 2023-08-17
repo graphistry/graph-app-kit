@@ -66,6 +66,152 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
 
+    - name: Free Disk Space
+      env:
+          COMPOSE_DOCKER_CLI_BUILD: 1
+          DOCKER_BUILDKIT: 1
+      run: |
+        df -h
+        sudo docker system df
+        echo "Prune docker"
+        sudo docker system prune -f -a --volumes
+        sudo docker builder prune -a
+        df -h
+        sudo docker system df
+        echo "swap info (expected: 4GB at /mnt/swapfile)"
+        grep Swap /proc/meminfo
+        #echo "Identiy biggest dpkg packages"
+        #sudo dpkg-query --show --showformat='${Installed-Size}\t${Package}\n' | sort -rh | head -50 | awk '{print $1/1024, $2}' || echo "fail dpkg-query"
+        #echo "Identify biggest apt packages"
+        #sudo aptitude search "~i" --display-format "%p %I" --sort installsize | tail -50 || echo "fail apt search"
+        echo "Remove apt packages"
+        apt-get purge --auto-remove -y azure-cli google-cloud-sdk hhvm google-chrome-stable firefox powershell mono-devel || echo ok1
+        apt-get purge --auto-remove aria2 ansible shellcheck rpm xorriso zsync \
+          'clang-.*' lldb-6.0 lld-6.0 lldb-8 lld-8 \
+          lldb-9 lld-9 \
+          esl-erlang g++-8 g++-9 gfortran-8 gfortran-9 \
+          cabal-install-2.0 cabal-install-2.2 \
+          cabal-install-2.4 cabal-install-3.0 cabal-install-3.2 'gcc-.*' heroku imagemagick \
+          libmagickcore-dev libmagickwand-dev libmagic-dev ant ant-optional kubectl \
+          mercurial apt-transport-https mono-complete mono-devel 'mysql-.*' libmysqlclient-dev \
+          mssql-tools unixodbc-dev yarn bazel chrpath libssl-dev libxft-dev \
+          libfreetype6 libfreetype6-dev libfontconfig1 libfontconfig1-dev \
+          php-zmq snmp pollinate libpq-dev postgresql-client ruby-full \
+          sphinxsearch subversion mongodb-org -yq >/dev/null 2>&1 \
+          || echo "failed main apt-get remove2"
+        df -h
+        echo "Removing large packages"
+        apt-get purge --autoremove -y libgl1-mesa-dri || echo "fail remove libmesa"
+        apt-get purge --autoremove -y 'openjdk-.*' || echo "openjdk-11-jre-headless"
+        apt-get purge --autoremove -y 'mysql-server-core.*' || echo "fail remove mysql-server"
+        apt-get purge --autoremove -y r-base-core || echo "fail remove r-base-core"
+        apt-get purge --auto-remove -y '^ghc.*'  || echo failghc
+        apt-get purge --auto-remove -y '^dotnet-.*'  || echo faildotnet
+        apt-get purge --auto-remove -y '^llvm-.*'  || echo failllvm
+        apt-get purge --auto-remove -y 'php.*'  || echo failphp
+        apt-get purge --auto-remove -y 'adoptopenjdk-.*' || echo 'fail jdk'
+        apt-get purge --auto-remove -y 'hhvm' || echo 'fail hhvm'
+        apt-get purge --auto-remove -y 'google-chrome-stable' || echo 'fail chrome'
+        apt-get purge --auto-remove -y 'firefox' || echo 'fail ffox'
+        apt-get purge --auto-remove -y podman 'mongo.*' || echo failmongo
+        ( apt-get purge --auto-remove -y 'rust' || apt-get purge --auto-remove -y 'rust.*' ) || echo "couldn't remove rust"
+        sudo rm -rf /usr/share/az_* || echo "fail az cleanup"
+        sudo rm -rf /usr/local/julia  || echo "fail julia cleanup"
+        echo "--- /opt ---"
+        sudo ls /opt
+        sudo rm -rf /opt/az || echo "fail az"
+        sudo rm -rf /opt/hostedtoolcache/go || echo "fail go cleanup"
+        sudo rm -rf /opt/hostedtoolcache/Ruby/2.5.8 || echo "fail ruby cleanup"
+        sudo rm -rf /opt/hostedtoolcache/Ruby/2.6.6 || echo "fail ruby cleanup"
+        sudo rm -rf /opt/hostedtoolcache/Ruby/2.7.1 || echo "fail ruby cleanup"
+        sudo rm -rf /opt/hostedtoolcache/PyPy || echo "fail pypy cleanup"
+        sudo rm -rf /opt/ghc || echo "fail ghc cleanup"
+        sudo rm -rf /opt/hostedtoolcache && sudo mkdir -p /opt/hostedtoolcache
+        sudo rm -rf /opt/microsoft || echo "fail microsoft"
+        sudo rm -rf /opt/pipx || echo "skip pipx"
+        echo "--- /usr/include ---"
+        sudo ls /usr/include
+        sudo rm -rf /usr/include/boost || echo "fail boost cleanup"
+        sudo rm -rf /usr/include/php || echo "fail php cleanup"
+        echo "--- /usr/lib ---"
+        sudo ls /usr/lib
+        sudo rm -rf /usr/lib/google-cloud-sdk || echo "fail gcloud cleanup"
+        sudo rm -rf /usr/lib/jvm || echo "fail jvm cleanup"
+        sudo rm -rf /usr/lib/mono || echo "fail mono cleanup"
+        sudo rm -rf /usr/lib/llvm-* || echo "fail llvm cleanup"
+        echo "--- /usr/local ---"
+        sudo ls /usr/local
+        sudo rm -rf /usr/local/aws-cli || echo "fail aws-cli cleanup"
+        sudo rm -rf /usr/local/aws-sam-cli || echo "fail aws-sam-cli cleanup"
+        sudo rm -rf /usr/local/bin/bicep || echo "fail bicep cleanup"
+        sudo rm -rf /usr/local/bin/cmake-gui || echo "fail cmake-gui cleanup"
+        sudo rm -rf /usr/local/bin/helm || echo "fail helm cleanup"
+        sudo rm -rf /usr/local/bin/kubectl || echo "fail kubectl cleanup"
+        sudo rm -rf /usr/local/bin/minikube || echo "fail minikube cleanup"
+        sudo rm -rf /usr/local/bin/node || echo "fail node cleanup"
+        sudo rm -rf /usr/local/bin/oc || echo "fail oc cleanup"
+        sudo rm -rf /usr/local/bin/packer || echo "fail packer cleanup"
+        sudo rm -rf /usr/local/bin/pulumi || echo "fail pulumi cleanup"
+        sudo rm -rf /usr/local/bin/pulumi-* || echo "fail pulumi-* cleanup"
+        sudo rm -rf /usr/local/bin/stack || echo "fail stack cleanup"
+        sudo rm -rf /usr/local/bin/terraform || echo "fail terraform cleanup"
+        sudo rm -rf /usr/local/graalvm || echo "fail graal cleanup"
+        sudo rm -rf /usr/local/julia* || echo "fail julia cleanup"
+        sudo rm -rf /usr/local/lib/android || echo "fail android cleanup"
+        sudo rm -rf /usr/local/lib/heroku || echo "fail heroku cleanup"
+        sudo rm -rf /usr/local/lib/node_modules || echo "fail node_modules cleanup"
+        sudo rm -rf /usr/local/n || echo "fail n cleanup"
+        sudo rm -rf /usr/local/sqlpackage || echo "fail sqlpackage cleanup"
+        echo "--- /usr/share ---"
+        sudo ls /usr/share
+        sudo rm -rf /usr/share/dotnet || echo "fail dotnet cleanup"
+        sudo rm -rf /usr/share/miniconda || echo 'skip miniconda'
+        sudo rm -rf /usr/share/gradle  || echo "skip gradle"
+        sudo rm -rf /usr/share/gradle* || echo "fail gradle cleanup"
+        sudo rm -rf /usr/share/kotlinc || echo 'skip kotlinc'
+        sudo rm -rf /usr/share/rust || echo 'skip rust'
+        sudo rm -rf /usr/share/sbt || echo 'skip sbt'
+        sudo rm -rf /usr/share/swift || echo "fail swift cleanup"
+        sudo rm -rf /usr/share/vcpkg || echo "fail vcpkg cleanup"
+        echo "--- /home ---"
+        sudo ls /home
+        sudo rm -rf /home/linuxbrew || echo "fail linuxbrew cleanup"
+        df -h
+        ( sudo apt-get install -y wajig && wajig large ) || echo "Failed installing wajig"
+        sudo apt-get autoremove -y >/dev/null 2>&1
+        sudo apt-get clean
+        sudo apt-get autoremove -y >/dev/null 2>&1
+        sudo apt-get autoclean -y >/dev/null 2>&1
+        df -h
+        echo "------------ remaining /usr/local/lib (1) ------------"
+        sudo du -sh /usr/local/lib/* | sort -h | tail -n 20 || echo ok
+        echo "------------ remaining /usr/share (1) ------------"
+        sudo du -sh /usr/share/* | sort -h | tail -n 10 || echo ok
+        echo "------------ remaining /usr/local (1) ------------"
+        sudo du -sh /usr/local/* | sort -h | tail -n 10 || echo ok
+        echo "------------ remaining /usr/local/bin (1) ------------"
+        sudo du -sh /usr/local/bin/* | sort -h | tail -n 10 || echo ok
+        echo "------------ remaining /opt (1) ------------"
+        sudo du -sh /opt/* | sort -h | tail -n 10 || echo ok
+        echo "https://github.com/actions/virtual-environments/issues/709"
+        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+        echo "------------ remaining /usr/share ------------"
+        du -sh /usr/share/* | sort -h || echo ok
+        echo "------------ remaining /usr/local ------------"
+        du -sh /usr/local/* | sort -h || echo ok
+        echo "------------ remaining /usr/local/bin --------"
+        du -sh /usr/local/bin/* | sort -h || echo ok
+        echo "------------ remaining /opt ------------"
+        sudo du -sh /opt/* | sort -h || echo ok
+        echo "------------ remaining /opt/hostedtoolcache/* ------------"
+        sudo du -sh /opt/hostedtoolcache/* | sort -h || echo ok hosted
+        df -h
+        sudo docker info
+        sudo docker system df
+        sudo ls -alh /var/lib/docker || echo 'ok docker'
+        sudo ls -alh /var/lib/docker/buildkit || echo 'ok docker buildkit'
+        df -h
+        
     - name: Build docker
       env:
           COMPOSE_DOCKER_CLI_BUILD: 1

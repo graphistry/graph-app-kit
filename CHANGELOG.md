@@ -21,6 +21,26 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+## [2.40.28 - 2023.08.16]
+
+### Changed
+
+- upgrade from streamlit v1.21.0 to latest --> v1.25.0
+- improved the logging behavior and print statements not being written (we recommend using pyton logger instead of print statements for greater functionality and control) [issue #104](https://github.com/graphistry/graph-app-kit/issues/104)
+- fixed unhandled exception in demo_avr when splunk credentials not set [issue #105](https://github.com/graphistry/graph-app-kit/issues/105)
+- fixed incorrect ST_PUBLIC_PORT printed in the logs from entrypoint.sh [issue #106](https://github.com/graphistry/graph-app-kit/issues/106)
+
+### Added
+
+in a previous release two new demo views were added: demo_avr and demo_login which are both cyber security related 
+
+### Breaking
+
+- check if upgrade from streamlit 1.21 --> 1.25 might have affected your code
+
+
+## [2023.02.10]
+
 ### Changed
 
 * Infra: CUDA base now 11.5
