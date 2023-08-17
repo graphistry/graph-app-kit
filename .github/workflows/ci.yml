@@ -49,6 +49,38 @@ jobs:
       run: |
         cd src/python && python -m pytest test
 
+  free-space:
+
+    runs-on: ubuntu-latest
+
+    env:
+      COMPOSE_DOCKER_CLI_BUILD: 1
+      DOCKER_BUILDKIT: 1    
+
+    strategy:
+      matrix:
+        flavor: [ 'dc', 'dc.cpu' ]
+
+    steps:
+
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Free Disk Space
+      env:
+          COMPOSE_DOCKER_CLI_BUILD: 1
+          DOCKER_BUILDKIT: 1
+      run: |
+        df -h
+        echo "remove big /usr/local"
+        sudo rm -rf "/usr/local/share/boost"
+        sudo rm -rf /usr/local/lib/android >/dev/null 2>&1
+        df -h
+        sudo rm -rf /usr/share/dotnet/sdk > /dev/null 2>&1
+        sudo rm -rf /usr/share/dotnet/shared > /dev/null 2>&1
+        sudo rm -rf /usr/share/swift > /dev/null 2>&1
+        df -h      
+
   test-docker:
 
     runs-on: ubuntu-latest
