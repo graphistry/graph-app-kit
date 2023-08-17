@@ -21,8 +21,6 @@ from views.demo_login.marlowe import (
 
 import streamlit as st
 
-logger = logging.getLogger(__name__)
-
 ############################################
 #
 #   DASHBOARD SETTINGS
@@ -32,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 app_id = "demo_login"
+logger = logging.getLogger(app_id)
 urlParams = URLParam(app_id)
 
 # Splunk configuration

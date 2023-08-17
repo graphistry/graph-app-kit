@@ -5,7 +5,7 @@ import asyncio, datetime, graphistry, pandas as pd, \
 from components import GraphistrySt, URLParam
 from css import all_css
 from TigerGraph_helper import tg_helper
-from util import getChild
+import logging
 
 ############################################
 #
@@ -16,7 +16,7 @@ from util import getChild
 
 
 app_id = 'tigergraph_circle'
-logger = getChild(app_id)
+logger = logging.getLogger(app_id)
 urlParams = URLParam(app_id)
 node_id_col = 'id'
 src_id_col = 'from_id'

@@ -35,6 +35,13 @@ if [[ -f "/root/gak/config.toml" ]]; then
     cp /root/gak/config.toml /root/.streamlit/config.toml
 fi
 
+# if ST_LOG_LEVEL is defined, set it for the base logger of the streamlit app by passing 
+#  it in here. To set only set LOG_LEVEL for views and not the root logger for the app, 
+#  use LOG_LEVEL
+
+if [ -v ST_LOG_LEVEL ]; then
+    PASS_LOG_LEVEL="--logger.level=${ST_LOG_LEVEL}"
+fi
 
 { source activate rapids || echo ok ; } \
-    && echo "pwd: `pwd`" && find . && streamlit run "$@"
+    && echo "pwd: `pwd`" && find . && streamlit run "$@" "${PASS_LOG_LEVEL}"

@@ -1,7 +1,7 @@
 import graphistry, pandas as pd, streamlit as st
 from components import GraphistrySt, URLParam
 from css import all_css
-from util import getChild
+import logging
 
 ############################################
 #
@@ -12,7 +12,7 @@ from util import getChild
 
 
 app_id = 'fincen'
-logger = getChild(app_id)
+logger = logging.getLogger(app_id)
 urlParams = URLParam(app_id)
 
 

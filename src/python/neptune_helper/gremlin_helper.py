@@ -8,8 +8,9 @@ from gremlin_python.process.strategies import *
 from gremlin_python.process.traversal import *
 from gremlin_python.structure.graph import Path, Vertex, Edge
 from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
+from util import getChild
 
-logger = logging.getLogger()
+logger = getChild(__name__)
 
 def connect_to_neptune():
     """Creates a connection to Neptune and returns the traversal source"""

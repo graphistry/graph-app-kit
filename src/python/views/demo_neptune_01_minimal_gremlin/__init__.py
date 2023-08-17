@@ -5,12 +5,12 @@ import pandas as pd
 import streamlit as st
 from components import GraphistrySt, URLParam
 from css import all_css
-from util import getChild
 from neptune_helper import gremlin_helper, df_helper
 
 from gremlin_python import statics
 from gremlin_python.process.graph_traversal import __
 from gremlin_python.process.traversal import WithOptions, T
+import logging 
 
 ############################################
 #
@@ -21,7 +21,7 @@ from gremlin_python.process.traversal import WithOptions, T
 
 
 app_id = 'app_neptune_01'
-logger = getChild(app_id)
+logger = logging.getLogger(app_id)
 urlParams = URLParam(app_id)
 node_id_col = 'id'
 src_id_col = 'source'

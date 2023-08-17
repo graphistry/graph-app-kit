@@ -1,8 +1,7 @@
 import importlib
-import os
-
-from util import getChild
+import logging, os
 import streamlit as st
+from util import getChild
 
 logger = getChild(__name__)
 
@@ -38,13 +37,15 @@ class AppPicker:
     # () -> {'id' -> { 'name': str, 'id': str, 'module': Module } }
     def list_modules(self):
         
-        # debug: 
-        print("func: print(flush=True) call list_modules() 111111", flush=True)
-        print("func: print(NO flush) call list_modules() 111111")
-        logger.info("logger.INFO() msg in list_modules() 111111")
-        logger.error("logger.ERROR() msg in list_modules() 111111")
-        logger.debug("logger.DEBUG() msg in list_modules() 111111")
-        print(f"func: print() call LOG_LEVEL={os.getenv('LOG_LEVEL')}", flush=True)
+        # tcook - debug logger issues and prints to stdout
+        # print("func: print(flush=True) in list_modules()", flush=True)
+        # print("func: print(NO flush) in list_modules()")
+        # logger.info("logger.INFO() msg in list_modules()")
+        # logger.error("logger.ERROR() msg in list_modules()")
+        # logger.debug("logger.DEBUG() msg in list_modules()")
+        # print(f"func: print() call LOG_LEVEL={os.getenv('LOG_LEVEL')}", flush=True)
+
+        # tcook: does not affect newlines issues in logger
         # for handler in logger.handlers:
         #     handler.flush()
 
@@ -65,22 +66,25 @@ class AppPicker:
                     if self.check_included(nfo_resolved):
                         modules_by_id[mod_id] = nfo_resolved
             except:  # noqa: E722
-                print("exception caught in list_modules()", flush=True)
 
-                # debug: 
-                print("func: list_modules() 222222", flush=True)
-                logger.info("logger.INFO msg in list_modules() 222222")
-                logger.error("logger.ERROR msg in list_modules() 222222")
-                logger.debug("logger.DEBUG msg in list_modules() 222222")
-                print(f"check: LOG_LEVEL={os.getenv('LOG_LEVEL')}", flush=True)
-                for handler in logger.handlers:
-                    handler.flush()
+                # tcook - debug logger issues and prints to stdout
+                # print("exception caught in list_modules()", flush=True)
+                # print("func: list_modules() 222222", flush=True)
+                # logger.info("logger.INFO msg in list_modules() 222222")
+                # logger.error("logger.ERROR msg in list_modules() 222222")
+                # logger.debug("logger.DEBUG msg in list_modules() 222222")
+                # print(f"check: LOG_LEVEL={os.getenv('LOG_LEVEL')}", flush=True)
 
-                logger.debug(
+                logger.error(
                     "Module loader ignoring file views/%s due to import failure; safe to ignore for .swp etc files",
                     view_folder,
                     exc_info=True,
                 )
+
+                # tcook: does not affect newlines issues in logger
+                # for handler in logger.handlers:
+                #     handler.flush()
+
         sorted_mods = sorted(modules_by_id.values(), key=lambda nfo: nfo["id"])
         for i in range(len(sorted_mods)):
             sorted_mods[i]["index"] = i

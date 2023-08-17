@@ -1,12 +1,11 @@
 import json
 import urllib
+import streamlit as st
+import logging
 
 from util import getChild
 
-import streamlit as st
-
 logger = getChild(__name__)
-
 
 class URLParam:
     def __init__(self, prefix="d_"):

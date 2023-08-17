@@ -3,7 +3,7 @@ from components import GraphistrySt, URLParam
 from graphistry import PyGraphistry
 from css import all_css
 from time import sleep
-from util import getChild
+import logging
 
 ############################################
 #
@@ -14,7 +14,7 @@ from util import getChild
 
 
 app_id = 'app_01'
-logger = getChild(app_id)
+logger = logging.getLogger(app_id)
 urlParams = URLParam(app_id)
 
 

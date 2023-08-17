@@ -4,13 +4,12 @@ import pandas as pd
 import streamlit as st
 from components import GraphistrySt, URLParam
 from css import all_css
-from util import getChild
 import time
 from TigerGraph_helper import tg_helper
 import plotly.express as px
 import pyTigerGraph as tg
 import datetime
-
+import logging
 
 ############################################
 #
@@ -21,7 +20,7 @@ import datetime
 
 
 app_id = 'tigergraph_fraud'
-logger = getChild(app_id)
+logger = logging.getLogger(app_id)
 urlParams = URLParam(app_id)
 node_id_col = 'id'
 src_id_col = 'Source'
