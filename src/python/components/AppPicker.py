@@ -3,8 +3,6 @@ import logging, os
 import streamlit as st
 from util import getChild
 
-logging.basicConfig(format="%(levelname)s %(asctime)s %(name)s:%(message)s\n")
-
 logger = getChild(__name__)
 
 # loads all views/<app>/__init__.py and tracks active as URL param "?view_index=<info()['id']>"
