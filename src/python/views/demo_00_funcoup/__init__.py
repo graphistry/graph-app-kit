@@ -89,41 +89,39 @@ def sidebar_area():
         'Max_category': 'strongest couping class for this pair. This is also the class for which the LLRs are given'
     }
 
-    filter_by_node_org_init = urlParams.get_field('filter_by_org', default='all')
-    filter_by_node_org = \
+    filter_by_org_type_init = urlParams.get_field('filter_by_org', default='all')
+    filter_by_org_type = \
         st.sidebar.selectbox(
             'Filter nodes by:',
-            ('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannascii','M.musculus','O.sativa','P.falciparum','R.norvegicus','S.cerevisiae','S,pombe','S.scrofa','S.solfataticus').index(filter_by_node_org_init),
-            index=('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannascii','M.musculus','O.sativa','R.norvegicus','S.cerevisiae','S,pombe','S.scrofa','S.solfataticus').index(filter_by_node_org_init),
+            ('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannascii','M.musculus','O.sativa','P.falciparum','R.norvegicus','S.cerevisiae','S,pombe','S.scrofa','S.solfataticus'),
+            index=('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannascii','M.musculus','O.sativa','R.norvegicus','S.cerevisiae','S,pombe','S.scrofa','S.solfataticus').index(filter_by_org_type_init),
             format_func=(lambda option: option_to_label[option]))
-    urlParams.set_field('filter_by_org', filter_by_node_org)
+    urlParams.set_field('filter_by_org', filter_by_org_type)
 
-    edges_df = pd.read_csv('https://funcoup.org/downloads/download.action?type=network&instanceID=24480085&fileName=FC5.0_'+filter_by_org+'_compact.gz', sep='\t')
-
-
-    filter_by_node_type_init = urlParams.get_field('filter_by_type', default='all')
+    filter_by_node_type_init = urlParams.get_field('filter_by_node', default='all')
     filter_by_node_type = \
         st.sidebar.selectbox(
             'Filter nodes by:',
-            ('PFC','FBS_max','FBS_*','LLR_*','LLR_*','Max_category').index(filter_by_node_type_init),
-            index=('PFC','FBS_max','FBS_*','LLR_*','LLR_*','Max_category').index(filter_by_node_type),
+            ('PFC','FBS_max','FBS_*','LLR_*','LLR_*','Max_category')
+            index=('PFC','FBS_max','FBS_*','LLR_*','LLR_*','Max_category').index(filter_by_node_type_init),
             format_func=(lambda option: option_to_label[option]))
-    urlParams.set_field('filter_by_type', filter_by_node_type)
+    urlParams.set_field('filter_by_node', filter_by_node_type)
 
     filter_by_net_type_init = urlParams.get_field('filter_by_net', default='all')
     filter_by_net_type = \
         st.sidebar.selectbox(
             'Filter nodes by:',
-            ('PFC','FBS_max','FBS_*','LLR_*','LLR_*','Max_category').index(filter_by_net_type_init),
-            index=('PFC','FBS_max','FBS_*','LLR_*','LLR_*','Max_category').index(filter_by_net_type),
+            ('compact','full'),
+            index=('compact','full').index(filter_by_net_type_init),
             format_func=(lambda option: option_to_label[option]))
-    urlParams.set_field('filter_by_type', filter_by_net_type)
+    urlParams.set_field('filter_by_net', filter_by_net_type)
     
+    edges_df = pd.read_csv('https://funcoup.org/downloads/download.action?type=network&instanceID=24480085&fileName=FC5.0_'+filter_by_org+'_'filter_by_net_type'+.gz', sep='\t')
 
     return {
         # 'n': n,
         'edges_df': edges_df,
-        'organism': filter_by_node_org,
+        'organism': filter_by_org_type,
         'node_type': filter_by_node_type,
         'net_type': filter_by_net_type,
     }
