@@ -13,7 +13,7 @@ import logging
 #  Controls how entrypoint.py picks it up
 
 
-app_id = 'app_00'
+app_id = 'app_05'
 logger = logging.getLogger(app_id)
 urlParams = URLParam(app_id)
 
@@ -23,7 +23,7 @@ def info():
         'id': app_id,
         'name': 'Bio: FUNCOUP',
         'enabled': True,
-        'tags': ['demo', 'demo_bio']
+        'tags': ['bio', 'large', 'funcoup','demo'],
     }
 
 
@@ -102,7 +102,7 @@ def sidebar_area():
     filter_by_node_type = \
         st.sidebar.selectbox(
             'Filter nodes by:',
-            ('PFC','FBS_max','FBS_*','LLR_*','LLR_*','Max_category')
+            ('PFC','FBS_max','FBS_*','LLR_*','LLR_*','Max_category'),
             index=('PFC','FBS_max','FBS_*','LLR_*','LLR_*','Max_category').index(filter_by_node_type_init),
             format_func=(lambda option: option_to_label[option]))
     urlParams.set_field('filter_by_node', filter_by_node_type)
@@ -116,7 +116,7 @@ def sidebar_area():
             format_func=(lambda option: option_to_label[option]))
     urlParams.set_field('filter_by_net', filter_by_net_type)
     
-    edges_df = pd.read_csv('https://funcoup.org/downloads/download.action?type=network&instanceID=24480085&fileName=FC5.0_'+filter_by_org+'_'filter_by_net_type'+.gz', sep='\t')
+    edges_df = pd.read_csv('https://funcoup.org/downloads/download.action?type=network&instanceID=24480085&fileName=FC5.0_'+filter_by_org_type+'_'+filter_by_net_type+'.gz', sep='\t')
 
     return {
         # 'n': n,
@@ -190,8 +190,6 @@ def plot_url(edges_df):
     url = graphistry\
             .bind(source="Gene_1", destination="Gene_2")\
             .edges(edges_df)\
-            # .nodes(nodes_df)\
-            # .bind(node='n', point_color='nc')\
             .settings(url_params={
                 'pointSize': 0.3,
                 'splashAfter': 'false',
