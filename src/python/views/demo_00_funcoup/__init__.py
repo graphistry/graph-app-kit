@@ -72,7 +72,7 @@ def sidebar_area():
         'P.falciparum': 'P.falciparum',
         'R.norvegicus': 'R.norvegicus',
         'S.cerevisiae': 'S.cerevisiae',
-        'S,pombe': 'S.pombe',
+        'S.pombe': 'S.pombe',
         'S.scrofa': 'S.scrofa',
         'S.solfataticus': 'S.solfataricus',
     }
@@ -83,8 +83,8 @@ def sidebar_area():
     filter_by_org_type = \
         st.sidebar.selectbox(
             'Choose species:',
-            ('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannascii','M.musculus','O.sativa','P.falciparum','R.norvegicus','S.cerevisiae','S,pombe','S.scrofa','S.solfataticus'),
-            index=('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannascii','M.musculus','O.sativa','R.norvegicus','S.cerevisiae','S,pombe','S.scrofa','S.solfataticus').index(filter_by_org_type_init),
+            ('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannascii','M.musculus','O.sativa','P.falciparum','R.norvegicus','S.cerevisiae','S.pombe','S.scrofa','S.solfataticus'),
+            index=('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannascii','M.musculus','O.sativa','P.falciparum','R.norvegicus','S.cerevisiae','S.pombe','S.scrofa','S.solfataticus').index(filter_by_org_type_init),
             format_func=(lambda option: species_to_label[option]))
     urlParams.set_field('filter_by_org', filter_by_org_type)
 
@@ -140,7 +140,6 @@ def sidebar_area():
             format_func=(lambda option: umap_to_label[option]))
     urlParams.set_field('filter_by_umap', filter_by_umap_type)
     
-    # edges_df = pd.read_csv('https://funcoup.org/downloads/download.action?type=network&instanceID=24480085&fileName=FC5.0_B.taurus_compact.gz', sep='\t')
     edges_df = pd.read_csv('https://funcoup.org/downloads/download.action?type=network&instanceID=24480085&fileName=FC5.0_'+filter_by_org_type+'_'+filter_by_net_type+'.gz', sep='\t')
 
     return {
@@ -163,28 +162,9 @@ def sidebar_area():
 @st.cache_data
 def run_filters(edges_df,umap_type=False):
 
-    filtered_edges_df = edges_df[:100000] #[['2:Gene1','3:Gene2','1:FBS_max','#0:PFC']]
+    filtered_edges_df = edges_df
     filtered_edges_df = filtered_edges_df.replace({'ENSG00000':''},regex=True)
-    # filtered_edges_df.rename(columns={'2:Gene1':'Gene1','3:Gene2':'Gene2','#0:PFC':'PFC','1:FBS_max':'FBS'},inplace=True)
     filtered_edges_df.columns=filtered_edges_df.columns.str.split(':').str[1]
-    # filtered_edges_df = edges_df
-    # if node_type == 'all':
-    #     pass
-    # elif node_type == 'odd':
-    #     filtered_edges_df = filtered_edges_df[ filtered_edges_df['s'] % 2 == 1 ]
-    #     filtered_edges_df = filtered_edges_df[ filtered_edges_df['d'] % 2 == 1 ]
-    # elif node_type == 'even':
-    #     filtered_edges_df = filtered_edges_df[ filtered_edges_df['s'] % 2 == 0 ]
-    #     filtered_edges_df = filtered_edges_df[ filtered_edges_df['d'] % 2 == 0 ]
-    # else:
-    #     raise Exception('Unknown filter1 option result: %s' % node_type)
-
-    # if node_range[0] > 0:
-    #     filtered_edges_df = filtered_edges_df[ filtered_edges_df['s'] >= node_range[0] ]
-    #     filtered_edges_df = filtered_edges_df[ filtered_edges_df['d'] >= node_range[0] ]
-    # if node_range[1] <= n:
-    #     filtered_edges_df = filtered_edges_df[ filtered_edges_df['s'] <= node_range[1] ]
-    #     filtered_edges_df = filtered_edges_df[ filtered_edges_df['d'] <= node_range[1] ]
 
     # include viz generation as part of cache
     url = plot_url(filtered_edges_df,umap_type)
@@ -209,9 +189,8 @@ def plot_url(edges_df,umap_type=False):
     })
     n = len(nodes_df)
 
-    nodes_df['nc'] = nodes_df['n'].replace('ENSG00000','',regex=True)
-    nodes_df['nc'] = pd.to_numeric(nodes_df['nc'], errors='coerce')
-    nodes_df['nc'] = nodes_df['nc'].fillna(0).apply(lambda v: 0x01000000 * round(255 * v / n))
+    nodes_df['ind'] = nodes_df.index 
+    nodes_df['nc'] = nodes_df['ind'].apply(lambda v: 0x01000000 * round(255 * v / n,2))
 
     logger.info('Starting graphistry plot')
     if not GraphistrySt().test_login():
@@ -240,7 +219,7 @@ def plot_url(edges_df,umap_type=False):
                     'splashAfter': 'false',
                     'bg': '%23' + 'f0f2f6'
                 })\
-                .umap(engine='umap_learn')\
+                .umap(feature_engine='dirty_cat',engine='umap_learn')\
                 .plot(render=False)
 
     logger.info('Generated viz, got back urL: %s', url)
