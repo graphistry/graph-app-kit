@@ -66,7 +66,7 @@ def sidebar_area():
         'E.coli': 'E.coli',
         'G.gallus': 'G.gallus',
         'H.sapiens': 'H.sapiens',
-        'M.jannascii': 'M.jannascii',
+        'M.jannaschii': 'M.jannaschii',
         'M.musculus': 'M.musculus',
         'O.sativa': 'O.sativa',
         'P.falciparum': 'P.falciparum',
@@ -74,7 +74,7 @@ def sidebar_area():
         'S.cerevisiae': 'S.cerevisiae',
         'S.pombe': 'S.pombe',
         'S.scrofa': 'S.scrofa',
-        'S.solfataticus': 'S.solfataricus',
+        'S.solfataricus': 'S.solfataricus',
     }
 
     base_url = os.environ['BASE_URL']
@@ -83,8 +83,8 @@ def sidebar_area():
     filter_by_org_type = \
         st.sidebar.selectbox(
             'Choose species:',
-            ('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannascii','M.musculus','O.sativa','P.falciparum','R.norvegicus','S.cerevisiae','S.pombe','S.scrofa','S.solfataticus'),
-            index=('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannascii','M.musculus','O.sativa','P.falciparum','R.norvegicus','S.cerevisiae','S.pombe','S.scrofa','S.solfataticus').index(filter_by_org_type_init),
+            ('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannaschii','M.musculus','O.sativa','P.falciparum','R.norvegicus','S.cerevisiae','S.pombe','S.scrofa','S.solfataricus'),
+            index=('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannaschii','M.musculus','O.sativa','P.falciparum','R.norvegicus','S.cerevisiae','S.pombe','S.scrofa','S.solfataricus').index(filter_by_org_type_init),
             format_func=(lambda option: species_to_label[option]))
     urlParams.set_field('filter_by_org', filter_by_org_type)
 
@@ -162,13 +162,15 @@ def sidebar_area():
 @st.cache_data
 def run_filters(edges_df,umap_type=False):
 
-    edges_df.columns=edges_df.columns.str.split(':').str[1]
+    filtered_edges_df = edges_df
+    # filtered_edges_df = filtered_edges_df.replace({'ENSG00000':''},regex=True)
+    filtered_edges_df.columns=filtered_edges_df.columns.str.split(':').str[1]
 
     # include viz generation as part of cache
-    url = plot_url(edges_df,umap_type)
+    url = plot_url(filtered_edges_df,umap_type)
 
     return {
-        'edges_df': edges_df,
+        'edges_df': filtered_edges_df,
         'url': url
     }
 
