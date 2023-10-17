@@ -1,3 +1,4 @@
 ###
 ### Use this file for your custom view requirements here vs in the requirements-system.txt
 ###
+umap-learn

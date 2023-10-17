@@ -13,7 +13,7 @@ import logging
 #  Controls how entrypoint.py picks it up
 
 
-app_id = 'app_05'
+app_id = 'app_00'
 logger = logging.getLogger(app_id)
 urlParams = URLParam(app_id)
 
@@ -53,7 +53,7 @@ def custom_css():
 # #https://docs.streamlit.io/en/stable/api.html#display-interactive-widgets
 def sidebar_area():
     st.sidebar.title("Pick an Organism")
-    option_to_label = {
+    species_to_label = {
         'A.thaliana': 'A.thaliana',
         'B.subtilis': 'B.subtilis',
         'B.taurus': 'B.taurus',
@@ -79,8 +79,18 @@ def sidebar_area():
 
     base_url = os.environ['BASE_URL']
 
+    filter_by_org_type_init = urlParams.get_field('filter_by_org', default='H.sapiens')
+    filter_by_org_type = \
+        st.sidebar.selectbox(
+            'Choose species:',
+            ('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannascii','M.musculus','O.sativa','P.falciparum','R.norvegicus','S.cerevisiae','S,pombe','S.scrofa','S.solfataticus'),
+            index=('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannascii','M.musculus','O.sativa','R.norvegicus','S.cerevisiae','S,pombe','S.scrofa','S.solfataticus').index(filter_by_org_type_init),
+            format_func=(lambda option: species_to_label[option]))
+    urlParams.set_field('filter_by_org', filter_by_org_type)
+
+
     st.sidebar.title("Edge Type")
-    option_to_label = {
+    edge_to_label = {
         'PFC': 'The confidence Score',
         'FBS_max': 'The final Bayesian Score (FBS) of the strongest coupling class',
         'FBS_*': 'Bayesian Score of all coupling classes',
@@ -89,41 +99,56 @@ def sidebar_area():
         'Max_category': 'strongest couping class for this pair. This is also the class for which the LLRs are given'
     }
 
-    filter_by_org_type_init = urlParams.get_field('filter_by_org', default='all')
-    filter_by_org_type = \
-        st.sidebar.selectbox(
-            'Filter nodes by:',
-            ('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannascii','M.musculus','O.sativa','P.falciparum','R.norvegicus','S.cerevisiae','S,pombe','S.scrofa','S.solfataticus'),
-            index=('A.thaliana', 'B.subtilis', 'B.taurus','C.elegans','C.familiaris','C.intestinalis','D.discoideum','D.melanogaster','D.rerio','E.coli','G.gallus','H.sapiens','M.jannascii','M.musculus','O.sativa','R.norvegicus','S.cerevisiae','S,pombe','S.scrofa','S.solfataticus').index(filter_by_org_type_init),
-            format_func=(lambda option: option_to_label[option]))
-    urlParams.set_field('filter_by_org', filter_by_org_type)
-
-    filter_by_node_type_init = urlParams.get_field('filter_by_node', default='all')
+    filter_by_node_type_init = urlParams.get_field('filter_by_node', default='PFC')
     filter_by_node_type = \
         st.sidebar.selectbox(
-            'Filter nodes by:',
+            'Filter node by:',
             ('PFC','FBS_max','FBS_*','LLR_*','LLR_*','Max_category'),
             index=('PFC','FBS_max','FBS_*','LLR_*','LLR_*','Max_category').index(filter_by_node_type_init),
-            format_func=(lambda option: option_to_label[option]))
+            format_func=(lambda option: edge_to_label[option]))
     urlParams.set_field('filter_by_node', filter_by_node_type)
 
-    filter_by_net_type_init = urlParams.get_field('filter_by_net', default='all')
+
+    st.sidebar.title("Net Type")
+    net_to_label = {
+        'compact': 'compact',
+        'full': 'full',
+    }
+
+    filter_by_net_type_init = urlParams.get_field('filter_by_net', default='compact')
     filter_by_net_type = \
         st.sidebar.selectbox(
-            'Filter nodes by:',
+            'Filter net by:',
             ('compact','full'),
             index=('compact','full').index(filter_by_net_type_init),
-            format_func=(lambda option: option_to_label[option]))
+            format_func=(lambda option: net_to_label[option]))
     urlParams.set_field('filter_by_net', filter_by_net_type)
+
+
+    st.sidebar.title("Umap Type")
+    umap_to_label = {
+        True: True,
+        False: False,
+    }
+
+    filter_by_umap_type_init = urlParams.get_field('filter_by_umap', default=False)
+    filter_by_umap_type = \
+        st.sidebar.selectbox(
+            'Filter umap by:',
+            (True,False),
+            index=(True,False).index(filter_by_umap_type_init),
+            format_func=(lambda option: umap_to_label[option]))
+    urlParams.set_field('filter_by_umap', filter_by_umap_type)
     
+    # edges_df = pd.read_csv('https://funcoup.org/downloads/download.action?type=network&instanceID=24480085&fileName=FC5.0_B.taurus_compact.gz', sep='\t')
     edges_df = pd.read_csv('https://funcoup.org/downloads/download.action?type=network&instanceID=24480085&fileName=FC5.0_'+filter_by_org_type+'_'+filter_by_net_type+'.gz', sep='\t')
 
     return {
-        # 'n': n,
         'edges_df': edges_df,
-        'organism': filter_by_org_type,
-        'node_type': filter_by_node_type,
-        'net_type': filter_by_net_type,
+        # 'org_type': filter_by_org_type,
+        # 'node_type': filter_by_node_type,
+        # 'net_type': filter_by_net_type,
+        'umap_type': filter_by_umap_type,
     }
 
 
@@ -136,10 +161,12 @@ def sidebar_area():
 
 #@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 @st.cache_data
-def run_filters(node_type, organism, net_type, edges_df):
+def run_filters(edges_df,umap_type=False):
 
-    filtered_edges_df = edges_df['Gene_1','Gene_2',node_type]
-
+    filtered_edges_df = edges_df[:100000] #[['2:Gene1','3:Gene2','1:FBS_max','#0:PFC']]
+    filtered_edges_df = filtered_edges_df.replace({'ENSG00000':''},regex=True)
+    # filtered_edges_df.rename(columns={'2:Gene1':'Gene1','3:Gene2':'Gene2','#0:PFC':'PFC','1:FBS_max':'FBS'},inplace=True)
+    filtered_edges_df.columns=filtered_edges_df.columns.str.split(':').str[1]
     # filtered_edges_df = edges_df
     # if node_type == 'all':
     #     pass
@@ -160,7 +187,7 @@ def run_filters(node_type, organism, net_type, edges_df):
     #     filtered_edges_df = filtered_edges_df[ filtered_edges_df['d'] <= node_range[1] ]
 
     # include viz generation as part of cache
-    url = plot_url(filtered_edges_df)
+    url = plot_url(filtered_edges_df,umap_type)
 
     return {
         'edges_df': filtered_edges_df,
@@ -175,27 +202,46 @@ def run_filters(node_type, organism, net_type, edges_df):
 ############################################
 
 
-def plot_url(edges_df):
+def plot_url(edges_df,umap_type=False):
 
-    # nodes_df = pd.DataFrame({
-    #     'n': pd.concat([edges_df['s'], edges_df['d']]).unique()
-    # })
+    nodes_df = pd.DataFrame({
+        'n': pd.concat([edges_df['Gene1'], edges_df['Gene2']]).unique()
+    })
+    n = len(nodes_df)
 
-    # nodes_df['nc'] = nodes_df['n'].apply(lambda v: 0x01000000 * round(255 * v / n))
+    nodes_df['nc'] = nodes_df['n'].replace('ENSG00000','',regex=True)
+    nodes_df['nc'] = pd.to_numeric(nodes_df['nc'], errors='coerce')
+    nodes_df['nc'] = nodes_df['nc'].fillna(0).apply(lambda v: 0x01000000 * round(255 * v / n))
 
     logger.info('Starting graphistry plot')
     if not GraphistrySt().test_login():
         return ''
-
-    url = graphistry\
-            .bind(source="Gene_1", destination="Gene_2")\
-            .edges(edges_df)\
-            .settings(url_params={
-                'pointSize': 0.3,
-                'splashAfter': 'false',
-                'bg': '%23' + 'f0f2f6'
-            })\
-            .plot(render=False)
+    
+    if umap_type == False:
+        url = graphistry\
+                .edges(edges_df)\
+                .bind(source="Gene1", destination="Gene2")\
+                .nodes(nodes_df)\
+                .bind(node='n', point_color='nc')\
+                .settings(url_params={
+                    'pointSize': 0.3,
+                    'splashAfter': 'false',
+                    'bg': '%23' + 'f0f2f6'
+                })\
+                .plot(render=False)
+    elif umap_type == True:
+        url = graphistry\
+                .edges(edges_df)\
+                .bind(source="Gene1", destination="Gene2")\
+                .nodes(nodes_df)\
+                .bind(node='n', point_color='nc')\
+                .settings(url_params={
+                    'pointSize': 0.3,
+                    'splashAfter': 'false',
+                    'bg': '%23' + 'f0f2f6'
+                })\
+                .umap(engine='umap_learn')\
+                .plot(render=False)
 
     logger.info('Generated viz, got back urL: %s', url)
 
