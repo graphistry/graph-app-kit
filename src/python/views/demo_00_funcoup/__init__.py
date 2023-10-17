@@ -162,15 +162,13 @@ def sidebar_area():
 @st.cache_data
 def run_filters(edges_df,umap_type=False):
 
-    filtered_edges_df = edges_df
-    filtered_edges_df = filtered_edges_df.replace({'ENSG00000':''},regex=True)
-    filtered_edges_df.columns=filtered_edges_df.columns.str.split(':').str[1]
+    edges_df.columns=edges_df.columns.str.split(':').str[1]
 
     # include viz generation as part of cache
-    url = plot_url(filtered_edges_df,umap_type)
+    url = plot_url(edges_df,umap_type)
 
     return {
-        'edges_df': filtered_edges_df,
+        'edges_df': edges_df,
         'url': url
     }
 
