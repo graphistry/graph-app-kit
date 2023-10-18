@@ -58,7 +58,7 @@ def sidebar_area():
     n = st.sidebar.number_input('Number of nodes', min_value=10, max_value=100000, value=n_init, step=20)
     urlParams.set_field('N', n)
 
-    base_url = os.environ['BASE_URL']
+    base_url = os.environ.get('BASE_URL', 'http://localhost:8501')
 
     edges_df = pd.concat([
         pd.DataFrame({

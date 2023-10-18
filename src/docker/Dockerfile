@@ -33,6 +33,7 @@ ENV LANG=C.UTF-8
 ENV BASE_URL=http://localhost:8501/dashboard
 ENV BASE_PATH=dashboard/
 ENV LOG_LEVEL=ERROR
+ENV VIEW_PATH=/apps/views
 COPY python/ /apps/
 
 COPY docker/entrypoint.sh /entrypoint.sh

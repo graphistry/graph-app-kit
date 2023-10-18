@@ -120,6 +120,17 @@ cd graph-app-kit/private/graph-app-kit && docker-compose -p priv run -d --name s
 
 3. [Main configurations and extensions](docs/extend.md): Database connectors, authentication, notebook-based editing, and more
 
+### Native (Experimental)
+
+Install dependencies, pick location of views folder, and run:
+
+```bash
+cd src/python
+pip3 install -r requirements-system.txt
+pip3 install -r requirements-app.txt
+VIEW_PATH="`pwd`/views" streamlit run entrypoint.py 
+```
+
 ## The pieces
 
 ### Core

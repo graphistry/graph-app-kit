@@ -24,7 +24,8 @@ from views.demo_avr.marlowe import (
 import streamlit as st
 
 # App configuration
-CSS_PATH = "/apps/views/demo_avr/app.css"
+view_path = os.environ.get("VIEW_PATH", "/apps/views")
+CSS_PATH = f"{view_path}/demo_avr/app.css"
 DEFAULT_PIVOT_URL_INVESTIGATION_ID = "123"
 
 ############################################
