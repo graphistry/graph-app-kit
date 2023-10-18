@@ -21,6 +21,11 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+### Infra
+
+* Enable native execution with stronger default env var handling
+
+
 ## [2.40.28 - 2023.08.16]
 
 ### Changed
