@@ -79,7 +79,7 @@ def sidebar_area():
 
     base_url = os.environ['BASE_URL']
 
-    filter_by_org_type_init = urlParams.get_field('filter_by_org', default='H.sapiens')
+    filter_by_org_type_init = urlParams.get_field('filter_by_org', default='B.subtilis')
     filter_by_org_type = \
         st.sidebar.selectbox(
             'Choose organism:',
@@ -95,7 +95,7 @@ def sidebar_area():
         'full': 'full',
     }
 
-    filter_by_net_type_init = urlParams.get_field('filter_by_net', default='compact')
+    filter_by_net_type_init = urlParams.get_field('filter_by_net', default='full')
     filter_by_net_type = \
         st.sidebar.selectbox(
             'Select FunCoup Network:',
@@ -148,7 +148,7 @@ def sidebar_area():
         False: False,
     }
 
-    filter_by_umap_type_init = urlParams.get_field('filter_by_umap', default=False)
+    filter_by_umap_type_init = urlParams.get_field('filter_by_umap', default=True)
     filter_by_umap_type = \
         st.sidebar.selectbox(
             'If Full Network, run and plot UMAP:',
