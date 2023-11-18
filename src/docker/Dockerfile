@@ -16,15 +16,15 @@ EXPOSE 8501
 WORKDIR /app
 
 COPY python/conda-app.sh ./
-RUN { source activate rapids || echo ok ; } && ./conda-app.sh
+RUN { source activate base || echo ok ; } && ./conda-app.sh
 
 COPY python/requirements-system.txt ./
 RUN --mount=type=cache,target=/root/.cache \
-    { source activate rapids || echo ok ; } && pip install -r requirements-system.txt
+    { source activate base || echo ok ; } && pip install -r requirements-system.txt
 
 COPY python/requirements-app.txt ./
 RUN --mount=type=cache,target=/root/.cache  \
-    { source activate rapids || echo ok ; } && pip install -r requirements-app.txt
+    { source activate base || echo ok ; } && pip install -r requirements-app.txt
 
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
