@@ -24,7 +24,8 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 ### Infra
 
 * Enable native execution with stronger default env var handling
-
+* Update CUDA default from 11.5 to 11.8 to match Graphistry
+* Switch Python base environment from rapids to base to match Graphistry
 
 ## [2.40.28 - 2023.08.16]
 
