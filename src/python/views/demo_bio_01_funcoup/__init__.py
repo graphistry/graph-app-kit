@@ -13,7 +13,7 @@ import logging
 #  Controls how entrypoint.py picks it up
 
 
-app_id = 'app_00'
+app_id = 'app_bio_01'
 logger = logging.getLogger(app_id)
 urlParams = URLParam(app_id)
 
@@ -88,82 +88,44 @@ def sidebar_area():
             format_func=(lambda option: species_to_label[option]))
     urlParams.set_field('filter_by_org', filter_by_org_type)
 
-
-    st.sidebar.title("Network Type")
-    net_to_label = {
-        'compact': 'compact',
-        'full': 'full',
-    }
-
-    filter_by_net_type_init = urlParams.get_field('filter_by_net', default='full')
-    filter_by_net_type = \
-        st.sidebar.selectbox(
-            'Select FunCoup Network:',
-            ('compact','full'),
-            index=('compact','full').index(filter_by_net_type_init),
-            format_func=(lambda option: net_to_label[option]))
-    urlParams.set_field('filter_by_net', filter_by_net_type)
-
-
-    st.sidebar.title("Choose Edge Weight")
-    edge_to_label = {'PFC':'PFC', 'FBS_max':'FBS_max', 'FBS_PPI':'FBS_PPI',
-       'FBS_Metabolic':'FBS_Metabolic', 'FBS_Signaling':'FBS_Signaling', 'LLR_MEX':'LLR_MEX', 'LLR_PIN':'LLR_PIN',
-       'LLR_SCL':'LLR_SCL', 'LLR_PHP':'LLR_PHP', 'LLR_MIR':'LLR_MIR', 'LLR_TFB':'LLR_TFB', 'LLR_PEX':'LLR_PEX',
-       'LLR_GIN':'LLR_GIN', 'LLR_DOM':'LLR_DOM', 'LLR_QMS':'LLR_QMS', 'LLR_HSA':'LLR_HSA', 'LLR_MMU':'LLR_MMU',
-       'LLR_RNO':'LLR_RNO', 'LLR_CFA':'LLR_CFA', 'LLR_GGA':'LLR_GGA', 'LLR_DRE':'LLR_DRE', 'LLR_CIN':'LLR_CIN',
-       'LLR_DME':'LLR_DME', 'LLR_CEL':'LLR_CEL', 'LLR_BTA':'LLR_BTA', 'LLR_SCE':'LLR_SCE', 'LLR_ATH':'LLR_ATH',
-       'LLR_SPO':'LLR_SPO', 'LLR_BSU':'LLR_BSU', 'LLR_ECO':'LLR_ECO', 'LLR_PFA':'LLR_PFA', 'LLR_DDI':'LLR_DDI',
-       'LLR_SSO':'LLR_SSO', 'LLR_SSC':'LLR_SSC', 'LLR_MJA':'LLR_MJA', 'LLR_OSA':'LLR_OSA','Max_category':'Max_category'
-    }
-
-    filter_by_node_type_init = urlParams.get_field('filter_by_node', default='PFC')
-    filter_by_node_type = \
-        st.sidebar.selectbox(
-            'if UMAP=True, all edges used:',
-            ('PFC', 'FBS_max', 'FBS_PPI',
-       'FBS_Metabolic', 'FBS_Signaling', 'LLR_MEX', 'LLR_PIN',
-       'LLR_SCL', 'LLR_PHP', 'LLR_MIR', 'LLR_TFB', 'LLR_PEX',
-       'LLR_GIN', 'LLR_DOM', 'LLR_QMS', 'LLR_HSA', 'LLR_MMU',
-       'LLR_RNO', 'LLR_CFA', 'LLR_GGA', 'LLR_DRE', 'LLR_CIN',
-       'LLR_DME', 'LLR_CEL', 'LLR_BTA', 'LLR_SCE', 'LLR_ATH',
-       'LLR_SPO', 'LLR_BSU', 'LLR_ECO', 'LLR_PFA', 'LLR_DDI',
-       'LLR_SSO', 'LLR_SSC', 'LLR_MJA', 'LLR_OSA',
-       'Max_category'),
-            index=('PFC', 'FBS_max', 'FBS_PPI',
-       'FBS_Metabolic', 'FBS_Signaling', 'LLR_MEX', 'LLR_PIN',
-       'LLR_SCL', 'LLR_PHP', 'LLR_MIR', 'LLR_TFB', 'LLR_PEX',
-       'LLR_GIN', 'LLR_DOM', 'LLR_QMS', 'LLR_HSA', 'LLR_MMU',
-       'LLR_RNO', 'LLR_CFA', 'LLR_GGA', 'LLR_DRE', 'LLR_CIN',
-       'LLR_DME', 'LLR_CEL', 'LLR_BTA', 'LLR_SCE', 'LLR_ATH',
-       'LLR_SPO', 'LLR_BSU', 'LLR_ECO', 'LLR_PFA', 'LLR_DDI',
-       'LLR_SSO', 'LLR_SSC', 'LLR_MJA', 'LLR_OSA',
-       'Max_category').index(filter_by_node_type_init),
-            format_func=(lambda option: edge_to_label[option]))
-    urlParams.set_field('filter_by_node', filter_by_node_type)
-
-
-    st.sidebar.title("UMAP T/F")
+    st.sidebar.title("Select a Network Type")
     umap_to_label = {
-        True: True,
-        False: False,
+        True: 'UMAP',
+        False: 'FunCoup',
     }
-
-    filter_by_umap_type_init = urlParams.get_field('filter_by_umap', default=True)
+    
+    filter_by_umap_type_init = urlParams.get_field('filter_by_umap', default='FunCoup')
     filter_by_umap_type = \
         st.sidebar.selectbox(
-            'If Full Network, run and plot UMAP:',
+            'Display functional coupling network (select link evidence below) or UMAP against all 40 evidence types:',
             (True,False),
             index=(True,False).index(filter_by_umap_type_init),
             format_func=(lambda option: umap_to_label[option]))
     urlParams.set_field('filter_by_umap', filter_by_umap_type)
+
+    if filter_by_umap_type is 'UMAP':
+        filter_by_net_type = 'full'
+    else:
+        filter_by_net_type = 'compact'
+
+    st.sidebar.title("Select an Evidence Type")
+    edge_to_label = {'PFC':'PFC', 'FBS_max':'FBS_max'}
+
+    filter_by_node_type_init = urlParams.get_field('filter_by_node', default='PFC')
+    filter_by_node_type = \
+        st.sidebar.selectbox(
+            'for FunCoup Network display',
+            ('PFC', 'FBS_max'),
+            index=('PFC', 'FBS_max').index(filter_by_node_type_init),
+            format_func=(lambda option: edge_to_label[option]))
+    urlParams.set_field('filter_by_node', filter_by_node_type)
+
     
     edges_df = pd.read_csv('https://funcoup.org/downloads/download.action?type=network&instanceID=24480085&fileName=FC5.0_'+filter_by_org_type+'_'+filter_by_net_type+'.gz', sep='\t')
 
     return {
         'edges_df': edges_df,
-        # 'org_type': filter_by_org_type,
         'node_type': filter_by_node_type,
-        # 'net_type': filter_by_net_type,
         'umap_type': filter_by_umap_type,
     }
 
@@ -201,6 +163,8 @@ def run_filters(edges_df, node_type, umap_type=False):
 
 def plot_url(edges_df,node_type, umap_type=False):
 
+    edges_df.replace({'ENSG00000':''},regex=True,inplace=True) ## remove ENSG00000 from gene names for better compression
+
     nodes_df = pd.DataFrame({
         'n': pd.concat([edges_df['Gene1'], edges_df['Gene2']]).unique()
     })
@@ -216,7 +180,7 @@ def plot_url(edges_df,node_type, umap_type=False):
     if umap_type == False:
         url = graphistry\
                 .edges(edges_df)\
-                .bind(source="Gene1", destination="Gene2", weight=node_type)\
+                .bind(source="Gene1", destination="Gene2", edge_weight=node_type)\
                 .nodes(nodes_df)\
                 .bind(node='n', point_color='nc')\
                 .settings(url_params={
@@ -224,8 +188,9 @@ def plot_url(edges_df,node_type, umap_type=False):
                     'splashAfter': 'false',
                     'bg': '%23' + 'f0f2f6'
                 })\
-                .plot(render=False)
+                .plot(render=False)#, as_files=True, suffix='.html', output=None, open=False)
     elif umap_type == True:
+        
         AA = graphistry\
                 .nodes(edges_df)\
                 .bind(source="Gene1", destination="Gene2")\
