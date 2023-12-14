@@ -20,7 +20,7 @@ echo "Log level (LOG_LEVEL): $LOG_LEVEL"
 echo "Graphistry user (GRAPHISTRY_USERNAME): $GRAPHISTRY_USERNAME"
 echo ""
 
-
+export PYTHONPATH=$PYTHONPATH:$ADDITIONAL_PYTHON_PATH
 
 mkdir -p /root/.streamlit
 
