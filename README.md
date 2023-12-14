@@ -176,4 +176,4 @@ We welcome all sorts of help!
 * Connectors: Examples for common databases and how to get a lot of data out
 * Demos!
 
-See [develop.md](develop.md) for more contributor information
+See [DEVELOP.md](DEVELOP.md) for more contributor information
