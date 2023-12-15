@@ -2,7 +2,7 @@
 
 ## Install Custom Python Packages Locally
 
-Install the desired custom Python packages on your localhost.  For example, if you want to include a different version of `pygraphistry` and an additional dependency like `faker`, run the following commands in your terminal:
+Install the desired custom Python packages on your localhost.  For example, if you want to include a different version of `PyGraphistry` and an additional dependency like `faker`, run the following commands in your terminal:
 
 ```bash
 pip install pip install graphistry[all] -t /home/user/additional-python-packages
