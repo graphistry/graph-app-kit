@@ -166,6 +166,7 @@ For non-minimal installs, if GPUs are present, `graph-app-kit` leverages GPU clo
 
 * [Caddy](https://caddyserver.com/): Reverse proxy for custom URLs, [automatic LetsEncrypt TLS certificates](http://letsencrypt.org/), multiple sites on the same domain, pluggable authentication (see [integrations guide](docs/extend.md))
 
+* Also you can install your [custom Python Packages](docs/additional-packages.md).
 
 ## Contribute
 
