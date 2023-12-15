@@ -6,11 +6,11 @@ Install the desired custom Python packages on your localhost.  For example, if y
 
 ```bash
 mamba create --yes -n myenv python=3.8
-pip install pip install graphistry[all] -t /home/user/additional-python-packages
-pip install faker -t /home/user/additional-python-packages
+pip install pip install graphistry[all]
+pip install faker
 ```
 
-If the environment is airgapped, copy the packages into the folder `/home/user/additional-python-packages`.  Ensure that you use the same system architecture and Python version.
+If the environment is airgapped, copy the packages into your local directory (e.g. `/home/user/additional-python-packages`).  Ensure that you use the same system architecture and Python version.
 
 ## Mount the Volume in Docker Compose
 
@@ -27,5 +27,7 @@ services:
         ADDITIONAL_PYTHON_PATH: "/mnt"
     ...
 ```
+
+If using conda, replace `/home/user/additional-python-packages` with the full path of `$CONDA_PREFIX/lib/python3.8/site-packages`.
 
 That's it! You've successfully added custom Python packages to the graph-app-kit container.  You can now use these packages in your GAK environment for graph analytics and visualizations.
