@@ -25,6 +25,11 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 
 * Enable native execution with stronger default env var handling
 
+## [2023.02.10]
+
+### Changed
+
+* Update dependency PyGraphistry 0.33.0
 
 ## [2.40.28 - 2023.08.16]
 
