@@ -50,7 +50,8 @@ class AppPicker:
         #     handler.flush()
 
         modules_by_id = {}
-        for view_folder in sorted([view.split("/")[-1] for (view, _, _) in os.walk("/apps/views") if view != "/apps/views"]):
+        view_path = os.environ.get("VIEW_PATH", "/apps/views")
+        for view_folder in sorted([view.split("/")[-1] for (view, _, _) in os.walk(view_path) if view != view_path and not view.endswith("__pycache__")]):
             try:
                 mod = importlib.import_module(f"views.{view_folder}")
                 if hasattr(mod, "run"):

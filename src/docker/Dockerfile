@@ -1,12 +1,12 @@
 # Default to big image, but allow thin cpu override
 ARG DOCKER_TAG=latest
-ARG GRAPHISTRY_FORGE_BASE_VERSION=v2.40.8-11.5
+ARG GRAPHISTRY_FORGE_BASE_VERSION=v2.40.67-11.5
 ARG PYTHON_VERSION=3.8
 ARG BASE_IMAGE=graphistry/graphistry-forge-base:${GRAPHISTRY_FORGE_BASE_VERSION}
 FROM python:$PYTHON_VERSION as cpu_base
 
 ARG DOCKER_TAG=latest
-ARG GRAPHISTRY_FORGE_BASE_VERSION=v2.40.8-11.5
+ARG GRAPHISTRY_FORGE_BASE_VERSION=v2.40.67-11.5
 ARG BASE_IMAGE=graphistry/graphistry-forge-base:${GRAPHISTRY_FORGE_BASE_VERSION}
 FROM $BASE_IMAGE
 
@@ -33,6 +33,7 @@ ENV LANG=C.UTF-8
 ENV BASE_URL=http://localhost:8501/dashboard
 ENV BASE_PATH=dashboard/
 ENV LOG_LEVEL=ERROR
+ENV VIEW_PATH=/apps/views
 COPY python/ /apps/
 
 COPY docker/entrypoint.sh /entrypoint.sh

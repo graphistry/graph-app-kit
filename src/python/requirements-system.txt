@@ -1,4 +1,4 @@
-graphistry==0.29.3
+graphistry==0.33.5
 streamlit==1.25.0
 
 ################
