@@ -9,6 +9,6 @@ pip install pip install graphistry[all]
 pip install faker
 ```
 
-Graph-app-kit dependencies are normal and can be safely ignored.
+Graph-app-kit dependency errors on `pip install` are normal and can be safely ignored.
 
 If the environment is airgapped, copy the packages into the path `./data/py_envs/gak` from the root directory of the Graphistry install.  Ensure that you use the same system architecture and Python version.
