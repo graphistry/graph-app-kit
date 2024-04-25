@@ -67,6 +67,9 @@ x-build-kwargs:
 services:
   streamlit:
     <<: *production_opts
+    environment:
+      PYTHONPATH: "/opt/py_env"
+      PIP_TARGET: "/opt/py_env"
     image: graphistry/graph-app-kit-st:${DOCKER_TAG:-latest}-${CUDA_SHORT_VERSION:-11.5}
     command: --server.baseUrlPath="$BASE_PATH" /apps/entrypoint.py
     build:
@@ -83,6 +86,7 @@ services:
       - ${NEPTUNE_KEY_PATH:-/tmp/mt.pem}:/secrets/neptune-reader.pem
       - ../streamlit/config.toml:/root/gak/config.toml
       - ../streamlit/credentials.toml:/root/gak/credentials.toml
+      - ../data/py_envs/gak:/opt/py_env
     healthcheck:
       test:
         [
