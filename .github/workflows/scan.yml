@@ -31,7 +31,7 @@ jobs:
       DOCKER_BUILDKIT: 1
     strategy:
       matrix:
-        CUDA_SHORT_VERSION: ['11.5']
+        CUDA_SHORT_VERSION: ['11.8']
     steps:
 
       - name: checkout
@@ -94,7 +94,7 @@ jobs:
       DOCKER_BUILDKIT: 1
     strategy:
       matrix:
-        CUDA_SHORT_VERSION: ['11.5']
+        CUDA_SHORT_VERSION: ['11.8']
     steps:
 
       - name: checkout
