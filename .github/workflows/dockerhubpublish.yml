@@ -54,7 +54,7 @@ jobs:
 
         run: |
           cd src/docker \
-          && GRAPHISTRY_FORGE_BASE_VERSION=v${{ env.RELEASE_VERSION }}-${{ env.CUDA_SHORT_VERSION }} docker-compose -f docker-compose.yml build
+          && GRAPHISTRY_FORGE_BASE_VERSION=v${{ env.RELEASE_VERSION }}-${{ env.CUDA_SHORT_VERSION }} docker compose -f docker-compose.yml build
 
       - name: tag the image
         run: |
