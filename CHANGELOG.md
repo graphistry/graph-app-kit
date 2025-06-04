@@ -21,6 +21,8 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+## [2.43.0 - 2025.06.06]
+
 ### Changed
 
 * Update dependency PyGraphistry 0.33.8
@@ -28,6 +30,7 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 ### Infra
 
 * Enable native execution with stronger default env var handling
+* Use CUDA 12.8 version and base images 2.43.0
 
 ## [2023.02.10]
 
