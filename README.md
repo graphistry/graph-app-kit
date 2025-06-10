@@ -24,9 +24,9 @@ This open source effort puts together patterns the Graphistry team has reused ac
 
 ## What
 
-* **Minimal core**: The barebones dashboard server. In provides a StreamLit docker-compose container with PyData ecosystem libraries and examples of visualizing data from various systems. Install it, plug in credentials to various web services like cloud databases and a free [Graphistry Hub](https://hub.graphistry.com) visualization account, and launch. It does not have GPU ETL and GPU AI libraries.
+* **Minimal core**: The barebones dashboard server. In provides a StreamLit docker compose container with PyData ecosystem libraries and examples of visualizing data from various systems. Install it, plug in credentials to various web services like cloud databases and a free [Graphistry Hub](https://hub.graphistry.com) visualization account, and launch. It does not have GPU ETL and GPU AI libraries.
 
-* **Full core**: Initially for AWS, the full core bundles adds to the docker-compose system: Accounts, Jupyter notebooks for authoring, serves StreamLit dashboards with both public + private zones, and runs Graphistry/RAPIDS locally on the same server. Launch with on click via the Cloud Formation template.
+* **Full core**: Initially for AWS, the full core bundles adds to the docker compose system: Accounts, Jupyter notebooks for authoring, serves StreamLit dashboards with both public + private zones, and runs Graphistry/RAPIDS locally on the same server. Launch with on click via the Cloud Formation template.
 
 * **Full core + DB**: DB-specific variants are the same as minimal/full, and add simpler DB-specific quick launching/connecting.
 
@@ -36,7 +36,7 @@ This open source effort puts together patterns the Graphistry team has reused ac
 
 **Note**: Base image includes Nvidia RAPIDS and AI dependencies so is quite large, see CPU alternative for a lightweight alternativve
 
-**Note**: Use `sudo` for docker-compose commands if your configuration requires it and is giving permission error
+**Note**: Use `sudo` for docker compose commands if your configuration requires it and is giving permission error
 
 ```bash
 # Minimal core
@@ -44,18 +44,18 @@ git clone https://github.com/graphistry/graph-app-kit.git
 cd graph-app-kit/src/docker
 
 # Enable docker buildkit
-# ... or run docker-compose via provided alias script `./dc`
+# ... or run docker compose via provided alias script `./dc`
 export DOCKER_BUILDKIT=1
 export COMPOSE_DOCKER_CLI_BUILD=1
 
 # Build
-docker-compose build
+docker compose build
 
 # Optional: Edit src/docker/.env (API accounts), docker-compose.yml: Auth, ports, ...
 
 # Launch
-docker-compose up -d
-docker-compose logs -f -t --tail=100
+docker compose up -d
+docker compose logs -f -t --tail=100
 ```
 
 => `http://localhost:8501/`
@@ -65,7 +65,7 @@ To [add views](docs/views.md) and relaunch:
 ```bash
 # Add dashboards @ src/python/views/<your_custom_view>/__init__.py
 
-docker-compose up -d --force-recreate
+docker compose up -d --force-recreate
 ```
 
 ### Quick (Local code) - minimal CPU core + third-party connectors
@@ -102,14 +102,14 @@ sudo docker ps
 sudo docker logs -f -t --tail=1 MY_CONTAINER
 
 # restart a graphistry container
-cd graphistry && sudo docker-compose restart MY_CONTAINER
+cd graphistry && sudo docker compose restart MY_CONTAINER
 
 # restart caddy (Caddy 1 override)
-cd graphistry && sudo docker-compose -f docker-compose.gak.graphistry.yml up -d caddy
+cd graphistry && sudo docker compose -f docker-compose.gak.graphistry.yml up -d caddy
 
 # run streamlit
-cd graph-app-kit/public/graph-app-kit && docker-compose -p pub run -d --name streamlit-pub streamlit
-cd graph-app-kit/private/graph-app-kit && docker-compose -p priv run -d --name streamlit-priv streamlit
+cd graph-app-kit/public/graph-app-kit && docker compose -p pub run -d --name streamlit-pub streamlit
+cd graph-app-kit/private/graph-app-kit && docker compose -p priv run -d --name streamlit-priv streamlit
 ```
 
 **Minimal**: Open Streamlit, ssh to connect/add [free Graphistry Hub username/pass](https://www.graphistry.com/get-started):
@@ -140,7 +140,7 @@ VIEW_PATH="`pwd`/views" streamlit run entrypoint.py
 * [Graphistry](https://www.graphistry.com/get-started) point-and-click GPU-accelerated visual graph analytics
 * Data frames: Data wrangling via [Pandas](https://pandas.pydata.org/)and [Apache Arrow](https://arrow.apache.org/), including handling formats such as CSV, XLS, JSON, Parquet, and more
 
-* Standard Docker and docker-compose cross-platform deployment
+* Standard Docker and docker compose cross-platform deployment
 
 ### GPU acceleration (optional) - Full
 

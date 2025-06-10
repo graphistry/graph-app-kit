@@ -10,7 +10,7 @@ Not required but recommended, we recommend setting up Jupyter-based shared web a
 
 * Modify Python files in `src/python/views/[your dashboard]/__init__.py`, and in-tool, hit the `rerun` button that appears
 * Add new views by adding `views/[your dsahboard]/__init__.py` with methods `def info(): return {'name': 'x'}` and `def run(): None`
-* Add new dependencies: modify `src/python/requirements-app.txt` and rerun `docker-compose build` and restart
+* Add new dependencies: modify `src/python/requirements-app.txt` and rerun `docker compose build` and restart
 
 ## Toggle views
 

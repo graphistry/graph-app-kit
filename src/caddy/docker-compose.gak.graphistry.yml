@@ -1,4 +1,4 @@
-#Reuse graphistry's docker-compose setup.. except downgrade to caddy1 for auth support
+#Reuse graphistry's docker compose setup.. except downgrade to caddy1 for auth support
 #Start _after_ graphistry
 
 version: '3.5'

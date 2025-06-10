@@ -6,8 +6,8 @@ These instructions are for contributing to this repository. See main README.md f
 
 ```bash
 cd src/docker
-docker-compose build
-docker-compose up
+docker compose build
+docker compose up
 ```
 
 ## Test

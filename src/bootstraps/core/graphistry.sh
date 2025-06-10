@@ -58,11 +58,11 @@ echo '----- Finish pub vs. priv .env specialization'
 echo '----- Launching graph-app-kit as streamlit-pub/priv:8501'
 ( \
   cd "${GAK_PUBLIC}/src/docker" \
-  && sudo docker-compose -p pub run -d --name streamlit-pub streamlit \
+  && sudo docker compose -p pub run -d --name streamlit-pub streamlit \
 )
 ( \
   cd "${GAK_PRIVATE}/src/docker" \
-  && sudo docker-compose -p priv run -d --name streamlit-priv streamlit \
+  && sudo docker compose -p priv run -d --name streamlit-priv streamlit \
 )
 
 ./hello-end.sh "$SCRIPT"

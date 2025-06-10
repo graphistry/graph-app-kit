@@ -1,6 +1,6 @@
 # Configure graph-app-kit and add integrations
 
-Most settings can be configured by creating a custom Docker environment file `src/docker/.env` (see `src/envs/*.env` for options). You can also edit `docker-compose.yml` and `/etc/docker/daemon.json`, but we recommend sticking to `.env`.
+Most settings can be configured by creating a custom Docker environment file `src/docker/.env` (see `src/envs/*.env` for options). You can also edit `docker compose.yml` and `/etc/docker/daemon.json`, but we recommend sticking to `.env`.
 
 Integration settings that deal with external systems such as TLS, accounts, and notebooks require having launched them. If you are not integrating into existing ones, see the initial [setup section](setup.md) for how to quicklaunch a Graphistry server.
 
@@ -8,7 +8,7 @@ Integration settings that deal with external systems such as TLS, accounts, and 
 
 By default, `graph-app-kit` logging uses the Docker json file driver:
 
-* Inspect recent activities: `cd src/docker` and then `sudo docker-compose logs -f -t --tail=100`
+* Inspect recent activities: `cd src/docker` and then `sudo docker compose logs -f -t --tail=100`
 
 * Setup [alternative logging drivers](https://docs.docker.com/config/containers/logging/configure/)
 
@@ -24,7 +24,7 @@ By default, `graph-app-kit` logging uses the Docker json file driver:
 
 ## TLS with Cadddy
 
-* Auth: See [Caddy sample](src/caddy/Caddyfile) reverse proxy example for an authentication check against an account system, including the one shipping with your Graphistry server (requires `sudo docker-compose restart caddy` in your Graphistry server upon editing `/var/graphistry/data/config/Caddyfile`)
+* Auth: See [Caddy sample](src/caddy/Caddyfile) reverse proxy example for an authentication check against an account system, including the one shipping with your Graphistry server (requires `sudo docker compose restart caddy` in your Graphistry server upon editing `/var/graphistry/data/config/Caddyfile`)
 
 ## Public+Private views
 * To simulatenously run 1 public and 1 private instance, create two `graph-app-kit` clones `public_dash` and `private_dash`, and for `src/docker/.env`, set:

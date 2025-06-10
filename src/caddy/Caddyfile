@@ -8,7 +8,7 @@
 ###                                                                                      #
 ###   -- Relaunch:                                                                       #
 ###                                                                                      #
-###      docker-compose stop caddy && docker-compose up -d                               #
+###      docker compose stop caddy && docker compose up -d                               #
 ###                                                                                      #
 ##########################################################################################
 
