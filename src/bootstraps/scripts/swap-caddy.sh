@@ -5,7 +5,7 @@ set -ex
 ## ... So we stop Graphistry's Caddy 2  and put in a docker compose of its old
 
 CADDY_FILENAME=${CADDY_FILENAME:-full.Caddyfile}
-CADDY_COMPOSE_FILENAME=${CADDY_COMPOSE_FILENAME:-docker compose.gak.graphistry.yml}
+CADDY_COMPOSE_FILENAME=${CADDY_COMPOSE_FILENAME:-docker-compose.gak.graphistry.yml}
 
 SCRIPT="Swap Caddyfile"
 ./hello-start.sh "$SCRIPT"

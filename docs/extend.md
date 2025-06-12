@@ -1,6 +1,6 @@
 # Configure graph-app-kit and add integrations
 
-Most settings can be configured by creating a custom Docker environment file `src/docker/.env` (see `src/envs/*.env` for options). You can also edit `docker compose.yml` and `/etc/docker/daemon.json`, but we recommend sticking to `.env`.
+Most settings can be configured by creating a custom Docker environment file `src/docker/.env` (see `src/envs/*.env` for options). You can also edit `docker-compose.yml` and `/etc/docker/daemon.json`, but we recommend sticking to `.env`.
 
 Integration settings that deal with external systems such as TLS, accounts, and notebooks require having launched them. If you are not integrating into existing ones, see the initial [setup section](setup.md) for how to quicklaunch a Graphistry server.
 
