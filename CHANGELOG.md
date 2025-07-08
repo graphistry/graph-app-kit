@@ -21,6 +21,18 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+
+## [2.43.1 - 2025.07.07]
+
+### Infra 
+
+* updates to src/docker/Caddyfile to prevent rendering issues in Graphistry Enterprise
+
+### Fixes
+
+* added environment variable: GRAPHISTRY_PRIVACY_MODE - defaults to private if unset (default)
+
+
 ## [2.43.0 - 2025.06.06]
 
 ### Changed
