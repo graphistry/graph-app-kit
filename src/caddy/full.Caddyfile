@@ -1,15 +1,29 @@
 
 :80 {
 
-  proxy /public/dash http://streamlit-pub:8501/ {
+  proxy /public/dash http://streamlit-pub:8501 {
     websocket
     transparent
+    without /public/dash
   }
 
-  proxy /private/dash http://streamlit-priv:8501/ {
+  proxy /public/_stcore http://streamlit-pub:8501/_stcore {
+    transparent
+    without /public
+  }
+
+
+  proxy /private/dash http://streamlit-priv:8501 {
     websocket
     transparent
+    without /private/dash
   }
+
+  proxy /private/dash/_stcore http://streamlit-priv:8501/_stcore {
+    transparent
+    without /private/dash
+  }
+
 
   proxy / nginx:80 {
     websocket
