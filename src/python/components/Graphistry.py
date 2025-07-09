@@ -25,12 +25,12 @@ def set_graphistry_privacy_mode():
             graphistry.privacy(mode=privacy_mode)
             logger.debug(f"Graphistry privacy mode set to: '{privacy_mode}'")
         else:
-            logger.warning(f"Invalid GRAPHISTRY_DEFAULT_PRIVACY value: '{privacy_mode}'. Must be one of: {valid_privacy_modes}.
-            logger.warning('More info: https://pygraphistry.readthedocs.io/en/latest/demos/more_examples/graphistry_features/sharing_tutorial.html'
-            logger.warning('Will use default mode of private.")
+            logger.warning(f"Invalid GRAPHISTRY_DEFAULT_PRIVACY value: '{privacy_mode}'. Must be one of: {valid_privacy_modes}.")
+            logger.warning('More info: https://pygraphistry.readthedocs.io/en/latest/demos/more_examples/graphistry_features/sharing_tutorial.html')
+            logger.warning('Will use default mode of private.')
     else:
         logger.info(f"GRAPHISTRY_DEFAULT_PRIVACY not set. Defaulting to privacy mode private for visualization.")
-        graphistry.privacy(mode=private)
+        graphistry.privacy(mode="private")
 
 class GraphistrySt:
     def __init__(self, overrides={}):
