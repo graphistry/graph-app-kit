@@ -29,7 +29,6 @@ echo
 ./prepopulate-notebooks.sh graph-app-kit/public views ubuntu
 ./prepopulate-notebooks.sh graph-app-kit/private views ubuntu
 ./graphistry-wait-healthy.sh
-./swap-caddy.sh
 source ./graphistry-service-account.sh
 echo "Got SERVICE_USER ${SERVICE_USER}, SERVICE_PASS"
 
