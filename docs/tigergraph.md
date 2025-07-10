@@ -43,7 +43,7 @@ TIGERGRAPH_GRAPHNAME=AntiFraud
 TIGERGRAPH_SECRET=mysecret
 ```
 
-3. Restart your Streamlit container with the new creds: `cd src/docker && sudo docker-compose up -d --force-recreate`
+3. Restart your Streamlit container with the new creds: `cd src/docker && sudo docker compose up -d --force-recreate`
 
 ## Explore
 

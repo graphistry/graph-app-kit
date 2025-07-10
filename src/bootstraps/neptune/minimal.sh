@@ -49,7 +49,7 @@ echo '===== Configuring graph-app-kit with Graphistry account and Neptune ====='
 echo '----- Launching graph-app-kit as streamlit-pub:8501'
 ( \
   cd "${GAK_PUBLIC}/src/docker" \
-  && sudo /usr/local/bin/docker-compose up -d streamlit \
+  && sudo /usr/local/bin/docker compose up -d streamlit \
 )
 
 ./hello-end.sh "$SCRIPT"

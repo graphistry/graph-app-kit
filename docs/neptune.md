@@ -112,11 +112,11 @@ Launch using a button at the bottom of the [identity graph sample cloud formatio
 * **Streamlit: Public dashboards**
   * **http://[the.public.ip.address]/public/dash**
   * Installed at `/home/ubuntu/graph-app-kit/public/graph-app-kit`
-  * Run as `src/docker $ docker-compose -p pub run -d --name streamlit-pub streamlit`
+  * Run as `src/docker $ docker compose -p pub run -d --name streamlit-pub streamlit`
 * **Streamlit: Private dashboards**
   * **http://[the.public.ip.address]/private/dash**
   * Installed at `/home/ubuntu/graph-app-kit/private/graph-app-kit`
-  * Run as `src/docker $ docker-compose -p priv run -d --name streamlit-priv streamlit`
+  * Run as `src/docker $ docker compose -p priv run -d --name streamlit-priv streamlit`
 * **Jupyter: Data science notebooks + Streamlit dashboard live-editing**
   * **http://[the.public.ip.address]/notebook**
   * Live-edit `graph-app-kit` view folders `notebook/graph-app-kit/[public,private]/views`
@@ -126,7 +126,7 @@ Launch using a button at the bottom of the [identity graph sample cloud formatio
 * **Streamlit: Public dashboards**
   * **http://[the.public.ip.address]/public/dash**
   * Installed at `/home/ubuntu/graph-app-kit/public/graph-app-kit`
-  * Run as `src/docker $ docker-compose up -d streamlit`
+  * Run as `src/docker $ docker compose up -d streamlit`
 
 ## 4. Next steps
 

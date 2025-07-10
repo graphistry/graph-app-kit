@@ -40,11 +40,11 @@ Reset and restart your `graph-app-kit` container:
 
 ```bash
 cd src/docker
-sudo docker-compose down -v
-sudo docker-compose up -d
+sudo docker compose down -v
+sudo docker compose up -d
 ```
 
-Watch logs with `sudo docker-compose logs -f -t --tail=1`
+Watch logs with `sudo docker compose logs -f -t --tail=1`
 
 Access your Streamlit instance at http://the.public.ip.address:8501
 

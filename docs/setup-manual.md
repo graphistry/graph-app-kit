@@ -10,7 +10,7 @@ For quick launchers, see the [AWS quick launch setup guide](setup.md).
 
 * Ubuntu 18.04 LTS is the most common choice for containerized GPU computing
 
-* Install docker-ce and docker-compose
+* Install docker-ce and docker compose
 
 * Optional:
    * GPU: If you have a [RAPIDS.ai](https://www.rapids.ai)-compatible GPU (see below), install the Nvidia docker runtime and set it as the default for Docker daemons
@@ -57,9 +57,9 @@ GRAPHISTRY_PASSWORD=your_password
 
 `cd src/docker` and then:
 
-* Start: `sudo docker-compose up -d`
+* Start: `sudo docker compose up -d`
 * Use: Go to `http://localhost:8501/dashboard` (or whatever the public IP)
-* Stop: `sudo docker-compose down -v`
+* Stop: `sudo docker compose down -v`
 
 ## Graph!
 

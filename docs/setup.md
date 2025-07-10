@@ -85,11 +85,11 @@ Go to your public Streamlit dashboard and start exploring: http://[the.public.ip
 * **Streamlit: Public dashboards**
   * **http://[the.public.ip.address]/public/dash**
   * Installed at `/home/ubuntu/graph-app-kit/public/graph-app-kit`
-  * Run as `src/docker $ docker-compose -p pub run -d --name streamlit-pub streamlit`
+  * Run as `src/docker $ docker compose -p pub run -d --name streamlit-pub streamlit`
 * **Streamlit: Private dashboards**
   * **http://[the.public.ip.address]/private/dash**
   * Installed at `/home/ubuntu/graph-app-kit/private/graph-app-kit`
-  * Run as `src/docker $ docker-compose -p priv run -d --name streamlit-priv streamlit`
+  * Run as `src/docker $ docker compose -p priv run -d --name streamlit-priv streamlit`
 * **Jupyter: Data science notebooks + Streamlit dashboard live-editing**
   * **http://[the.public.ip.address]/notebook**
   * Live-edit `graph-app-kit` view folders `notebook/graph-app-kit/[public,private]/views`
@@ -99,7 +99,7 @@ Go to your public Streamlit dashboard and start exploring: http://[the.public.ip
 * **Streamlit: Public dashboards**
   * **http://[the.public.ip.address]/public/dash**
   * Installed at `/home/ubuntu/graph-app-kit/public/graph-app-kit`
-  * Run as `src/docker $ docker-compose up -d streamlit`
+  * Run as `src/docker $ docker compose up -d streamlit`
 
 ## 4. Optional - administer
 
@@ -127,19 +127,19 @@ For more advanced Graphistry administration, so the [Graphistry admin docs repo]
 
 ```bash
 # restart a graphistry container
-cd graphistry && sudo docker-compose restart MY_CONTAINER  # do *not* run it's caddy (v2)
+cd graphistry && sudo docker compose restart MY_CONTAINER  # do *not* run it's caddy (v2)
 
 # restart caddy (Caddy 1 override over Graphistry's Caddy 2)
-cd graphistry && sudo docker-compose -f docker-compose.gak.graphistry.yml up -d caddy
+cd graphistry && sudo docker compose -f docker-compose.gak.graphistry.yml up -d caddy
 ```
 
 ### Streamlit
 
-Use `docker-compose` project names (`-p the_name`) to distinguish your public vs private dashboards:
+Use `docker compose` project names (`-p the_name`) to distinguish your public vs private dashboards:
 
 ```bash
-cd graph-app-kit/public/graph-app-kit && docker-compose -p pub run -d --name streamlit-pub streamlit
-cd graph-app-kit/private/graph-app-kit && docker-compose -p priv run -d --name streamlit-priv streamlit
+cd graph-app-kit/public/graph-app-kit && docker compose -p pub run -d --name streamlit-pub streamlit
+cd graph-app-kit/private/graph-app-kit && docker compose -p priv run -d --name streamlit-priv streamlit
 ```
 
 ## 5. Next steps

@@ -14,7 +14,7 @@ networks:
     name: grph_net
 
 #-----------------------------------------------------------
-# Ex: Reuse network from another docker-compose
+# Ex: Reuse network from another docker compose
 #-----------------------------------------------------------
 #networks:
 #  grph_net:
