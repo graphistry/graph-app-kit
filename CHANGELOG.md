@@ -22,6 +22,25 @@ Extensions:
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
 
+## [2.43.6 - 2025.08.21]
+
+### Infra
+
+* Added dual CUDA build support in CI/CD pipeline
+* Modified `.github/workflows/dockerhubpublish.yml` to use matrix strategy for CUDA versions ['12.8', '11.8']
+* Docker images now automatically built and tagged with CUDA version suffix for both versions
+  - Example: `graphistry/graph-app-kit-st:v2.43.6-12.8` and `graphistry/graph-app-kit-st:v2.43.6-11.8`
+* Build process uses `GRAPHISTRY_FORGE_BASE_VERSION` environment variable override from parent Graphistry CI/CD
+* Local development defaults to CUDA 12.8 with ability to override via environment variables
+
+### Notes
+
+* Enterprise customers can choose appropriate CUDA version based on their GPU hardware
+  - CUDA 11.8: Legacy GPU support (V100, RTX series)
+  - CUDA 12.8: Latest GPU features (H100, Blackwell)
+* No breaking changes - existing deployments continue with CUDA 12.8 default
+
+
 ## [2.43.1 - 2025.07.07]
 
 ### Infra 
