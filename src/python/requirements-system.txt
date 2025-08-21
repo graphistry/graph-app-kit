@@ -1,5 +1,5 @@
-graphistry==0.33.8
-streamlit==1.25.0
+streamlit==1.38.0
+protobuf==5.29.3
 
 ################
 #

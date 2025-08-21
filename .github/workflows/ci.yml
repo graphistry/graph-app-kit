@@ -60,11 +60,19 @@ jobs:
     strategy:
       matrix:
         flavor: [ 'dc', 'dc.cpu' ]
+        CUDA_SHORT_VERSION: ['12.8', '11.8']
 
     steps:
 
     - name: Checkout repo
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: get most recent tag
+      run: |
+        echo "RELEASE_VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+        echo "CUDA_SHORT_VERSION=${{ matrix.CUDA_SHORT_VERSION }}" >> $GITHUB_ENV
 
     - name: Free Disk Space
       env:
@@ -216,5 +224,6 @@ jobs:
       env:
           COMPOSE_DOCKER_CLI_BUILD: 1
           DOCKER_BUILDKIT: 1
+          GRAPHISTRY_FORGE_BASE_VERSION: v${{ env.RELEASE_VERSION }}-${{ env.CUDA_SHORT_VERSION }}
       run: |
         cd src/docker && ./${{ matrix.flavor }} build
