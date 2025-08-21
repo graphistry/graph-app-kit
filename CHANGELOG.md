@@ -32,6 +32,7 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
   - Example: `graphistry/graph-app-kit-st:v2.43.6-12.8` and `graphistry/graph-app-kit-st:v2.43.6-11.8`
 * Build process uses `GRAPHISTRY_FORGE_BASE_VERSION` environment variable override from parent Graphistry CI/CD
 * Local development defaults to CUDA 12.8 with ability to override via environment variables
+* Updated CI Python test matrix from [3.7, 3.8, 3.9] to [3.8, 3.9, 3.10] for Ubuntu 24.04 compatibility
 
 ### Notes
 
