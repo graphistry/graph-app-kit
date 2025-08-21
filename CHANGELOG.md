@@ -38,7 +38,7 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 
 * Fix graph-app-kit dependency conflicts by upgrading streamlit to 1.38.0 (protobuf 5.x support) and removing duplicate graphistry requirement already provided by base image
 * Fix conda environment name from "rapids" to "base" for RAPIDS 25.02 compatibility
-* Update graph-app-kit CI test-docker job to use dynamic base image versioning with dual CUDA support (11.8/12.8) matching the publish workflow
+* Update graph-app-kit CI test-docker job to use dynamic base image versioning matching the publish workflow
 
 ### Notes
 
