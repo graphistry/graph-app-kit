@@ -26,7 +26,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [ 3.7, 3.8, 3.9 ]
+        python-version: [ "3.8", "3.9", "3.10" ]
 
     steps:
 
@@ -65,6 +65,12 @@ jobs:
 
     - name: Checkout repo
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: get most recent tag
+      run: |
+        echo "RELEASE_VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
 
     - name: Free Disk Space
       env:
@@ -216,5 +222,6 @@ jobs:
       env:
           COMPOSE_DOCKER_CLI_BUILD: 1
           DOCKER_BUILDKIT: 1
+          GRAPHISTRY_FORGE_BASE_VERSION: v${{ env.RELEASE_VERSION }}-12.8
       run: |
         cd src/docker && ./${{ matrix.flavor }} build

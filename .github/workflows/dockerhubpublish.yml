@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest-4-cores
     strategy:
       matrix:
-        CUDA_SHORT_VERSION: ['12.8']
+        CUDA_SHORT_VERSION: ['12.8', '11.8']
       fail-fast: true
 
 

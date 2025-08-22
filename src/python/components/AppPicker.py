@@ -93,12 +93,12 @@ class AppPicker:
 
     # () -> ? str
     def get_maybe_active_view_id(self, query_params):
-        maybe_default_view_id = query_params[self.VIEW_APP_ID_VAR][0] if self.VIEW_APP_ID_VAR in query_params else None
+        maybe_default_view_id = query_params[self.VIEW_APP_ID_VAR] if self.VIEW_APP_ID_VAR in query_params else None
         return maybe_default_view_id
 
     # () -> ? { 'name': str, 'id': str, 'module': Module }
     def get_and_set_active_app(self):
-        query_params = st.experimental_get_query_params()
+        query_params = st.query_params.to_dict()
         maybe_default_view_id = self.get_maybe_active_view_id(query_params)
         logger.debug("url view id: %s", maybe_default_view_id)
 
@@ -114,15 +114,26 @@ class AppPicker:
                 view = modules_by_id[view_id]
             else:
                 sorted_mods = sorted(modules_by_id.values(), key=lambda nfo: nfo["index"])
+                options = [nfo["id"] for nfo in sorted_mods]
+
+                # Ensure the maybe_default_view_id exists in modules_by_id, otherwise default to 0
+                default_index = 0
+                if maybe_default_view_id is not None and maybe_default_view_id in modules_by_id:
+                    default_index = modules_by_id[maybe_default_view_id]["index"]
+
+                logger.debug("AppPicker: options=%s, maybe_default_view_id=%s, default_index=%s",
+                            options, maybe_default_view_id, default_index)
                 view_id = st.sidebar.selectbox(
                     "",
-                    [nfo["id"] for nfo in sorted_mods],
-                    index=0 if maybe_default_view_id is None else modules_by_id[maybe_default_view_id]["index"],
-                    format_func=(lambda id: modules_by_id[id]["name"].upper()),
+                    options,
+                    index=default_index,
+                    format_func=(lambda id: modules_by_id[id]["name"].upper())
                 )
                 view = modules_by_id[view_id]
-                query_params[self.VIEW_APP_ID_VAR] = view_id
-                st.experimental_set_query_params(**query_params)
+                # Only update query params if the view has actually changed
+                if query_params.get(self.VIEW_APP_ID_VAR) != view_id:
+                    query_params[self.VIEW_APP_ID_VAR] = view_id
+                    st.query_params.from_dict(query_params)
 
         return view
 

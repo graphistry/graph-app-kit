@@ -22,6 +22,37 @@ Extensions:
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
 
+## [2.43.6 - 2025.08.21]
+
+### Infra
+
+* Added dual CUDA build support in CI/CD pipeline
+* Modified `.github/workflows/dockerhubpublish.yml` to use matrix strategy for CUDA versions ['12.8', '11.8']
+* Docker images now automatically built and tagged with CUDA version suffix for both versions
+  - Example: `graphistry/graph-app-kit-st:v2.43.6-12.8` and `graphistry/graph-app-kit-st:v2.43.6-11.8`
+* Build process uses `GRAPHISTRY_FORGE_BASE_VERSION` environment variable override from parent Graphistry CI/CD
+* Local development defaults to CUDA 12.8 with ability to override via environment variables
+* Updated CI Python test matrix from [3.7, 3.8, 3.9] to [3.8, 3.9, 3.10] for Ubuntu 24.04 compatibility
+
+### Fixes
+
+* Fix graph-app-kit dependency conflicts by upgrading streamlit to 1.38.0 (protobuf 5.x support) and removing duplicate graphistry requirement already provided by base image
+* Fix conda environment name from "rapids" to "base" for RAPIDS 25.02 compatibility
+* Update graph-app-kit CI test-docker job to use dynamic base image versioning matching the publish workflow
+* Replace deprecated streamlit experimental query params API (st.experimental_get_query_params/st.experimental_set_query_params) with new st.query_params API and fix data structure compatibility issues
+* Fix Neptune demo connection errors by adding proper null checking for gremlin_helper.connect_to_neptune() return values
+* Update FunCoup bio demo to use FC6.0 data source with new URL structure and column mapping for compatibility
+* Add data size limiting (50k edges max) and 502 Bad Gateway error handling for large datasets in bio demos
+* Fix dropdown selection issues in AppPicker by removing unnecessary query parameter updates and widget keys
+
+### Notes
+
+* Enterprise customers can choose appropriate CUDA version based on their GPU hardware
+  - CUDA 11.8: Legacy GPU support (V100, RTX series)
+  - CUDA 12.8: Latest GPU features (H100, Blackwell)
+* No breaking changes - existing deployments continue with CUDA 12.8 default
+
+
 ## [2.43.1 - 2025.07.07]
 
 ### Infra 

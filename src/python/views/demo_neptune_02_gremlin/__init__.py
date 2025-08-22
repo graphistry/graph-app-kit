@@ -192,7 +192,11 @@ def path_to_df(p):
 @st.cache_data
 def run_filters(num_edges, state, city):
     global metrics
-    g, conn = gremlin_helper.connect_to_neptune()
+    result = gremlin_helper.connect_to_neptune()
+    if result is None:
+        st.error("Neptune connection not configured. Please set NEPTUNE_READER_HOST, NEPTUNE_READER_PORT, and NEPTUNE_READER_PROTOCOL environment variables.")
+        return {'nodes_df': None, 'edges_df': None, 'url': None}
+    g, conn = result
 
     logger.info('Querying neptune')
     tic = time.perf_counter()
