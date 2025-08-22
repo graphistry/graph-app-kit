@@ -136,7 +136,7 @@ def sidebar_area(cluster_id, general_probability, cluster_select_values):
     )
 
     # Query parameters from a shared URL
-    query_params: Dict[str, Any] = st.experimental_get_query_params()
+    query_params: Dict[str, Any] = st.query_params.to_dict()
 
     # Finally, set any query params that have changed
     logger.debug(f"Almost final query_params: {query_params}\n")
@@ -151,7 +151,7 @@ def sidebar_area(cluster_id, general_probability, cluster_select_values):
         query_params.pop("general_probability")
 
     logger.debug(f"Final query_params: {query_params}\n")
-    st.experimental_set_query_params(**query_params)
+    st.query_params.from_dict(query_params)
 
     return {
         "cluster_id": cluster_id,
@@ -259,7 +259,7 @@ def run_all():
             splunk_client: Union[SplunkConnection, Any] = cache_splunk_client(splunk_username, splunk_password, splunk_host)
 
             # Query parameters from a shared URL
-            query_params: Dict[str, Any] = st.experimental_get_query_params()
+            query_params: Dict[str, Any] = st.query_params.to_dict()
 
             # Log what we got
             logger.debug(f"Initial query_params: {query_params}\n")

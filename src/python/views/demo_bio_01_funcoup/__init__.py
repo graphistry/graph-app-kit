@@ -94,7 +94,13 @@ def sidebar_area():
         False: 'FunCoup',
     }
     
-    filter_by_umap_type_init = urlParams.get_field('filter_by_umap', default='FunCoup')
+    filter_by_umap_type_init = urlParams.get_field('filter_by_umap', default=False)
+    # Handle both boolean and string values for backwards compatibility
+    if isinstance(filter_by_umap_type_init, str):
+        if filter_by_umap_type_init == 'UMAP':
+            filter_by_umap_type_init = True
+        else:  # 'FunCoup' or any other string
+            filter_by_umap_type_init = False
     filter_by_umap_type = \
         st.sidebar.selectbox(
             'Display functional coupling network (select link evidence below) or UMAP against all 40 evidence types:',
@@ -109,19 +115,43 @@ def sidebar_area():
         filter_by_net_type = 'compact'
 
     st.sidebar.title("Select an Evidence Type")
-    edge_to_label = {'PFC':'PFC', 'FBS_max':'FBS_max'}
+    edge_to_label = {'PPV':'PPV', 'FBS_max':'FBS_max'}
 
-    filter_by_node_type_init = urlParams.get_field('filter_by_node', default='PFC')
+    filter_by_node_type_init = urlParams.get_field('filter_by_node', default='PPV')
+    # Handle backwards compatibility for old PFC parameter
+    if filter_by_node_type_init == 'PFC':
+        filter_by_node_type_init = 'PPV'
     filter_by_node_type = \
         st.sidebar.selectbox(
             'for FunCoup Network display',
-            ('PFC', 'FBS_max'),
-            index=('PFC', 'FBS_max').index(filter_by_node_type_init),
+            ('PPV', 'FBS_max'),
+            index=('PPV', 'FBS_max').index(filter_by_node_type_init),
             format_func=(lambda option: edge_to_label[option]))
     urlParams.set_field('filter_by_node', filter_by_node_type)
 
     
-    edges_df = pd.read_csv('https://funcoup.org/downloads/download.action?type=network&instanceID=24480085&fileName=FC5.0_'+filter_by_org_type+'_'+filter_by_net_type+'.gz', sep='\t')
+    try:
+        # Updated to use FC6.0 with new URL structure
+        url = f'https://funcoup.org/download/network&FC6.0_{filter_by_org_type}_{filter_by_net_type}.gz'
+        logger.info("Attempting to load data from: %s", url)
+        edges_df = pd.read_csv(url, sep='\t')
+    except Exception as e:
+        logger.error("Failed to load data from funcoup.org: %s", e)
+        # Try fallback to old FC5.0 URL structure
+        try:
+            old_url = f'https://funcoup.org/downloads/download.action?type=network&instanceID=24480085&fileName=FC5.0_{filter_by_org_type}_{filter_by_net_type}.gz'
+            logger.info("Trying fallback URL: %s", old_url)
+            edges_df = pd.read_csv(old_url, sep='\t')
+        except Exception as e2:
+            logger.error("Fallback URL also failed: %s", e2)
+            # Create a minimal demo dataset as fallback with proper column structure
+            edges_df = pd.DataFrame({
+                'Gene1': ['GeneA', 'GeneB', 'GeneC'],
+                'Gene2': ['GeneB', 'GeneC', 'GeneD'],
+                'PPV': [0.8, 0.9, 0.7],
+                'FBS_max': [0.6, 0.8, 0.5]
+            })
+            st.sidebar.warning("⚠️ External data source unavailable. Using demo dataset.")
 
     return {
         'edges_df': edges_df,
@@ -143,7 +173,30 @@ def run_filters(edges_df, node_type, umap_type=False):
 
     filtered_edges_df = edges_df
     # filtered_edges_df = filtered_edges_df.replace({'ENSG00000':''},regex=True)
-    filtered_edges_df.columns=filtered_edges_df.columns.str.split(':').str[1]
+
+    # Process column names - handle FC6.0 format (with ':') and fallback format (without ':')
+    new_columns = []
+    for col in filtered_edges_df.columns:
+        if ':' in str(col):
+            new_col = str(col).split(':')[1]
+        else:
+            new_col = str(col)
+        new_columns.append(new_col)
+
+    filtered_edges_df.columns = new_columns
+    # Map FC6.0 columns to expected names for backward compatibility
+    if 'ProteinA' in filtered_edges_df.columns and 'ProteinB' in filtered_edges_df.columns:
+        filtered_edges_df = filtered_edges_df.rename(columns={
+            'ProteinA': 'Gene1',
+            'ProteinB': 'Gene2'
+        })
+
+    # Limit dataset size to prevent 502 errors
+    MAX_EDGES = 50000  # Reasonable limit for Graphistry upload
+    if len(filtered_edges_df) > MAX_EDGES:
+        logger.warning("Dataset too large (%d edges), sampling to %d edges", len(filtered_edges_df), MAX_EDGES)
+        filtered_edges_df = filtered_edges_df.sample(n=MAX_EDGES, random_state=42)
+        st.sidebar.warning(f"⚠️ Dataset too large ({len(filtered_edges_df)} edges), showing random sample of {MAX_EDGES} edges.")
 
     # include viz generation as part of cache
     url = plot_url(filtered_edges_df,node_type,umap_type)
@@ -178,30 +231,45 @@ def plot_url(edges_df,node_type, umap_type=False):
         return ''
     
     if umap_type == False:
-        url = graphistry\
-                .edges(edges_df)\
-                .bind(source="Gene1", destination="Gene2", edge_weight=node_type)\
-                .nodes(nodes_df)\
-                .bind(node='n', point_color='nc')\
-                .settings(url_params={
-                    'pointSize': 0.3,
-                    'splashAfter': 'false',
-                    'bg': '%23' + 'f0f2f6'
-                })\
-                .plot(render=False)#, as_files=True, suffix='.html', output=None, open=False)
+        try:
+            url = graphistry\
+                    .edges(edges_df)\
+                    .bind(source="Gene1", destination="Gene2", edge_weight=node_type)\
+                    .nodes(nodes_df)\
+                    .bind(node='n', point_color='nc')\
+                    .settings(url_params={
+                        'pointSize': 0.3,
+                        'splashAfter': 'false',
+                        'bg': '%23' + 'f0f2f6'
+                    })\
+                    .plot(render=False)#, as_files=True, suffix='.html', output=None, open=False)
+        except Exception as e:
+            if "502" in str(e) or "Bad Gateway" in str(e):
+                logger.error("502 Bad Gateway error - dataset might be too large: %s", e)
+                st.error("Dataset is too large for visualization. Please try a smaller organism or contact administrator.")
+                return ''
+            else:
+                raise e
     elif umap_type == True:
-        
-        AA = graphistry\
-                .nodes(edges_df)\
-                .bind(source="Gene1", destination="Gene2")\
-                .settings(url_params={
-                    'pointSize': 0.3,
-                    'splashAfter': 'false',
-                    'bg': '%23' + 'f0f2f6'
-                })\
-                .umap(feature_engine='dirty_cat',engine='umap_learn',memoize=True)
-        emb2=AA._node_embedding
-        url=graphistry.nodes(emb2.reset_index(),'index').edges(AA._edges,'_src_implicit','_dst_implicit').bind(point_x="x",point_y="y").settings(url_params={"play":0}).addStyle(bg={'color': '#eee'}).plot(render=False)
+        try:
+            AA = graphistry\
+                    .nodes(edges_df)\
+                    .bind(source="Gene1", destination="Gene2")\
+                    .settings(url_params={
+                        'pointSize': 0.3,
+                        'splashAfter': 'false',
+                        'bg': '%23' + 'f0f2f6'
+                    })\
+                    .umap(feature_engine='dirty_cat',engine='umap_learn',memoize=True)
+            emb2=AA._node_embedding
+            url=graphistry.nodes(emb2.reset_index(),'index').edges(AA._edges,'_src_implicit','_dst_implicit').bind(point_x="x",point_y="y").settings(url_params={"play":0}).addStyle(bg={'color': '#eee'}).plot(render=False)
+        except Exception as e:
+            if "502" in str(e) or "Bad Gateway" in str(e):
+                logger.error("502 Bad Gateway error - dataset might be too large for UMAP: %s", e)
+                st.error("Dataset is too large for UMAP visualization. Please try a smaller organism or contact administrator.")
+                return ''
+            else:
+                raise e
 
     logger.info('Generated viz, got back urL: %s', url)
 

@@ -39,6 +39,11 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 * Fix graph-app-kit dependency conflicts by upgrading streamlit to 1.38.0 (protobuf 5.x support) and removing duplicate graphistry requirement already provided by base image
 * Fix conda environment name from "rapids" to "base" for RAPIDS 25.02 compatibility
 * Update graph-app-kit CI test-docker job to use dynamic base image versioning matching the publish workflow
+* Replace deprecated streamlit experimental query params API (st.experimental_get_query_params/st.experimental_set_query_params) with new st.query_params API and fix data structure compatibility issues
+* Fix Neptune demo connection errors by adding proper null checking for gremlin_helper.connect_to_neptune() return values
+* Update FunCoup bio demo to use FC6.0 data source with new URL structure and column mapping for compatibility
+* Add data size limiting (50k edges max) and 502 Bad Gateway error handling for large datasets in bio demos
+* Fix dropdown selection issues in AppPicker by removing unnecessary query parameter updates and widget keys
 
 ### Notes
 
