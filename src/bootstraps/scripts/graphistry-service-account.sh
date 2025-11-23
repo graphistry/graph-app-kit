@@ -26,7 +26,7 @@ POST_SCRIPT="CELERY_BROKER_URL=zz python manage.py shell && echo done || { echo 
     cd "${GRAPHISTRY_HOME}" \
     && docker-compose exec -T nexus \
         bash -c \
-          "source activate rapids && echo \"${ADD_USER_SCRIPT}; ${VERIFY_USER_SCRIPT}\" | ${POST_SCRIPT}" \
+          "source activate base && echo \"${ADD_USER_SCRIPT}; ${VERIFY_USER_SCRIPT}\" | ${POST_SCRIPT}" \
 )
 
 ./hello-end.sh "$SCRIPT"
