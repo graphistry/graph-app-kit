@@ -21,6 +21,17 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+## [2.50.0 - 2025.11.25]
+
+### Infra
+
+* Upgrade to CUDA 13.0 base images (v2.50.0-13.0): Use RAPIDS 25.10 (from 25.02)
+* Update CI/CD to build CUDA 13.0 (from 12.8) and 12.9 (from 11.8) versions
+* Change conda environment activation from rapids to base
+
+### Fixes
+
+* Fix AttributeError when LOG_LEVEL=TRACE by mapping unsupported log levels to DEBUG
 
 ## [2.43.6 - 2025.08.21]
 
