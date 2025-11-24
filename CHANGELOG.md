@@ -21,6 +21,16 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+### Infra
+
+* Add configurable `cuda_versions` input parameter to DockerHub publish workflow for flexible CI builds
+* CUDA versions can now be passed as a JSON array (e.g., `'["12.8", "11.8"]'`) when triggering workflow manually or from other workflows
+
+### Fixes
+
+* Change conda environment activation from `rapids` to `base` for compatibility with newer RAPIDS versions
+* Fix `AttributeError` when `LOG_LEVEL=TRACE` by mapping unsupported log levels (TRACE, VERBOSE) to DEBUG with stderr warning
+
 
 ## [2.43.6 - 2025.08.21]
 
