@@ -41,5 +41,5 @@ if [ -v ST_LOG_LEVEL ]; then
     PASS_LOG_LEVEL="--logger.level=${ST_LOG_LEVEL}"
 fi
 
-{ source activate rapids || echo ok ; } \
+{ source activate base || echo ok ; } \
     && echo "pwd: `pwd`" && find . && streamlit run "$@" "${PASS_LOG_LEVEL}"
