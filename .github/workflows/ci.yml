@@ -229,6 +229,6 @@ jobs:
       env:
           COMPOSE_DOCKER_CLI_BUILD: 1
           DOCKER_BUILDKIT: 1
-          GRAPHISTRY_FORGE_BASE_VERSION: v${{ env.RELEASE_VERSION }}-12.8
+          GRAPHISTRY_FORGE_BASE_VERSION: v${{ env.RELEASE_VERSION }}-13.0
       run: |
         cd src/docker && ./${{ matrix.flavor }} build
