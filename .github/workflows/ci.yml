@@ -68,9 +68,16 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: get most recent tag
+    - name: get base version from repo defaults
       run: |
-        echo "RELEASE_VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+        # Read default version from Dockerfile (e.g., v2.43.0-12.8 -> 2.43)
+        DEFAULT_VERSION=$(sed -n 's/.*GRAPHISTRY_FORGE_BASE_VERSION=v\([0-9]*\.[0-9]*\).*/\1/p' src/docker/Dockerfile | head -1)
+
+        # Find latest tag for that major.minor
+        LATEST_TAG=$(git tag -l "${DEFAULT_VERSION}.*" --sort=-v:refname | head -1)
+
+        echo "RELEASE_VERSION=${LATEST_TAG}" >> $GITHUB_ENV
+        echo "Using base image: v${LATEST_TAG}-12.8"
 
     - name: Free Disk Space
       env:
