@@ -70,14 +70,14 @@ jobs:
 
     - name: get base version from repo defaults
       run: |
-        # Read default version from Dockerfile (e.g., v2.43.0-12.8 -> 2.43)
+        # Read default version from Dockerfile (e.g., v2.50.0-13 -> 2.50)
         DEFAULT_VERSION=$(sed -n 's/.*GRAPHISTRY_FORGE_BASE_VERSION=v\([0-9]*\.[0-9]*\).*/\1/p' src/docker/Dockerfile | head -1)
 
         # Find latest tag for that major.minor
         LATEST_TAG=$(git tag -l "${DEFAULT_VERSION}.*" --sort=-v:refname | head -1)
 
         echo "RELEASE_VERSION=${LATEST_TAG}" >> $GITHUB_ENV
-        echo "Using base image: v${LATEST_TAG}-12.8"
+        echo "Using base image: v${LATEST_TAG}-13"
 
     - name: Free Disk Space
       env:
@@ -229,6 +229,6 @@ jobs:
       env:
           COMPOSE_DOCKER_CLI_BUILD: 1
           DOCKER_BUILDKIT: 1
-          GRAPHISTRY_FORGE_BASE_VERSION: v${{ env.RELEASE_VERSION }}-12.8
+          GRAPHISTRY_FORGE_BASE_VERSION: v${{ env.RELEASE_VERSION }}-13
       run: |
         cd src/docker && ./${{ matrix.flavor }} build
