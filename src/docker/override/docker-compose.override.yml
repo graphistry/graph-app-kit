@@ -54,7 +54,7 @@ services:
       args:
         - DOCKER_TAG=${DOCKER_TAG:-latest}
         - BUILDKIT_INLINE_CACHE=1
-        - GRAPHISTRY_FORGE_BASE_VERSION=${GRAPHISTRY_FORGE_BASE_VERSION:-v2.50.0-13.0}
+        - GRAPHISTRY_FORGE_BASE_VERSION=${GRAPHISTRY_FORGE_BASE_VERSION:-v2.50.0-13}
       context: ..
       dockerfile: ./docker/Dockerfile
       cache_from:
