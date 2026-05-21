@@ -1,5 +1,4 @@
-streamlit==1.38.0
-protobuf==5.29.3
+streamlit==1.57.0
 
 ################
 #
