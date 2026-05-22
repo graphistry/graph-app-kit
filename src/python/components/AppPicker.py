@@ -124,10 +124,11 @@ class AppPicker:
                 logger.debug("AppPicker: options=%s, maybe_default_view_id=%s, default_index=%s",
                             options, maybe_default_view_id, default_index)
                 view_id = st.sidebar.selectbox(
-                    "",
+                    "Select view",
                     options,
                     index=default_index,
-                    format_func=(lambda id: modules_by_id[id]["name"].upper())
+                    format_func=(lambda id: modules_by_id[id]["name"].upper()),
+                    label_visibility="collapsed",
                 )
                 view = modules_by_id[view_id]
                 # Only update query params if the view has actually changed
