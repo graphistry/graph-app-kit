@@ -92,7 +92,7 @@ To test template changes before merge, upload your branch's template by hand to 
    * Required reviewers must include at least two people. With self-review blocked, the person who merges or dispatches cannot approve their own run.
 2. **Close the path to master that skips review** (Settings → Actions → General → Workflow permissions):
    * **Uncheck** "Allow GitHub Actions to create and approve pull requests". Otherwise any writer's workflow can approve their own PR with `GITHUB_TOKEN` and merge to master without human review, which defeats the master-only gate. Consider also enabling "Require approval of the most recent reviewable push" and "Do not allow bypassing the above settings" on master.
-   * Any token stored as a repo-level secret can be read by a workflow on any branch. Check the other repo secrets, `GRAPHISTRY_GHA_CI_BUILD_GAK` and `GRAPHISTRY_GHA_CI_GAK`, which no workflow in this repo references. If either can approve or merge PRs here, or has other write access, delete it or move it to a protected environment.
+   * Any token stored as a repo-level secret can be read by a workflow on any branch. Delete repo-level secrets that no workflow in this repo references, or move them to a protected environment.
 3. **AWS OIDC provider**: in the bucket's AWS account, add the IAM identity provider `token.actions.githubusercontent.com` with audience `sts.amazonaws.com` (skip this if it already exists).
 4. **IAM role** (for example `graph-app-kit-publish-templates`):
    * Trust policy, limited to this repo's `publish-templates` environment:
