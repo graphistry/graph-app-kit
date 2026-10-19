@@ -31,6 +31,7 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 
 * Publish workflows: `permissions: {}` with per-job grants, actions pinned to commit SHAs (`actions/checkout` v7.0.1, `aws-actions/configure-aws-credentials` v6.3.0, `docker/login-action` v4.6.0), `persist-credentials: false`, no `${{ }}` interpolation in `run:` scripts
 * Template publish runs only when templates or the workflow change on `master` (or on manual dispatch)
+* CI and Scan workflows declare explicit least-privilege `permissions:` so the repo default token can be set to read-only
 
 ### Dev
 

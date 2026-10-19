@@ -55,13 +55,13 @@ For faster AWS launches and Graphistry Enterprise, we:
 
 Ahead of time:
 
-* Ensure you've set `GRAPHISTRY_FORGE_BASE_VERSION` in the `Dockerfile` (not just the `docker-compose.yml`)
 * Merged into master
+* The workflow builds on `graphistry/graphistry-forge-base:v<tag>-<cuda>` (it overrides the `GRAPHISTRY_FORGE_BASE_VERSION` default from the `Dockerfile`/`docker-compose.yml`), so the release tag must match a forge-base tag that exists for every CUDA version you publish. Suffixed tags such as `2.39.12.1` only work if a matching base tag exists.
 
 Publish:
 
-1. `git tag 2.39.12 && git push --tags` from master
-  * Use a tag that corresponds to the Graphistry version, or some suffix (`2.39.12.1`)
+1. `git tag 2.39.12 && git push origin 2.39.12` from master
+  * Use the tag of the Graphistry version you are building on
   * Note lack of `v`: the image is published as `v2.39.12-<cuda>`
 2. In GitHub Actions, run `build&publishtoDockerHub` from **master** (optionally pass `cuda_versions`, e.g. `["12.8"]`). The version comes from the latest tag.
 3. A reviewer approves the run in the `dockerhub-publish` environment
@@ -87,6 +87,7 @@ To test template changes before merge, upload your branch's template by hand to 
 1. **Create and lock the GitHub environments** (Settings → Environments):
    * `publish-templates`: required reviewers = release maintainers, enable "Prevent self-review"; deployment branches and tags = "Selected branches and tags" with a single **branch** rule `master` (no tag rules).
    * `dockerhub-publish`: the same settings.
+   * Settings → Actions → General → Workflow permissions: select "Read repository contents and packages permissions" and **uncheck** "Allow GitHub Actions to create and approve pull requests". Otherwise any writer's workflow can approve their own PR with `GITHUB_TOKEN` and merge to master without human review, which defeats the master-only gate. Consider also enabling "Require approval of the most recent reviewable push" on master. The workflows in this repo set their own `permissions:`, so the read-only default does not break them.
 2. **AWS OIDC provider**: in the bucket's AWS account, add the IAM identity provider `token.actions.githubusercontent.com` with audience `sts.amazonaws.com` (skip this if it already exists).
 3. **IAM role** (for example `graph-app-kit-publish-templates`):
    * Trust policy, limited to this repo's `publish-templates` environment:
@@ -124,8 +125,8 @@ To test template changes before merge, upload your branch's template by hand to 
 
 4. **Wire up the environments**:
    * `publish-templates`: add the environment variable `AWS_S3_PUBLISH_ROLE_ARN` = the role ARN from step 3. Until it is set, publish runs fail closed at "Require OIDC role configuration".
-   * `dockerhub-publish`: create a **new** DockerHub access token and store it with `DOCKERHUB_USERNAME` as environment secrets. Any branch could reach the old token before this change, so don't move it; replace it.
-5. **Merge, then verify**: the merge (or a manual dispatch from master) starts Publish. Approve it, check that the four `templates/latest/{core,neptune}/{graphistry,minimal}.yml` objects have a new LastModified time, and confirm the job log shows the assumed role. Then dispatch the DockerHub workflow from master, approve it, and confirm the images were pushed.
+   * `dockerhub-publish`: create a **new** DockerHub access token and store environment secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (the new token). Any branch could reach the old token before this change, so don't move it; replace it.
+5. **Merge, then verify**: the merge (or a manual dispatch from master) starts Publish. Approve it, check that the four `templates/latest/{core,neptune}/{graphistry,minimal}.yml` objects have a new LastModified time, and confirm the job log shows the assumed role. Verify the DockerHub path at the next real release (tag first, then dispatch). A test dispatch republishes the latest tag's `v<tag>-<cuda>` and `latest-<cuda>` images from current master.
 6. **Retire the old credentials** (only after step 5 succeeds):
    * In IAM, check the "last used" info for the access key behind `S3_AWS_ACCESS_KEY_ID` to make sure nothing else uses it. Then deactivate and delete it.
    * Delete the repo-level secrets `S3_AWS_ACCESS_KEY_ID`, `S3_AWS_SECRET_ACCESS_KEY`, `S3_AWS_REGION_PUBLIC`, `AWS_S3_BUCKET_PUBLIC`, `DOCKERHUB_TOKEN` and `DOCKERHUB_USERNAME`.

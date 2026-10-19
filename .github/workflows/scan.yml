@@ -7,6 +7,9 @@ on:
   schedule:
     - cron: '0 4 * * *'
 
+permissions:
+  contents: read
+
 jobs:
 
   cancel_outstanding:
@@ -14,6 +17,8 @@ jobs:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-security-scan') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      actions: write
     steps:
       - name: Cancel Previous Runs
         if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-cancel') }}
@@ -26,6 +31,9 @@ jobs:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-security-scan') }}
     runs-on: ubuntu-latest-4-cores
     timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
     env:
       COMPOSE_DOCKER_CLI_BUILD: 1
       DOCKER_BUILDKIT: 1
@@ -89,6 +97,9 @@ jobs:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-security-scan') }}
     runs-on: ubuntu-latest-4-cores
     timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
     env:
       COMPOSE_DOCKER_CLI_BUILD: 1
       DOCKER_BUILDKIT: 1
