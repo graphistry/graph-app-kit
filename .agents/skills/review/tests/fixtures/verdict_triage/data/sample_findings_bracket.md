@@ -1,0 +1,3 @@
+- [BLOCKER] [security] leaked credential in config.
+- [IMPORTANT] [tests] missing regression test.
+- [SUGGESTION] [quality] simplify naming.

@@ -21,6 +21,10 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+### Dev
+
+* Add agent skills under `.agents/skills/`: `plan` (file-based task plans) and `review` (multi-wave PR review), adapted for this repo's Python views, GitHub Actions publish workflows, and CloudFormation templates. Add `AGENTS.md`; gitignore `plans/`
+
 ## [2.50.5 - 2026.05.21]
 
 ### Infra
