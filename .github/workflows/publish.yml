@@ -24,10 +24,6 @@ on:
 
 permissions: {}
 
-concurrency:
-  group: publish-templates
-  cancel-in-progress: false
-
 jobs:
 
   publish:
@@ -35,6 +31,11 @@ jobs:
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Job-level and keyed by ref so a skipped non-master dispatch never joins
+    # (and cancels a pending run in) the master publish queue.
+    concurrency:
+      group: publish-templates-${{ github.ref }}
+      cancel-in-progress: false
     environment:
       name: publish-templates
       url: https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/core/graphistry.yml
