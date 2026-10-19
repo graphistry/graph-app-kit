@@ -1,52 +1,73 @@
 name: build&publishtoDockerHub
 
-on:
-  push:
-    tags:
-      - '[0-9]+.[0-9]+.[0-9]+(.*)'
+# Normally driven by graphistry/graphistry CI (.github/workflows/base.yml jobs
+# push_gak_tag + trigger-gak-build): it tags this repo with the graphistry VERSION,
+# then dispatches this workflow on master with cuda_versions '["13", "12"]' and
+# polls the run (30 min budget) — so the workflow name and master ref must stay.
+# Manual flow: tag on master, then dispatch from master; the image version comes
+# from the latest tag (`git describe --tags`).
+# (A tag-push trigger existed but its pattern never matched a real tag, and a tag
+# path would let any tag creator reach the DockerHub token, so it was removed.)
 
+on:
   workflow_dispatch:
     inputs:
       version:
         description: 'Version to bump to'
         required: false
       cuda_versions:
-        description: 'JSON array of CUDA versions'
+        description: 'JSON array of CUDA versions, matching graphistry-forge-base tag suffixes (e.g. "13", "12")'
         required: false
-        default: '["12.8", "11.8"]'
+        default: '["13", "12"]'
 
   workflow_call:
 
+permissions: {}
+
 jobs:
   docker-build-publish:
+    # Pushes public images (including :latest-<cuda>), so only master may publish;
+    # dispatch from any other ref is skipped. The DockerHub token lives on the protected
+    # `dockerhub-publish` environment (master only + required reviewers; see DEVELOP.md).
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest-4-cores
+    environment: dockerhub-publish
+    permissions:
+      contents: read
     strategy:
       matrix:
-        CUDA_SHORT_VERSION: ${{ fromJSON(inputs.cuda_versions || '["12.8", "11.8"]') }}
+        CUDA_SHORT_VERSION: ${{ fromJSON(inputs.cuda_versions || '["13", "12"]') }}
       fail-fast: true
 
 
     steps:
 
       - name: checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: get most recent tag
         run: |
-          echo "RELEASE_VERSION=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
-          echo "CUDA_SHORT_VERSION=${{ matrix.CUDA_SHORT_VERSION }}" >> $GITHUB_ENV
+          # Values flow into $GITHUB_ENV and image tags: reject anything but N or N.N
+          # (a newline in the free-form dispatch input would inject env vars).
+          if ! [[ "$MATRIX_CUDA_SHORT_VERSION" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+            echo "::error::Invalid CUDA version in cuda_versions input (expected N or N.N, e.g. 13 or 12.8)"
+            exit 1
+          fi
+          echo "RELEASE_VERSION=$(git describe --tags --abbrev=0)" >> "$GITHUB_ENV"
+          echo "CUDA_SHORT_VERSION=${MATRIX_CUDA_SHORT_VERSION}" >> "$GITHUB_ENV"
+        env:
+          MATRIX_CUDA_SHORT_VERSION: ${{ matrix.CUDA_SHORT_VERSION }}
 
       - name: check env
         run: |
-          echo $RELEASE_VERSION
-          echo ${{ env.RELEASE_VERSION }}
-          echo $CUDA_SHORT_VERSION
-          echo ${{ env.CUDA_SHORT_VERSION }}
+          echo "$RELEASE_VERSION"
+          echo "$CUDA_SHORT_VERSION"
 
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -58,12 +79,12 @@ jobs:
 
         run: |
           cd src/docker \
-          && GRAPHISTRY_FORGE_BASE_VERSION=v${{ env.RELEASE_VERSION }}-${{ env.CUDA_SHORT_VERSION }} docker compose -f docker-compose.yml build
+          && GRAPHISTRY_FORGE_BASE_VERSION="v${RELEASE_VERSION}-${CUDA_SHORT_VERSION}" docker compose -f docker-compose.yml build
 
       - name: tag the image
         run: |
-          docker tag graphistry/graph-app-kit-st:latest-${{ env.CUDA_SHORT_VERSION }} graphistry/graph-app-kit-st:v${{ env.RELEASE_VERSION }}-${{ env.CUDA_SHORT_VERSION }}
+          docker tag "graphistry/graph-app-kit-st:latest-${CUDA_SHORT_VERSION}" "graphistry/graph-app-kit-st:v${RELEASE_VERSION}-${CUDA_SHORT_VERSION}"
 
       - name: Publish Graph-App-Kit to DockerHub
         run: |
-          docker push graphistry/graph-app-kit-st:v${{ env.RELEASE_VERSION }}-${{ env.CUDA_SHORT_VERSION }} && docker push graphistry/graph-app-kit-st:latest-${{ env.CUDA_SHORT_VERSION }}
+          docker push "graphistry/graph-app-kit-st:v${RELEASE_VERSION}-${CUDA_SHORT_VERSION}" && docker push "graphistry/graph-app-kit-st:latest-${CUDA_SHORT_VERSION}"

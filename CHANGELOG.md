@@ -21,6 +21,18 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+### Security
+
+* Publish workflow: CloudFormation templates (public S3 `templates/latest/`) publish only from `master`, via the `publish-templates` environment (required reviewers) and a GitHub OIDC role scoped to `templates/latest/*`; the PR `publish` label and schedule no longer publish
+* DockerHub workflow: publish only by dispatch from `master`, via the `dockerhub-publish` environment; drop the tag-push trigger (its pattern never matched); validate `cuda_versions` entries (`N` or `N.N`) and default them to `["13", "12"]` to match what graphistry CI dispatches and the current `graphistry-forge-base` tags
+* Requires one-time repo/AWS setup before merge, plus post-merge cleanup (retire the old AWS key and DockerHub token, set the default token to read-only): see `DEVELOP.md` "One-time setup"
+
+### Infra
+
+* Publish workflows: `permissions: {}` with per-job grants, actions pinned to commit SHAs (`actions/checkout` v7.0.1, `aws-actions/configure-aws-credentials` v6.3.0, `docker/login-action` v4.6.0), `persist-credentials: false`, no `${{ }}` interpolation in `run:` scripts
+* Template publish runs only when templates or the workflow change on `master` (or on manual dispatch)
+* CI and Scan workflows declare explicit least-privilege `permissions:` so the repo default token can be set to read-only
+
 ### Dev
 
 * Add agent skills under `.agents/skills/`: `plan` (file-based task plans) and `review` (multi-wave PR review), adapted for this repo's Python views, GitHub Actions publish workflows, and CloudFormation templates. Add `AGENTS.md`; gitignore `plans/`
