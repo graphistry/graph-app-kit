@@ -1,0 +1,3 @@
+# CODE<TAB>path_regex<TAB>owner<TAB>expiry_yyyy-mm-dd<TAB>note
+# Example:
+# AP030\t^src/bootstraps/(core|neptune)/(graphistry|minimal)\\.yml$\t@graphistry/maintainers\t2027-06-30\tDocumented public ingress ports (22/80/443/8501) for customer stacks

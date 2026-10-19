@@ -130,3 +130,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Agent working memory (see .agents/skills/plan/SKILL.md)
+plans/
