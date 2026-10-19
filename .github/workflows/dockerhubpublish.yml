@@ -1,10 +1,11 @@
 name: build&publishtoDockerHub
 
-on:
-  push:
-    tags:
-      - '[0-9]+.[0-9]+.[0-9]+(.*)'
+# Release flow: tag the release on master, then dispatch this workflow from master;
+# the image version comes from the latest tag (`git describe --tags`).
+# (A tag-push trigger existed but its pattern never matched a real tag, and a tag
+# path would let any tag creator reach the DockerHub token, so it was removed.)
 
+on:
   workflow_dispatch:
     inputs:
       version:
@@ -21,10 +22,10 @@ permissions: {}
 
 jobs:
   docker-build-publish:
-    # Pushes public images (including :latest-<cuda>), so only master or release tags may
-    # publish; manual dispatch from any other branch is skipped. The DockerHub token lives
-    # on the protected `dockerhub-publish` environment (see DEVELOP.md).
-    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+    # Pushes public images (including :latest-<cuda>), so only master may publish;
+    # dispatch from any other ref is skipped. The DockerHub token lives on the protected
+    # `dockerhub-publish` environment (master only + required reviewers; see DEVELOP.md).
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest-4-cores
     environment: dockerhub-publish
     permissions:
@@ -45,6 +46,12 @@ jobs:
 
       - name: get most recent tag
         run: |
+          # Values flow into $GITHUB_ENV and image tags: reject anything but N.N
+          # (a newline in the free-form dispatch input would inject env vars).
+          if ! [[ "$MATRIX_CUDA_SHORT_VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid CUDA version in cuda_versions input (expected N.N, e.g. 12.8)"
+            exit 1
+          fi
           echo "RELEASE_VERSION=$(git describe --tags --abbrev=0)" >> "$GITHUB_ENV"
           echo "CUDA_SHORT_VERSION=${MATRIX_CUDA_SHORT_VERSION}" >> "$GITHUB_ENV"
         env:
