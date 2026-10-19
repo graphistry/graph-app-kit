@@ -87,10 +87,10 @@ To test template changes before merge, upload your branch's template by hand to 
 1. **Create and lock the GitHub environments** (Settings → Environments):
    * `publish-templates`: required reviewers = release maintainers, enable "Prevent self-review", **uncheck** "Allow administrators to bypass configured protection rules"; deployment branches and tags = "Selected branches and tags" with a single **branch** rule `master` (no tag rules).
    * `dockerhub-publish`: the same settings.
+   * Required reviewers must include at least two people. With self-review blocked, the person who merges or dispatches cannot approve their own run.
 2. **Close the path to master that skips review** (Settings → Actions → General → Workflow permissions):
-   * **Uncheck** "Allow GitHub Actions to create and approve pull requests". Otherwise any writer's workflow can approve their own PR with `GITHUB_TOKEN` and merge to master without human review, which defeats the master-only gate. Consider also enabling "Require approval of the most recent reviewable push" on master.
+   * **Uncheck** "Allow GitHub Actions to create and approve pull requests". Otherwise any writer's workflow can approve their own PR with `GITHUB_TOKEN` and merge to master without human review, which defeats the master-only gate. Consider also enabling "Require approval of the most recent reviewable push" and "Do not allow bypassing the above settings" on master.
    * Any token stored as a repo-level secret can be read by a workflow on any branch. Check the other repo secrets, `GRAPHISTRY_GHA_CI_BUILD_GAK` and `GRAPHISTRY_GHA_CI_GAK`, which no workflow in this repo references. If either can approve or merge PRs here, or has other write access, delete it or move it to a protected environment.
-   * *After* step 6 (merge): switch the default to "Read repository contents and packages permissions". Before this PR, `scan.yml` on master declares no `permissions:` and would fail under a read-only default. After the merge, every workflow here declares its own.
 3. **AWS OIDC provider**: in the bucket's AWS account, add the IAM identity provider `token.actions.githubusercontent.com` with audience `sts.amazonaws.com` (skip this if it already exists).
 4. **IAM role** (for example `graph-app-kit-publish-templates`):
    * Trust policy, limited to this repo's `publish-templates` environment:
@@ -133,6 +133,7 @@ To test template changes before merge, upload your branch's template by hand to 
 7. **Retire the old credentials** (once the template publish in step 6 succeeds; do not wait for a DockerHub release):
    * In IAM, check the "last used" info for the access key behind `S3_AWS_ACCESS_KEY_ID` to make sure nothing else uses it. Then deactivate and delete it.
    * Delete the repo-level secrets `S3_AWS_ACCESS_KEY_ID`, `S3_AWS_SECRET_ACCESS_KEY`, `S3_AWS_REGION_PUBLIC`, `AWS_S3_BUCKET_PUBLIC`, `DOCKERHUB_TOKEN` and `DOCKERHUB_USERNAME`.
+   * Set Settings → Actions → General → Workflow permissions to "Read repository contents and packages permissions". Do this only once every workflow on master declares its own `permissions:`, which is true after this change merges.
    * Revoke the old DockerHub token. Environment secrets take precedence over repo secrets with the same name, so the next real release, run on the new `dockerhub-publish` token, is the check that it works. If it fails, fix the environment secrets.
 
 Templates are no longer republished automatically on a schedule. If `templates/latest/` drifts, for example after a manual bucket edit, dispatch Publish from master.

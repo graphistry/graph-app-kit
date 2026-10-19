@@ -25,7 +25,7 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 
 * Publish workflow: CloudFormation templates (public S3 `templates/latest/`) publish only from `master`, via the `publish-templates` environment (required reviewers) and a GitHub OIDC role scoped to `templates/latest/*`; the PR `publish` label and schedule no longer publish
 * DockerHub workflow: publish only by dispatch from `master`, via the `dockerhub-publish` environment; drop the tag-push trigger (its pattern never matched); validate `cuda_versions` input
-* Requires one-time repo/AWS setup before merge, then retiring the old AWS key and DockerHub token: see `DEVELOP.md` "One-time setup"
+* Requires one-time repo/AWS setup before merge, plus post-merge cleanup (retire the old AWS key and DockerHub token, set the default token to read-only): see `DEVELOP.md` "One-time setup"
 
 ### Infra
 
