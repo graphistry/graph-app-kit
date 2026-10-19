@@ -173,10 +173,15 @@ read_lines ENV_FILES < <(printf '%s\n' "${CHANGED[@]}" | rg '(^|/)[^/]*\.env$|^s
 
 # Keep only paths that still exist at HEAD (deleted files have nothing to grep).
 existing_only() {  # usage: existing_only ARRAYNAME
-  local __arr="$1" __f __out=()
-  eval "for __f in \"\${$__arr[@]:-}\"; do [ -n \"\$__f\" ] && [ -f \"\$__f\" ] && __out+=(\"\$__f\"); done"
+  # `if`, not `[ ] && ...`: a false test as the loop's last command would make the
+  # eval return 1 and abort the script under `set -e` when the array is empty.
+  local __arr="$1" __f
+  local __in=()
+  eval "__in=(\"\${$__arr[@]:-}\")"
   eval "$__arr=()"
-  for __f in "${__out[@]:-}"; do [ -n "$__f" ] && eval "$__arr+=(\"\$__f\")"; done
+  for __f in "${__in[@]}"; do
+    if [ -n "$__f" ] && [ -f "$__f" ]; then eval "$__arr+=(\"\$__f\")"; fi
+  done
 }
 existing_only PY_FILES
 existing_only TEST_FILES
