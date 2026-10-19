@@ -21,6 +21,13 @@ Extensions:
 
 See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [open pull requests](https://github.com/graphistry/graph-app-kit/pulls)
 
+### Security
+
+* **Publish workflow (P0)**: CloudFormation templates are now published to the public S3 `templates/latest/` path only from `master`. Each run needs approval in the protected `publish-templates` environment. The PR `publish` label and the scheduled trigger no longer publish, and manual dispatch from any other branch is skipped.
+* Replace the stored long-lived AWS keys with a GitHub OIDC role. Its trust is limited to the `publish-templates` environment and its write access to `templates/latest/*`. See `DEVELOP.md` for setup and old-key rotation.
+* DockerHub publish now runs only from `master` or release tags, using secrets on the `dockerhub-publish` environment
+* Both publish workflows now default to `permissions: {}` with per-job grants, pin actions to full commit SHAs (`actions/checkout` v7.0.1, `aws-actions/configure-aws-credentials` v6.3.0, `docker/login-action` v4.6.0), use `persist-credentials: false`, and pass values to `run:` scripts through env vars instead of `${{ }}` interpolation
+
 ### Dev
 
 * Add agent skills under `.agents/skills/`: `plan` (file-based task plans) and `review` (multi-wave PR review), adapted for this repo's Python views, GitHub Actions publish workflows, and CloudFormation templates. Add `AGENTS.md`; gitignore `plans/`

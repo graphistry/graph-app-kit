@@ -1,54 +1,74 @@
 name: Publish
 
+# Uploads the CloudFormation templates that customers deploy (README "Launch Stack")
+# to the public bucket under templates/latest/.
+#
+# Only master may publish, and only through the protected `publish-templates`
+# environment (required reviewers + deployment branch policy: master). AWS access
+# is a short-lived GitHub OIDC session whose IAM role trusts only that environment
+# and may only write templates/latest/*. Setup: DEVELOP.md "AWS Publish action".
+
 on:
 
   #Merge
   push:
     branches:
       - master
+    paths:
+      - 'src/bootstraps/core/*.yml'
+      - 'src/bootstraps/neptune/*.yml'
+      - '.github/workflows/publish.yml'
 
-  #Label
-  pull_request:
-    types: [labeled]
-
-
-  #Enable UI-driven branch testing
+  #Manual republish (master only; other refs are skipped)
   workflow_dispatch:
 
-  #Test main bidaily @ 1a
-  schedule:
-    - cron: '0 1 1-31/2 * *'
+permissions: {}
+
+concurrency:
+  group: publish-templates
+  cancel-in-progress: false
 
 jobs:
 
-  stub_mt:
-    name: Always-succeed step to prevent appearing as a failure
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Do nothing
-        run: echo "Do nothing"
-
   publish:
-    name: Upload to Amazon S3
-    if: github.event.action != 'labeled' || github.event.label.name == 'publish'
+    name: Upload CloudFormation templates to S3
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: publish-templates
+      url: https://graph-app-kit-repo-public.s3.us-east-2.amazonaws.com/templates/latest/core/graphistry.yml
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_REGION: us-east-2
+      S3_BUCKET: graph-app-kit-repo-public
+      AWS_ROLE_ARN: ${{ vars.AWS_S3_PUBLISH_ROLE_ARN }}
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+    - name: Require OIDC role configuration
+      run: |
+        if [ -z "$AWS_ROLE_ARN" ]; then
+          echo "::error::Environment variable AWS_S3_PUBLISH_ROLE_ARN is not set on the publish-templates environment"
+          exit 1
+        fi
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
-        aws-access-key-id: ${{ secrets.S3_AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.S3_AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.S3_AWS_REGION_PUBLIC }}
+        persist-credentials: false
+
+    - name: Configure AWS credentials (OIDC)
+      uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+      with:
+        role-to-assume: ${{ env.AWS_ROLE_ARN }}
+        role-session-name: graph-app-kit-publish-${{ github.run_id }}
+        aws-region: ${{ env.AWS_REGION }}
 
     - name: Copy CloudFormation templates
       run: |
-        aws s3 cp src/bootstraps/core/graphistry.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/core/graphistry.yml"
-        aws s3 cp src/bootstraps/core/minimal.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/core/minimal.yml"
-        aws s3 cp src/bootstraps/neptune/graphistry.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/neptune/graphistry.yml"
-        aws s3 cp src/bootstraps/neptune/minimal.yml "s3://${{ secrets.AWS_S3_BUCKET_PUBLIC}}/templates/latest/neptune/minimal.yml"
-
+        set -euo pipefail
+        for template in core/graphistry.yml core/minimal.yml neptune/graphistry.yml neptune/minimal.yml; do
+          aws s3 cp "src/bootstraps/${template}" "s3://${S3_BUCKET}/templates/latest/${template}"
+        done
