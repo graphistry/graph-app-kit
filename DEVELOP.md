@@ -49,9 +49,9 @@ For faster AWS launches and Graphistry Enterprise, we:
   * Paste into `src/bootstraps/core,neptune/graphistry.yml`
   * Update `src/docker/docker-compose.yml::GRAPHISTRY_FORGE_BASE_VERSION`
 
-## DockerHub Automated Builds
+## DockerHub publish action
 
-Managed via DockerHub automates tagged builds
+`.github/workflows/dockerhubpublish.yml` builds and pushes `graphistry/graph-app-kit-st` as `v<tag>-<cuda>` and `latest-<cuda>`.
 
 Ahead of time:
 
@@ -60,20 +60,15 @@ Ahead of time:
 
 Publish:
 
-1. `git tag 2.39.12`
+1. `git tag 2.39.12 && git push --tags` from master
   * Use a tag that corresponds to the Graphistry version, or some suffix (`2.39.12.1`)
-  * Note lack of `v`
-2. `git push --tags`
+  * Note lack of `v`: the image is published as `v2.39.12-<cuda>`
+2. In GitHub Actions, run `build&publishtoDockerHub` from **master** (optionally pass `cuda_versions`, e.g. `["12.8"]`). The version comes from the latest tag.
+3. A reviewer approves the run in the `dockerhub-publish` environment
 
-DockerHub automatic builds will:
-* publish as tag `v2.39.12-11.4`: note addition of `v` and `-11.4`
-* publish as tag `latest`
+Dispatches from any other branch or tag are skipped. Pushing a tag no longer publishes on its own.
 
 See [current tags](https://hub.docker.com/r/graphistry/graph-app-kit-st/tags) and available [base tags](https://hub.docker.com/r/graphistry/graphistry-forge-base/tags)
-
-## DockerHub publish action
-
-`.github/workflows/dockerhubpublish.yml` builds and pushes `graphistry/graph-app-kit-st` on a release tag push, or by manual dispatch **from master or a tag**. Dispatches from other branches are skipped. The job runs in the `dockerhub-publish` GitHub environment, which holds the `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` secrets.
 
 ## AWS Publish action
 
@@ -87,8 +82,13 @@ To test template changes before merge, upload your branch's template by hand to 
 
 ### One-time setup (repo admin + AWS admin)
 
-1. **AWS OIDC provider**: in the bucket's AWS account, add the IAM identity provider `token.actions.githubusercontent.com` with audience `sts.amazonaws.com` (skip this if it already exists).
-2. **IAM role** (for example `graph-app-kit-publish-templates`):
+**Order matters.** GitHub auto-creates a missing environment with *no* protection the first time any workflow, on any branch, references it. So lock both environments down before the IAM role exists and before merging the workflow change. Merging also triggers a publish run immediately, because the change touches `publish.yml`.
+
+1. **Create and lock the GitHub environments** (Settings → Environments):
+   * `publish-templates`: required reviewers = release maintainers, enable "Prevent self-review"; deployment branches and tags = "Selected branches and tags" with a single **branch** rule `master` (no tag rules).
+   * `dockerhub-publish`: the same settings.
+2. **AWS OIDC provider**: in the bucket's AWS account, add the IAM identity provider `token.actions.githubusercontent.com` with audience `sts.amazonaws.com` (skip this if it already exists).
+3. **IAM role** (for example `graph-app-kit-publish-templates`):
    * Trust policy, limited to this repo's `publish-templates` environment:
 
      ```json
@@ -108,6 +108,7 @@ To test template changes before merge, upload your branch's template by hand to 
      }
      ```
 
+     Optional hardening, so the role no longer depends only on the environment's settings: if your AWS account supports STS condition keys for GitHub-specific claims, also require `"token.actions.githubusercontent.com:ref": "refs/heads/master"` and `"token.actions.githubusercontent.com:job_workflow_ref": "graphistry/graph-app-kit/.github/workflows/publish.yml@refs/heads/master"`. Check that the IAM policy editor accepts these keys. A condition on a claim STS doesn't provide fails closed, which shows up in step 5 as an AssumeRole error.
    * Permissions policy, limited to the template path:
 
      ```json
@@ -121,9 +122,13 @@ To test template changes before merge, upload your branch's template by hand to 
      }
      ```
 
-3. **GitHub environment `publish-templates`** (Settings → Environments):
-   * Required reviewers: the release maintainers. Enable "Prevent self-review".
-   * Deployment branches and tags: "Selected branches", with only `master`.
-   * Environment variable `AWS_S3_PUBLISH_ROLE_ARN` = the role ARN from step 2.
-4. **GitHub environment `dockerhub-publish`**: deployment branches and tags = `master` plus the release tag pattern (for example `[0-9]*`). Optionally add required reviewers. Move `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` here as environment secrets, then delete the repo-level copies.
-5. **Retire the old credentials**: deactivate and delete the IAM access key behind `S3_AWS_ACCESS_KEY_ID`. Then delete the repo secrets `S3_AWS_ACCESS_KEY_ID`, `S3_AWS_SECRET_ACCESS_KEY`, `S3_AWS_REGION_PUBLIC` and `AWS_S3_BUCKET_PUBLIC`. Rotate the DockerHub token, since any branch could previously reach it.
+4. **Wire up the environments**:
+   * `publish-templates`: add the environment variable `AWS_S3_PUBLISH_ROLE_ARN` = the role ARN from step 3. Until it is set, publish runs fail closed at "Require OIDC role configuration".
+   * `dockerhub-publish`: create a **new** DockerHub access token and store it with `DOCKERHUB_USERNAME` as environment secrets. Any branch could reach the old token before this change, so don't move it; replace it.
+5. **Merge, then verify**: the merge (or a manual dispatch from master) starts Publish. Approve it, check that the four `templates/latest/{core,neptune}/{graphistry,minimal}.yml` objects have a new LastModified time, and confirm the job log shows the assumed role. Then dispatch the DockerHub workflow from master, approve it, and confirm the images were pushed.
+6. **Retire the old credentials** (only after step 5 succeeds):
+   * In IAM, check the "last used" info for the access key behind `S3_AWS_ACCESS_KEY_ID` to make sure nothing else uses it. Then deactivate and delete it.
+   * Delete the repo-level secrets `S3_AWS_ACCESS_KEY_ID`, `S3_AWS_SECRET_ACCESS_KEY`, `S3_AWS_REGION_PUBLIC`, `AWS_S3_BUCKET_PUBLIC`, `DOCKERHUB_TOKEN` and `DOCKERHUB_USERNAME`.
+   * Revoke the old DockerHub token.
+
+Templates are no longer republished automatically on a schedule. If `templates/latest/` drifts, for example after a manual bucket edit, dispatch Publish from master.

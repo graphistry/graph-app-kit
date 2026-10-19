@@ -23,10 +23,14 @@ See [projects page](https://github.com/graphistry/graph-app-kit/projects) and [o
 
 ### Security
 
-* **Publish workflow (P0)**: CloudFormation templates are now published to the public S3 `templates/latest/` path only from `master`. Each run needs approval in the protected `publish-templates` environment. The PR `publish` label and the scheduled trigger no longer publish, and manual dispatch from any other branch is skipped.
-* Replace the stored long-lived AWS keys with a GitHub OIDC role. Its trust is limited to the `publish-templates` environment and its write access to `templates/latest/*`. See `DEVELOP.md` for setup and old-key rotation.
-* DockerHub publish now runs only from `master` or release tags, using secrets on the `dockerhub-publish` environment
-* Both publish workflows now default to `permissions: {}` with per-job grants, pin actions to full commit SHAs (`actions/checkout` v7.0.1, `aws-actions/configure-aws-credentials` v6.3.0, `docker/login-action` v4.6.0), use `persist-credentials: false`, and pass values to `run:` scripts through env vars instead of `${{ }}` interpolation
+* Publish workflow: CloudFormation templates (public S3 `templates/latest/`) publish only from `master`, via the `publish-templates` environment (required reviewers) and a GitHub OIDC role scoped to `templates/latest/*`; the PR `publish` label and schedule no longer publish
+* DockerHub workflow: publish only by dispatch from `master`, via the `dockerhub-publish` environment; drop the tag-push trigger (its pattern never matched); validate `cuda_versions` input
+* Requires one-time repo/AWS setup before merge, then retiring the old AWS key and DockerHub token: see `DEVELOP.md` "One-time setup"
+
+### Infra
+
+* Publish workflows: `permissions: {}` with per-job grants, actions pinned to commit SHAs (`actions/checkout` v7.0.1, `aws-actions/configure-aws-credentials` v6.3.0, `docker/login-action` v4.6.0), `persist-credentials: false`, no `${{ }}` interpolation in `run:` scripts
+* Template publish runs only when templates or the workflow change on `master` (or on manual dispatch)
 
 ### Dev
 
