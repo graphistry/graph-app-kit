@@ -1,7 +1,11 @@
 name: build&publishtoDockerHub
 
-# Release flow: tag the release on master, then dispatch this workflow from master;
-# the image version comes from the latest tag (`git describe --tags`).
+# Normally driven by graphistry/graphistry CI (.github/workflows/base.yml jobs
+# push_gak_tag + trigger-gak-build): it tags this repo with the graphistry VERSION,
+# then dispatches this workflow on master with cuda_versions '["13", "12"]' and
+# polls the run (30 min budget) — so the workflow name and master ref must stay.
+# Manual flow: tag on master, then dispatch from master; the image version comes
+# from the latest tag (`git describe --tags`).
 # (A tag-push trigger existed but its pattern never matched a real tag, and a tag
 # path would let any tag creator reach the DockerHub token, so it was removed.)
 
@@ -12,9 +16,9 @@ on:
         description: 'Version to bump to'
         required: false
       cuda_versions:
-        description: 'JSON array of CUDA versions'
+        description: 'JSON array of CUDA versions, matching graphistry-forge-base tag suffixes (e.g. "13", "12")'
         required: false
-        default: '["12.8", "11.8"]'
+        default: '["13", "12"]'
 
   workflow_call:
 
@@ -32,7 +36,7 @@ jobs:
       contents: read
     strategy:
       matrix:
-        CUDA_SHORT_VERSION: ${{ fromJSON(inputs.cuda_versions || '["12.8", "11.8"]') }}
+        CUDA_SHORT_VERSION: ${{ fromJSON(inputs.cuda_versions || '["13", "12"]') }}
       fail-fast: true
 
 
@@ -46,10 +50,10 @@ jobs:
 
       - name: get most recent tag
         run: |
-          # Values flow into $GITHUB_ENV and image tags: reject anything but N.N
+          # Values flow into $GITHUB_ENV and image tags: reject anything but N or N.N
           # (a newline in the free-form dispatch input would inject env vars).
-          if ! [[ "$MATRIX_CUDA_SHORT_VERSION" =~ ^[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::Invalid CUDA version in cuda_versions input (expected N.N, e.g. 12.8)"
+          if ! [[ "$MATRIX_CUDA_SHORT_VERSION" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
+            echo "::error::Invalid CUDA version in cuda_versions input (expected N or N.N, e.g. 13 or 12.8)"
             exit 1
           fi
           echo "RELEASE_VERSION=$(git describe --tags --abbrev=0)" >> "$GITHUB_ENV"

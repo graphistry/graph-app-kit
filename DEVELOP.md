@@ -51,9 +51,11 @@ For faster AWS launches and Graphistry Enterprise, we:
 
 ## DockerHub publish action
 
-`.github/workflows/dockerhubpublish.yml` builds and pushes `graphistry/graph-app-kit-st` as `v<tag>-<cuda>` and `latest-<cuda>`.
+`.github/workflows/dockerhubpublish.yml` builds and pushes `graphistry/graph-app-kit-st` as `v<tag>-<cuda>` and `latest-<cuda>`, where `<cuda>` is a `graphistry-forge-base` tag suffix (currently `13` and `12`).
 
-Ahead of time:
+**Normal path: driven by graphistry CI.** graphistry/graphistry's `base.yml` (`push_gak_tag` + `trigger-gak-build` jobs, on a `ci`-labeled PR, dispatch, or `workflow_call`) tags this repo with the graphistry `VERSION`, then dispatches this workflow on `master` with `cuda_versions '["13", "12"]'` using the PAT in graphistry's `GRAPHISTRY_GHA_CI_GAK` secret, and polls the run for up to 30 minutes. graphistry's release then builds its `graph-app-kit-*` app images on top of the published `v<VERSION>-<cuda>` image. Keep the workflow name `build&publishtoDockerHub`, the `workflow_dispatch` trigger, and master as the dispatch ref, or that chain breaks; anything that holds a dispatched run (for example a required reviewer) must clear within that 30-minute budget.
+
+**Manual path** (rebuild or fallback). Ahead of time:
 
 * Merged into master
 * The workflow builds on `graphistry/graphistry-forge-base:v<tag>-<cuda>` (it overrides the `GRAPHISTRY_FORGE_BASE_VERSION` default from the `Dockerfile`/`docker-compose.yml`), so the release tag must match a forge-base tag that exists for every CUDA version you publish. Suffixed tags such as `2.39.12.1` only work if a matching base tag exists.
@@ -63,8 +65,8 @@ Publish:
 1. `git tag 2.39.12 && git push origin 2.39.12` from master
   * Use the tag of the Graphistry version you are building on
   * Note lack of `v`: the image is published as `v2.39.12-<cuda>`
-2. In GitHub Actions, run `build&publishtoDockerHub` from **master** (optionally pass `cuda_versions`, e.g. `["12.8"]`). The version comes from the latest tag.
-3. A reviewer approves the run in the `dockerhub-publish` environment
+2. In GitHub Actions, run `build&publishtoDockerHub` from **master** (optionally pass `cuda_versions`, e.g. `["13"]`; each value must be `N` or `N.N`). The version comes from the latest tag.
+3. If the `dockerhub-publish` environment has required reviewers, one approves the run
 
 Dispatches from any other branch or tag are skipped. Pushing a tag no longer publishes on its own.
 
